@@ -1,0 +1,458 @@
+[
+  {
+    "id": "ACT-000001",
+    "timestamp": "2026-07-29T12:00:00Z",
+    "type": "commit_created",
+    "actor": "Shulem Freund",
+    "summary": "Initial commit",
+    "commitSha": "23bd7c4"
+  },
+  {
+    "id": "ACT-000002",
+    "timestamp": "2026-07-30T12:00:00Z",
+    "type": "ticket_completed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0001 completed: Formetrix Project Management System created",
+    "relatedTicketId": "FM-0001",
+    "relatedMilestoneId": "M0"
+  },
+  {
+    "id": "ACT-000003",
+    "timestamp": "2026-07-30T12:05:00Z",
+    "type": "ticket_created",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0002 through FM-0020 filed as the initial engineering backlog, per FM-0001's acceptance criteria",
+    "relatedMilestoneId": "M0"
+  },
+  {
+    "id": "ACT-000004",
+    "timestamp": "2026-07-30T20:57:39Z",
+    "type": "commit_created",
+    "actor": "Shulem Freund",
+    "summary": "FM-0001: Initialize Formetrix foundation",
+    "commitSha": "7e0db87"
+  },
+  {
+    "id": "ACT-000005",
+    "timestamp": "2026-07-30T19:00:00Z",
+    "type": "ticket_status_changed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0002 (relabeled request) filed as FM-0021 instead, to avoid an ID collision with the existing FM-0002",
+    "relatedTicketId": "FM-0021"
+  },
+  {
+    "id": "ACT-000006",
+    "timestamp": "2026-07-30T21:00:00Z",
+    "type": "ticket_completed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0021 completed: Supabase application foundation configured",
+    "relatedTicketId": "FM-0021",
+    "relatedMilestoneId": "M0"
+  },
+  {
+    "id": "ACT-000007",
+    "timestamp": "2026-07-30T22:30:00Z",
+    "type": "ticket_completed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0022 completed: docs/DOMAIN_MODEL.md created (ADR-0011–ADR-0014)",
+    "relatedTicketId": "FM-0022",
+    "relatedMilestoneId": "M0"
+  },
+  {
+    "id": "ACT-000008",
+    "timestamp": "2026-07-30T23:40:00Z",
+    "type": "ticket_completed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0023 completed: Founder Decisions FD-0001–FD-0009 recorded, domain boundary finalized",
+    "relatedTicketId": "FM-0023",
+    "relatedMilestoneId": "M0"
+  },
+  {
+    "id": "ACT-000009",
+    "timestamp": "2026-07-30T23:45:00Z",
+    "type": "founder_decision_approved",
+    "actor": "Shulem Freund",
+    "summary": "FD-0001 through FD-0009 approved",
+    "relatedDecisionId": "FD-0004"
+  },
+  {
+    "id": "ACT-000010",
+    "timestamp": "2026-07-31T00:33:00Z",
+    "type": "management_doc_edited",
+    "actor": "Shulem Freund",
+    "summary": "Founder Pack governing docs and .cursor/rules/formetrix.mdc copied directly into the repository"
+  },
+  {
+    "id": "ACT-000011",
+    "timestamp": "2026-07-31T00:35:00Z",
+    "type": "decision_recorded",
+    "actor": "Shulem Freund",
+    "summary": "ADR-0016 recorded: platform/ is the sole canonical Formetrix repository",
+    "relatedDecisionId": "ADR-0016"
+  },
+  {
+    "id": "ACT-000012",
+    "timestamp": "2026-07-31T05:41:15Z",
+    "type": "commit_created",
+    "actor": "Shulem Freund",
+    "summary": "FM-0001: Establish Formetrix engineering foundation — pushed to origin/main",
+    "commitSha": "92d0b03"
+  },
+  {
+    "id": "ACT-000013",
+    "timestamp": "2026-07-31T05:41:15Z",
+    "type": "ticket_status_changed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0002 status changed: in_progress -> completed (commit 92d0b03 pushed)",
+    "relatedTicketId": "FM-0002",
+    "previousValue": "in_progress",
+    "newValue": "completed"
+  },
+  {
+    "id": "ACT-000014",
+    "timestamp": "2026-07-31T05:41:15Z",
+    "type": "ticket_status_changed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0003 status changed: in_progress -> completed (commit 92d0b03 pushed, origin/main now matches local)",
+    "relatedTicketId": "FM-0003",
+    "previousValue": "in_progress",
+    "newValue": "completed"
+  },
+  {
+    "id": "ACT-000015",
+    "timestamp": "2026-07-31T07:15:00Z",
+    "type": "ticket_completed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0024 completed: docs/PROJECT_DASHBOARD_ARCHITECTURE.md created (ADR-0017–ADR-0019)",
+    "relatedTicketId": "FM-0024",
+    "relatedMilestoneId": "M0"
+  },
+  {
+    "id": "ACT-000016",
+    "timestamp": "2026-07-31T12:00:00Z",
+    "type": "ticket_completed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0025 completed: /internal/project-dashboard built and populated from real management/data/*.json",
+    "relatedTicketId": "FM-0025",
+    "relatedMilestoneId": "M0"
+  },
+  {
+    "id": "ACT-000017",
+    "timestamp": "2026-07-31T12:00:00Z",
+    "type": "release_published",
+    "actor": "AI Engineering Agent",
+    "summary": "0.1.0 remains Unreleased; structured data model now tracks it explicitly in releases.json",
+    "relatedRelease": "0.1.0"
+  },
+  {
+    "id": "ACT-000018",
+    "timestamp": "2026-07-31T14:00:00Z",
+    "type": "management_doc_edited",
+    "actor": "Shulem Freund",
+    "summary": "Official Formetrix brand system approved (Deep Navy, Charcoal, Electric Cyan, Light Gray, White; Inter + Space Grotesk)"
+  },
+  {
+    "id": "ACT-000019",
+    "timestamp": "2026-07-31T16:00:00Z",
+    "type": "ticket_completed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0026 completed: Formetrix brand system and reusable interactive detail-drawer system applied to /internal/project-dashboard",
+    "relatedTicketId": "FM-0026",
+    "relatedMilestoneId": "M0"
+  },
+  {
+    "id": "ACT-000020",
+    "timestamp": "2026-07-31T17:00:00Z",
+    "type": "ticket_status_changed",
+    "actor": "Shulem Freund",
+    "summary": "Runtime error reported: useDashboardDetail must be used within a DashboardDetailProvider (executive-summary.tsx)",
+    "relatedTicketId": "FM-0026"
+  },
+  {
+    "id": "ACT-000021",
+    "timestamp": "2026-07-31T18:00:00Z",
+    "type": "ticket_completed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0026A completed: dashboard consolidated to a single client boundary (ProjectDashboardShell); verified via production build and repeated fresh dev requests",
+    "relatedTicketId": "FM-0026A",
+    "relatedMilestoneId": "M0",
+    "commitSha": null
+  },
+  {
+    "id": "ACT-000022",
+    "timestamp": "2026-07-31T19:00:00Z",
+    "type": "ticket_created",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0027 filed: Add Current Work Focus and Project Code Legend to the dashboard",
+    "relatedTicketId": "FM-0027",
+    "relatedMilestoneId": "M0"
+  },
+  {
+    "id": "ACT-000023",
+    "timestamp": "2026-07-31T19:00:00Z",
+    "type": "ticket_status_changed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0027 status changed: planned -> in_progress",
+    "relatedTicketId": "FM-0027",
+    "relatedMilestoneId": "M0",
+    "previousValue": "planned",
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000024",
+    "timestamp": "2026-07-31T20:00:00Z",
+    "type": "ticket_completed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0027 completed: Current Work Focus and Project Codes legend shipped; closed out during FM-0028 (dev/prod-server verified, browser automation unavailable)",
+    "relatedTicketId": "FM-0027",
+    "relatedMilestoneId": "M0",
+    "previousValue": "in_progress",
+    "newValue": "completed"
+  },
+  {
+    "id": "ACT-000025",
+    "timestamp": "2026-07-31T20:15:00Z",
+    "type": "ticket_created",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0028 filed: Add Dashboard Intelligence Automation MVP",
+    "relatedTicketId": "FM-0028",
+    "relatedMilestoneId": "M0"
+  },
+  {
+    "id": "ACT-000026",
+    "timestamp": "2026-07-31T20:15:00Z",
+    "type": "ticket_status_changed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0028 status changed: planned -> in_progress",
+    "relatedTicketId": "FM-0028",
+    "relatedMilestoneId": "M0",
+    "previousValue": "planned",
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000027",
+    "timestamp": "2026-07-31T21:00:00Z",
+    "type": "ticket_completed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0028 completed: Dashboard Intelligence Automation MVP (dashboard:update/check/health, project health, Definition of Done); active ticket cleared, no next ticket auto-activated",
+    "relatedTicketId": "FM-0028",
+    "relatedMilestoneId": "M0",
+    "previousValue": "in_progress",
+    "newValue": "completed"
+  },
+  {
+    "id": "ACT-000028",
+    "timestamp": "2026-07-31T21:30:00Z",
+    "type": "ticket_status_changed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0007 status changed: backlog -> in_progress (Design the Initial Core Database Schema)",
+    "relatedTicketId": "FM-0007",
+    "relatedMilestoneId": "M1",
+    "previousValue": "backlog",
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000029",
+    "timestamp": "2026-07-31T21:00:00Z",
+    "type": "ticket_created",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0029 filed: Build the Property Workspace Foundation",
+    "relatedTicketId": "FM-0029",
+    "relatedMilestoneId": "M2"
+  },
+  {
+    "id": "ACT-000030",
+    "timestamp": "2026-07-31T21:00:00Z",
+    "type": "ticket_status_changed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0029 status changed: backlog -> in_progress",
+    "relatedTicketId": "FM-0029",
+    "relatedMilestoneId": "M2",
+    "previousValue": "backlog",
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000031",
+    "timestamp": "2026-07-31T21:45:00Z",
+    "type": "decision_recorded",
+    "actor": "AI Engineering Agent",
+    "summary": "ADR-0026 recorded: /property/[id] uses generateStaticParams + dynamicParams=false so unknown ids 404 at the router level, routing around a Next.js streaming/notFound() status-code limitation",
+    "relatedDecisionId": "ADR-0026"
+  },
+  {
+    "id": "ACT-000032",
+    "timestamp": "2026-07-31T22:00:00Z",
+    "type": "ticket_completed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0029 completed: Property Workspace Foundation shipped (/properties list, /property/[id] workspace with Overview panel and 8 Coming Soon sections, typed mock data, reusable domain components, Badge/interactiveCardClass promoted to shared UI); active ticket cleared, no next ticket auto-activated",
+    "relatedTicketId": "FM-0029",
+    "relatedMilestoneId": "M2",
+    "previousValue": "in_progress",
+    "newValue": "completed"
+  },
+  {
+    "id": "ACT-000033",
+    "timestamp": "2026-07-31T22:15:00Z",
+    "type": "ticket_completed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0007 completed: docs/DATABASE_SCHEMA.md core schema (User, Organization, OrganizationMember, Property, PropertyWorkspace) with ER diagram; ADR-0027/ADR-0028 recorded; architecture-only, no SQL/migrations",
+    "relatedTicketId": "FM-0007",
+    "relatedMilestoneId": "M1",
+    "previousValue": "in_progress",
+    "newValue": "completed"
+  },
+  {
+    "id": "ACT-000034",
+    "timestamp": "2026-07-31T23:00:00Z",
+    "type": "ticket_status_changed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0008 status changed: backlog -> in_progress (Design Authentication & Organization Architecture)",
+    "relatedTicketId": "FM-0008",
+    "relatedMilestoneId": "M1",
+    "previousValue": "backlog",
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000035",
+    "timestamp": "2026-07-31T23:45:00Z",
+    "type": "ticket_completed",
+    "actor": "AI Engineering Agent",
+    "summary": "FM-0008 completed: docs/AUTH_FLOW.md authentication & organization architecture (roles Owner/Admin/Member/Viewer, journeys, UI planning, security); ADR-0029/ADR-0030 recorded; planning only — no Auth, OAuth, or React components",
+    "relatedTicketId": "FM-0008",
+    "relatedMilestoneId": "M1",
+    "previousValue": "in_progress",
+    "newValue": "completed"
+  },
+  {
+    "id": "ACT-000036",
+    "timestamp": "2026-07-31T19:35:00Z",
+    "type": "ticket_status_changed",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0009 status changed: backlog -> in_progress (Implement Supabase Session Refresh Middleware and Protected Routes)",
+    "relatedTicketId": "FM-0009",
+    "relatedMilestoneId": "M1",
+    "previousValue": "backlog",
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000037",
+    "timestamp": "2026-07-31T19:55:00Z",
+    "type": "ticket_completed",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0009 completed: root middleware + updateSession session refresh, centralized route policy, getAuthenticatedUser, safe return-path redirects, /auth placeholders, ADR-0031 (Mission Control public); no sign-in/sign-up forms",
+    "relatedTicketId": "FM-0009",
+    "relatedMilestoneId": "M1",
+    "previousValue": "in_progress",
+    "newValue": "completed"
+  },
+  {
+    "id": "ACT-000038",
+    "timestamp": "2026-07-31T19:50:00Z",
+    "type": "ticket_status_changed",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0010 status changed: backlog -> in_progress (Implement Organization and Workspace Membership Model)",
+    "relatedTicketId": "FM-0010",
+    "relatedMilestoneId": "M1",
+    "previousValue": "backlog",
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000039",
+    "timestamp": "2026-07-31T20:00:00Z",
+    "type": "ticket_completed",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0010 completed: user_profiles/organizations/organization_memberships migrations + RLS, org access helpers, role hierarchy, V1 active-org selection (ADR-0032); no onboarding UI; migrations not auto-applied",
+    "relatedTicketId": "FM-0010",
+    "relatedMilestoneId": "M1",
+    "previousValue": "in_progress",
+    "newValue": "completed"
+  },
+  {
+    "id": "ACT-000040",
+    "timestamp": "2026-07-31T20:05:00Z",
+    "type": "ticket_status_changed",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0011 status changed: backlog -> in_progress (Implement Property and Parcel Database Schema with PostGIS)",
+    "relatedTicketId": "FM-0011",
+    "relatedMilestoneId": "M2",
+    "previousValue": "backlog",
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000041",
+    "timestamp": "2026-07-31T20:25:00Z",
+    "type": "ticket_completed",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0011 completed: PostGIS + properties/parcels/property_parcels migrations with RLS, provenance, spatial indexes (EPSG:4326 MultiPolygon), typed helpers and status transitions (ADR-0033); no UI/Regrid/Mapbox",
+    "relatedTicketId": "FM-0011",
+    "relatedMilestoneId": "M2",
+    "previousValue": "in_progress",
+    "newValue": "completed"
+  },
+  {
+    "id": "ACT-000042",
+    "timestamp": "2026-07-31T20:15:00Z",
+    "type": "ticket_status_changed",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0012 status changed: backlog -> in_progress (Implement Regrid Parcel Search and Property Creation Service)",
+    "relatedTicketId": "FM-0012",
+    "relatedMilestoneId": "M2",
+    "previousValue": "backlog",
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000043",
+    "timestamp": "2026-07-31T20:45:00Z",
+    "type": "ticket_completed",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0012 completed: Regrid client + search/import/createPropertyFromParcel/refresh services with (provider, provider_parcel_id) reuse, provenance, service-role upsert RPC, and unit tests (ADR-0034); no UI/map/workspace",
+    "relatedTicketId": "FM-0012",
+    "relatedMilestoneId": "M2",
+    "previousValue": "in_progress",
+    "newValue": "completed"
+  },
+  {
+    "id": "ACT-000044",
+    "timestamp": "2026-07-31T21:35:00Z",
+    "type": "ticket_status_changed",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0013 status changed: backlog -> in_progress (Build the Property Workspace Version 1)",
+    "relatedTicketId": "FM-0013",
+    "relatedMilestoneId": "M2",
+    "previousValue": "backlog",
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000045",
+    "timestamp": "2026-07-31T21:55:00Z",
+    "type": "ticket_completed",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0013 completed: service-backed Property Workspace (/properties + /property/[id]) with Overview, parcel provenance, timeline, recommendation placeholder, PropertyStatusBadge, lazy module hooks, empty states (no mocks); ADR-0035",
+    "relatedTicketId": "FM-0013",
+    "relatedMilestoneId": "M2",
+    "previousValue": "in_progress",
+    "newValue": "completed"
+  },
+  {
+    "id": "ACT-000046",
+    "timestamp": "2026-07-31T22:00:00Z",
+    "type": "ticket_status_changed",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0014 status changed: backlog -> in_progress (Property Dashboard)",
+    "relatedTicketId": "FM-0014",
+    "relatedMilestoneId": "M2",
+    "previousValue": "backlog",
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000047",
+    "timestamp": "2026-07-31T22:15:00Z",
+    "type": "ticket_completed",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0014 completed: Property Dashboard on /property/[id] with identity/location, data availability, datasets/analyses inventory, summaries, timeline, recommendation placeholder, module quick-nav (ADR-0036); no Mapbox/zoning/financial engines",
+    "relatedTicketId": "FM-0014",
+    "relatedMilestoneId": "M2",
+    "previousValue": "in_progress",
+    "newValue": "completed"
+  }
+]

@@ -1,0 +1,134 @@
+[
+  {
+    "id": "M0",
+    "name": "Repository Foundation",
+    "objective": "Establish the technical and organizational foundation the product will be built on — repository, constitution, engineering standards, application shell, and the project management system itself — before any business feature work begins.",
+    "status": "in_progress",
+    "startDate": "2026-07-29",
+    "targetDate": null,
+    "completedDate": null,
+    "ticketIds": [
+      "FM-0001",
+      "FM-0002",
+      "FM-0003",
+      "FM-0004",
+      "FM-0005",
+      "FM-0006",
+      "FM-0021",
+      "FM-0022",
+      "FM-0023",
+      "FM-0024",
+      "FM-0025",
+      "FM-0026",
+      "FM-0026A",
+      "FM-0027",
+      "FM-0028"
+    ],
+    "progressPercent": 80,
+    "deliverables": [
+      "Repository initialized on GitHub (Formetrix/platform)",
+      "FORMETRIX.md adopted as the binding project constitution (ADR-0009)",
+      "Founder Pack governing docs and .cursor/rules/formetrix.mdc imported and committed (FM-0002)",
+      "Next.js 15 application foundation scaffolded and verified",
+      "Formetrix Project Management System created (FM-0001)",
+      "Supabase application foundation configured (FM-0021)",
+      "platform/ established as the sole canonical repository (ADR-0016)",
+      "Project Control Dashboard architecture designed (FM-0024) and MVP built (FM-0025)",
+      "Formetrix brand system and interactive detail panels applied to the dashboard (FM-0026)",
+      "Dashboard provider runtime error fixed; single client-boundary structure verified stable (FM-0026A)",
+      "Current Work focus and Project Codes legend added to the dashboard (FM-0027)",
+      "Foundation committed and pushed to GitHub as 92d0b03 (FM-0003)"
+    ],
+    "blockers": [],
+    "lastUpdatedAt": "2026-07-31T19:30:00Z"
+  },
+  {
+    "id": "M1",
+    "name": "Authentication",
+    "objective": "Allow a developer to create an account, sign in, and access a workspace, with sessions and data properly scoped per organization.",
+    "status": "not_started",
+    "startDate": null,
+    "targetDate": null,
+    "completedDate": null,
+    "ticketIds": ["FM-0007", "FM-0008", "FM-0009", "FM-0010"],
+    "progressPercent": 100,
+    "deliverables": [
+      "Initial database schema: users, organizations (FM-0007)",
+      "Authentication & organization architecture (docs/AUTH_FLOW.md) (FM-0008)",
+      "Session refresh middleware and protected routes (src/middleware.ts) (FM-0009)",
+      "Organization/workspace membership model with RLS (supabase/migrations) (FM-0010)"
+    ],
+    "blockers": [],
+    "lastUpdatedAt": "2026-07-31T12:00:00Z"
+  },
+  {
+    "id": "M2",
+    "name": "Property Workspace",
+    "objective": "Let a developer search for and open a property, seeing verified parcel data and its location on a map — the entry point to the acquisition decision.",
+    "status": "not_started",
+    "startDate": null,
+    "targetDate": null,
+    "completedDate": null,
+    "ticketIds": ["FM-0011", "FM-0012", "FM-0013", "FM-0014", "FM-0015", "FM-0029"],
+    "progressPercent": 83,
+    "deliverables": [
+      "Property/parcel database schema on PostGIS (supabase/migrations) (FM-0011)",
+      "Regrid integration for parcel data ingestion (FM-0012)",
+      "Property Search (FM-0013)",
+      "Property Dashboard (FM-0014)",
+      "Mapbox parcel visualization (FM-0015)"
+    ],
+    "blockers": [],
+    "lastUpdatedAt": "2026-07-31T12:00:00Z"
+  },
+  {
+    "id": "M3",
+    "name": "Development Intelligence",
+    "objective": "Surface what can likely be built on a property — zoning classification and development constraints — so a developer can gauge feasibility.",
+    "status": "not_started",
+    "startDate": null,
+    "targetDate": null,
+    "completedDate": null,
+    "ticketIds": ["FM-0016", "FM-0017"],
+    "progressPercent": 0,
+    "deliverables": [
+      "Zoning data model and Zoning Overview (FM-0016)",
+      "Development constraints analysis: setbacks, FAR, height limits (FM-0017)"
+    ],
+    "blockers": [],
+    "lastUpdatedAt": "2026-07-31T12:00:00Z"
+  },
+  {
+    "id": "M4",
+    "name": "Financial Intelligence",
+    "objective": "Give a developer a traceable, assumption-explicit view of whether a property is financially viable.",
+    "status": "not_started",
+    "startDate": null,
+    "targetDate": null,
+    "completedDate": null,
+    "ticketIds": ["FM-0018", "FM-0019"],
+    "progressPercent": 0,
+    "deliverables": [
+      "Deterministic, testable financial calculation engine (FM-0018)",
+      "Financial Snapshot UI with scenario/sensitivity analysis (FM-0019)"
+    ],
+    "blockers": [],
+    "lastUpdatedAt": "2026-07-31T12:00:00Z"
+  },
+  {
+    "id": "M5",
+    "name": "AI Copilot",
+    "objective": "Synthesize verified facts, calculations, and known unknowns into an explainable recommendation on whether to pursue a property.",
+    "status": "not_started",
+    "startDate": null,
+    "targetDate": null,
+    "completedDate": null,
+    "ticketIds": ["FM-0020"],
+    "progressPercent": 0,
+    "deliverables": [
+      "AI Recommendation module with explicit fact/assumption/uncertainty separation and source citation (FM-0020)"
+    ],
+    "blockers": [],
+    "lastUpdatedAt": "2026-07-31T12:00:00Z"
+  }
+]

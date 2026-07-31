@@ -3,50 +3,69 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { getSupabaseConfig, isSupabaseConfigured } from "@/lib/supabase/config";
 
+export type SessionUpdateResult = {
+  response: NextResponse;
+  /** False when Supabase env vars are missing — no Auth calls were made. */
+  configured: boolean;
+  /**
+   * Verified Auth subject (`sub`) from `getClaims()` when a session exists.
+   * Null when unconfigured, signed out, or claims could not be verified.
+   */
+  userId: string | null;
+};
+
 /**
- * Session-refresh utility for Next.js middleware. NOT wired into a live
- * `src/middleware.ts` yet — that is intentionally out of scope here
- * (FORMETRIX.md §23: no authentication implementation in this pass).
- * When FM-0009 (management/TICKETS.md) is picked up, a root
- * `src/middleware.ts` should import and call this, then layer route
- * protection on top; this function only refreshes the session cookie,
- * it does not gate any routes.
+ * Session-refresh utility for Next.js middleware.
  *
- * Follows Supabase's current guidance for the App Router: create a
- * per-request client bound to the request/response cookies, then call
- * `getClaims()` — not `getSession()` — so the token is actually
- * revalidated against the Auth server. Skipping that call is a common
- * cause of users being silently logged out.
+ * Follows Supabase's current App Router guidance: create a per-request
+ * client bound to request/response cookies, then call `getClaims()` — not
+ * `getSession()` — so the access token is revalidated. The returned
+ * `response` must be returned from middleware so refreshed cookies are
+ * preserved on the client.
  *
- * Next.js 16 renames `middleware.ts` to `proxy.ts` and changes its
- * runtime; this repo is pinned to Next.js 15 (ADR-0001), so this stays
- * a `middleware.ts`-style utility until that migration is planned.
+ * This function refreshes the session; route gating is layered by
+ * `src/middleware.ts` using the returned `userId` / `configured` flags.
+ *
+ * Next.js 16 renames `middleware.ts` to `proxy.ts`; this repo is pinned to
+ * Next.js 15 (ADR-0001), so the root entry remains `src/middleware.ts`.
  */
-export async function updateSession(request: NextRequest) {
+export async function updateSession(request: NextRequest): Promise<SessionUpdateResult> {
   let supabaseResponse = NextResponse.next({ request });
 
   if (!isSupabaseConfigured()) {
-    return supabaseResponse;
+    return { response: supabaseResponse, configured: false, userId: null };
   }
 
-  const { url, anonKey } = getSupabaseConfig();
-  const supabase = createServerClient(url, anonKey, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll();
+  try {
+    const { url, anonKey } = getSupabaseConfig();
+    const supabase = createServerClient(url, anonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          supabaseResponse = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options),
+          );
+        },
       },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        supabaseResponse = NextResponse.next({ request });
-        cookiesToSet.forEach(({ name, value, options }) =>
-          supabaseResponse.cookies.set(name, value, options),
-        );
-      },
-    },
-  });
+    });
 
-  // Must be called — this is what actually refreshes the token.
-  await supabase.auth.getClaims();
+    // Must be called — this is what actually refreshes / revalidates the token.
+    const { data, error } = await supabase.auth.getClaims();
+    const userId =
+      !error && data?.claims && typeof data.claims.sub === "string" ? data.claims.sub : null;
 
-  return supabaseResponse;
+    return { response: supabaseResponse, configured: true, userId };
+  } catch {
+    // Invalid/partial credentials must not throw into global-error.tsx.
+    // Callers treat `configured: false` as the known unconfigured Auth state.
+    return {
+      response: NextResponse.next({ request }),
+      configured: false,
+      userId: null,
+    };
+  }
 }

@@ -11,3 +11,18 @@ Follow these rules:
 - Explain architectural tradeoffs.
 - Do not expand Version 1 scope.
 - Never fabricate business logic.
+
+## Definition of Done (every engineering ticket) — FM-0028
+
+A ticket may only be marked **Completed** after ALL of the following, in order.
+Do not rely on memory; follow this list. See `docs/MISSION_CONTROL.md` §8.
+
+1. Update the ticket's status and narrative source data (`management/data/tickets.json`, `management/TICKETS.md`, and any milestone narrative).
+2. Run `npm run dashboard:update` to recompute calculated dashboard fields.
+3. Run `npm run dashboard:check` — it must pass (no drift, no hard integrity errors).
+4. Run `npm run lint`, `npm run typecheck`, `npm run format:check`, and `npm run build` — all must pass.
+5. Run `npm run dashboard:health` to record the real validation results into project health.
+6. Append a `management/data/activity.json` entry and update `management/CHANGELOG.md`.
+7. Only then set the ticket status to `completed`, and re-run `npm run dashboard:update` so current work and rollups reflect the closure.
+
+Never claim a check passed without running it. Never hand-edit calculated dashboard fields — run the intelligence script instead.

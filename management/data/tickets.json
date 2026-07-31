@@ -1,0 +1,1151 @@
+[
+  {
+    "id": "FM-0001",
+    "title": "Create the Formetrix Project Management System",
+    "description": "Establish a management/ directory containing MILESTONES.md, TICKETS.md, DECISIONS.md, MEETINGS.md, and CHANGELOG.md as the permanent engineering record for the project.",
+    "milestoneId": "M0",
+    "status": "completed",
+    "priority": "high",
+    "type": "documentation",
+    "owner": null,
+    "dependencies": [],
+    "acceptanceCriteria": [
+      {
+        "text": "management/ contains five files: MILESTONES.md, TICKETS.md, DECISIONS.md, MEETINGS.md, and CHANGELOG.md.",
+        "met": true
+      },
+      {
+        "text": "Each of the five files opens with an \"About This Document\" section covering Purpose, How to Maintain This Document, and Structure.",
+        "met": true
+      },
+      {
+        "text": "Each file's Structure section defines the exact field schema for its entries and includes a blank template block.",
+        "met": true
+      },
+      {
+        "text": "Each file is populated with real content following its defined structure.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": "2026-07-30T12:00:00Z",
+    "completedAt": "2026-07-30T12:00:00Z",
+    "blockedReason": null,
+    "commitSha": "7e0db87",
+    "pullRequest": null,
+    "release": "0.1.0",
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T05:41:15Z"
+  },
+  {
+    "id": "FM-0002",
+    "title": "Import Founder Pack governing docs into the platform repository",
+    "description": "Copy docs/PRODUCT.md, ROADMAP.md, ARCHITECTURE.md, DATABASE.md, UI.md, and .cursor/rules/formetrix.mdc into this repository so they are version-controlled next to the code that implements them.",
+    "milestoneId": "M0",
+    "status": "completed",
+    "priority": "high",
+    "type": "infrastructure",
+    "owner": null,
+    "dependencies": [],
+    "acceptanceCriteria": [
+      {
+        "text": "docs/PRODUCT.md, ROADMAP.md, ARCHITECTURE.md, DATABASE.md, and UI.md exist in the platform repository.",
+        "met": true
+      },
+      { "text": ".cursor/rules/formetrix.mdc exists in the platform repository.", "met": true },
+      {
+        "text": "The imported files are committed to version control in this repository.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": null,
+    "completedAt": "2026-07-31T05:41:15Z",
+    "blockedReason": null,
+    "commitSha": "92d0b03",
+    "pullRequest": null,
+    "release": "0.1.0",
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T05:41:15Z"
+  },
+  {
+    "id": "FM-0003",
+    "title": "Commit and push the Next.js application foundation",
+    "description": "Commit and push the scaffolded App Router foundation — layout, theming, error boundaries, and Supabase/Mapbox integration points.",
+    "milestoneId": "M0",
+    "status": "completed",
+    "priority": "high",
+    "type": "infrastructure",
+    "owner": null,
+    "dependencies": [],
+    "acceptanceCriteria": [
+      { "text": "The App Router foundation is committed to git.", "met": true },
+      { "text": "The commit is pushed to GitHub.", "met": true },
+      {
+        "text": "npm run lint, npm run typecheck, and npm run build pass on the pushed state.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": null,
+    "completedAt": "2026-07-31T05:41:15Z",
+    "blockedReason": null,
+    "commitSha": "92d0b03",
+    "pullRequest": null,
+    "release": "0.1.0",
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T05:41:15Z"
+  },
+  {
+    "id": "FM-0004",
+    "title": "Set up continuous integration",
+    "description": "Add a GitHub Actions workflow that runs npm run lint, npm run typecheck, and npm run build on every pull request.",
+    "milestoneId": "M0",
+    "status": "planned",
+    "priority": "medium",
+    "type": "infrastructure",
+    "owner": null,
+    "dependencies": [
+      {
+        "ticketId": "FM-0003",
+        "note": "Completed (92d0b03, pushed) — the foundation this workflow would run against now exists on GitHub."
+      }
+    ],
+    "acceptanceCriteria": [
+      {
+        "text": "A GitHub Actions workflow file exists that triggers on pull requests.",
+        "met": false
+      },
+      {
+        "text": "The workflow runs npm run lint, npm run typecheck, and npm run build.",
+        "met": false
+      },
+      {
+        "text": "A pull request with a failing step is reported as failing by the workflow.",
+        "met": false
+      }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": null,
+    "completedAt": null,
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 0,
+    "lastUpdatedAt": "2026-07-31T12:00:00Z"
+  },
+  {
+    "id": "FM-0005",
+    "title": "Provision the Supabase project and wire environment variables",
+    "description": "Create the real Supabase project, generate real API keys, and fill in .env.local per .env.example. Connection setup only — no schema or auth logic.",
+    "milestoneId": "M0",
+    "status": "planned",
+    "priority": "high",
+    "type": "infrastructure",
+    "owner": null,
+    "dependencies": [
+      {
+        "ticketId": "FM-0003",
+        "note": "Completed — nothing further blocks this ticket other than actually provisioning a Supabase project."
+      }
+    ],
+    "acceptanceCriteria": [
+      { "text": "A Supabase project is created.", "met": false },
+      { "text": "Real API keys are generated for the project.", "met": false },
+      { "text": ".env.local is filled in per .env.example.", "met": false },
+      {
+        "text": "No database schema or authentication logic is added as part of this ticket.",
+        "met": false
+      }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": null,
+    "completedAt": null,
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 0,
+    "lastUpdatedAt": "2026-07-31T12:00:00Z"
+  },
+  {
+    "id": "FM-0006",
+    "title": "Connect Vercel deployment for the platform repository",
+    "description": "Wire the GitHub repository to a Vercel project so that approved branches deploy automatically.",
+    "milestoneId": "M0",
+    "status": "planned",
+    "priority": "medium",
+    "type": "infrastructure",
+    "owner": null,
+    "dependencies": [
+      {
+        "ticketId": "FM-0003",
+        "note": "Completed — the foundation is on GitHub, so a Vercel project can now be connected."
+      }
+    ],
+    "acceptanceCriteria": [
+      { "text": "The GitHub repository is linked to a Vercel project.", "met": false },
+      { "text": "Deploys trigger automatically from approved branches.", "met": false }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": null,
+    "completedAt": null,
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 0,
+    "lastUpdatedAt": "2026-07-31T12:00:00Z"
+  },
+  {
+    "id": "FM-0007",
+    "title": "Design the Initial Core Database Schema",
+    "description": "Architecture-only design of the foundational database schema (User, Organization, OrganizationMember, Property, PropertyWorkspace) as docs/DATABASE_SCHEMA.md — entities, fields, relationships, cardinality, ownership/tenancy, and future extension points, with a Mermaid ER diagram. No SQL, Prisma, migrations, live tables, Supabase connection, or authentication code.",
+    "milestoneId": "M1",
+    "status": "completed",
+    "priority": "high",
+    "type": "documentation",
+    "owner": "AI Engineering Agent",
+    "dependencies": [
+      {
+        "ticketId": "FM-0005",
+        "note": "Not a blocker for this ticket: FM-0007 is architecture-only and does not require a live Supabase project. Implementation (schema, migrations) is deferred to a later ticket once FM-0005 is provisioned."
+      }
+    ],
+    "acceptanceCriteria": [
+      {
+        "text": "docs/DATABASE_SCHEMA.md exists documenting the core entities (User, Organization, OrganizationMember, Property, PropertyWorkspace) with purpose, fields, data types, required/optional, primary key, foreign keys, unique constraints, and future extension points.",
+        "met": true
+      },
+      {
+        "text": "Relationships, cardinality, and ownership/tenancy rules are documented and consistent with the founder-approved domain model (FD-0002–FD-0005) and FORMETRIX.md.",
+        "met": true
+      },
+      { "text": "A Mermaid ER diagram is included.", "met": true },
+      {
+        "text": "PropertyWorkspace is defined as the evaluation surface that future modules (Parcel, Zoning, Constraints, Assumptions, Financial, Recommendation, Documents, Activity) attach to — extension points only, those modules not designed.",
+        "met": true
+      },
+      {
+        "text": "No SQL, Prisma schema, Supabase migrations, live tables, or authentication code were produced; the model is normalized, multi-tenant, and production-ready.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": "2026-07-31T21:30:00Z",
+    "completedAt": "2026-07-31T22:15:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T22:15:00Z"
+  },
+  {
+    "id": "FM-0008",
+    "title": "Design Authentication & Organization Architecture",
+    "description": "Architecture and UI planning for authentication and organization management: sign-in/up, password reset, email verification, organization creation/invitation/switching, membership roles, and account settings — documented as docs/AUTH_FLOW.md. No Supabase Auth configuration, OAuth, migrations, or React components.",
+    "milestoneId": "M1",
+    "status": "completed",
+    "priority": "high",
+    "type": "documentation",
+    "owner": "AI Engineering Agent",
+    "dependencies": [
+      {
+        "ticketId": "FM-0007",
+        "note": "Completed — auth/org flows build on the User, Organization, and OrganizationMember schema."
+      }
+    ],
+    "acceptanceCriteria": [
+      {
+        "text": "docs/AUTH_FLOW.md exists covering sign-in, sign-up, password reset, email verification, organization creation, invitation, switching, membership roles, and account settings.",
+        "met": true
+      },
+      {
+        "text": "Roles Owner, Admin, Member, and Viewer are defined with permissions, responsibilities, and future expansion.",
+        "met": true
+      },
+      {
+        "text": "Complete user journeys are documented with flow or sequence diagrams (new account → org → invite → join → multi-org → switch).",
+        "met": true
+      },
+      {
+        "text": "UI planning includes screen list, navigation, form fields, validation, error/empty states, and future MFA — no React components implemented.",
+        "met": true
+      },
+      {
+        "text": "Security considerations and future provider compatibility (Supabase Auth, Google/Microsoft, magic links, SSO) are documented; no providers or Auth implemented.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": "2026-07-31T23:00:00Z",
+    "completedAt": "2026-07-31T23:45:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T23:45:00Z"
+  },
+  {
+    "id": "FM-0009",
+    "title": "Implement Supabase Session Refresh Middleware and Protected Routes",
+    "description": "Implement authentication session infrastructure: root middleware that refreshes Supabase sessions, centralized protected-route policy, verified server-side user resolution, and safe redirect behavior. No sign-up/sign-in forms, OAuth, migrations, or role enforcement.",
+    "milestoneId": "M1",
+    "status": "completed",
+    "priority": "high",
+    "type": "infrastructure",
+    "owner": "Cursor Grok 4.5",
+    "dependencies": [
+      {
+        "ticketId": "FM-0008",
+        "note": "Completed — AUTH_FLOW.md defines redirect targets, public/protected surfaces, and session expectations."
+      }
+    ],
+    "acceptanceCriteria": [
+      {
+        "text": "Root middleware exists, uses src/lib/supabase/middleware.ts updateSession, and refreshes Supabase sessions with an appropriate matcher.",
+        "met": true
+      },
+      {
+        "text": "Protected-route policy is centralized; unauthenticated access redirects safely to /auth/sign-in with an open-redirect-safe return path.",
+        "met": true
+      },
+      {
+        "text": "Verified server-side authenticated-user resolution exists with typed results (authenticated / unauthenticated / unconfigured / error).",
+        "met": true
+      },
+      {
+        "text": "Public routes and static assets remain accessible; unconfigured Supabase does not crash public pages or silently bypass auth.",
+        "met": true
+      },
+      {
+        "text": "No sign-up/sign-in feature, OAuth, migrations, or role-based authorization was implemented.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": "2026-07-31T19:35:00Z",
+    "completedAt": "2026-07-31T19:55:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T19:55:00Z"
+  },
+  {
+    "id": "FM-0010",
+    "title": "Implement Organization and Workspace Membership Model",
+    "description": "Implement foundational organization-membership data model: user_profiles, organizations, organization_memberships migrations with RLS, typed server access helpers, role hierarchy, and safe V1 active-organization context. No onboarding/invitation UI; migrations are not applied to a live project.",
+    "milestoneId": "M1",
+    "status": "completed",
+    "priority": "medium",
+    "type": "infrastructure",
+    "owner": "Cursor Grok 4.5",
+    "dependencies": [
+      { "ticketId": "FM-0007", "note": "Completed — core schema design." },
+      { "ticketId": "FM-0008", "note": "Completed — AUTH_FLOW roles and org journeys." },
+      { "ticketId": "FM-0009", "note": "Completed — session middleware and getAuthenticatedUser." }
+    ],
+    "acceptanceCriteria": [
+      {
+        "text": "Migration-ready SQL exists for user_profiles, organizations, and organization_memberships with constraints, indexes, and updated-at handling.",
+        "met": true
+      },
+      {
+        "text": "RLS policies (or clearly separated SQL) cover profile self-access, org visibility for active members, and authorized membership management without self-elevation.",
+        "met": true
+      },
+      {
+        "text": "Typed server helpers exist for profile, current organization, membership/role checks, and listing organizations with explicit result types.",
+        "met": true
+      },
+      {
+        "text": "Active organization selection is safe for V1 (one active context); role hierarchy and slug validation are tested; no onboarding/invitation UI or live migration apply.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": "2026-07-31T19:50:00Z",
+    "completedAt": "2026-07-31T20:00:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T20:00:00Z"
+  },
+  {
+    "id": "FM-0011",
+    "title": "Implement Property and Parcel Database Schema with PostGIS",
+    "description": "Implement foundational PostgreSQL/PostGIS schema for properties, shared parcels, and property_parcels with provenance, spatial indexes, RLS, typed server helpers, and property status transition logic. No Property Workspace UI, Regrid, or Mapbox.",
+    "milestoneId": "M2",
+    "status": "completed",
+    "priority": "high",
+    "type": "infrastructure",
+    "owner": "Cursor Grok 4.5",
+    "dependencies": [
+      { "ticketId": "FM-0007", "note": "Completed — core schema design." },
+      { "ticketId": "FM-0010", "note": "Completed — org membership RLS helpers reused." }
+    ],
+    "acceptanceCriteria": [
+      {
+        "text": "PostGIS-enabled migrations define properties, parcels, and property_parcels with spatial indexes, provenance, and RLS.",
+        "met": true
+      },
+      {
+        "text": "One Property may link many Parcels; Parcels are shareable across Organizations without exposing private Property data.",
+        "met": true
+      },
+      {
+        "text": "Typed server helpers and centralized property status transition rules exist with pure tests; no UI/Regrid/Mapbox; migrations not auto-applied.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": "2026-07-31T20:05:00Z",
+    "completedAt": "2026-07-31T20:25:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T20:25:00Z"
+  },
+  {
+    "id": "FM-0012",
+    "title": "Implement Regrid Parcel Search and Property Creation Service",
+    "description": "Build Regrid API client and server services for parcel search (address/APN/coordinates), parcel import/sync with provenance, and createPropertyFromParcel without UI. No Mapbox, workspace UI, or financial analysis.",
+    "milestoneId": "M2",
+    "status": "completed",
+    "priority": "high",
+    "type": "infrastructure",
+    "owner": "Cursor Grok 4.5",
+    "dependencies": [
+      { "ticketId": "FM-0011", "note": "Completed — parcels/properties schema and helpers." }
+    ],
+    "acceptanceCriteria": [
+      {
+        "text": "Typed Regrid client exists with env validation, error handling, retry, and rate-limit handling.",
+        "met": true
+      },
+      {
+        "text": "searchParcels / importParcel / createPropertyFromParcel / refreshParcel services return typed results, reuse parcels by (provider, provider_parcel_id), and preserve provenance.",
+        "met": true
+      },
+      {
+        "text": "Focused tests cover duplicates, API failures, rate limits, parcel reuse, and property creation; no UI; live credentials not required for build/tests.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": "2026-07-31T20:15:00Z",
+    "completedAt": "2026-07-31T20:45:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T20:45:00Z"
+  },
+  {
+    "id": "FM-0013",
+    "title": "Build the Property Workspace (Version 1)",
+    "description": "Replace mock Property Workspace with real service-backed /properties and /property/[id]: overview with parcel provenance, timeline, recommendation placeholder, working section nav (Coming Soon for future modules), responsive investor-ready UI. No fake records; empty states when data or Regrid unavailable. Search UI remains out of scope.",
+    "milestoneId": "M2",
+    "status": "completed",
+    "priority": "high",
+    "type": "feature",
+    "owner": "Cursor Grok 4.5",
+    "dependencies": [
+      { "ticketId": "FM-0012", "note": "Completed — Regrid ingestion + property/parcel services." },
+      { "ticketId": "FM-0029", "note": "Completed — mock workspace shell to evolve." }
+    ],
+    "acceptanceCriteria": [
+      {
+        "text": "/properties and /property/[id] load from Property services with no mock records; empty states when unconfigured or no data.",
+        "met": true
+      },
+      {
+        "text": "Workspace header, left nav (working routes), Overview (facts, parcel card, timeline, recommendation placeholder), PropertyStatusBadge, and responsive layout ship investor-ready Formetrix design.",
+        "met": true
+      },
+      {
+        "text": "Lazy-load-ready extension points exist for Zoning, Financial, Constraints, Recommendation, Documents, Activity; no Mapbox/zoning engine/AI.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": "2026-07-31T21:35:00Z",
+    "completedAt": "2026-07-31T21:55:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T21:55:00Z"
+  },
+  {
+    "id": "FM-0014",
+    "title": "Property Dashboard",
+    "description": "Build the primary property overview screen showing what the property is, where it is, and what data is available. Central workspace dashboard with identity, parcel/property summary, data availability, dataset/analysis inventory, recommendation placeholder, timeline, and module quick-nav — real services only, no Mapbox/zoning/financial engines.",
+    "milestoneId": "M2",
+    "status": "completed",
+    "priority": "high",
+    "type": "feature",
+    "owner": "Cursor Grok 4.5",
+    "dependencies": [
+      { "ticketId": "FM-0013", "note": "Completed — service-backed Property Workspace shell." }
+    ],
+    "acceptanceCriteria": [
+      { "text": "The dashboard shows what the property is.", "met": true },
+      { "text": "The dashboard shows where the property is.", "met": true },
+      { "text": "The dashboard shows what data is available for the property.", "met": true }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": "2026-07-31T22:00:00Z",
+    "completedAt": "2026-07-31T22:15:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T22:15:00Z"
+  },
+  {
+    "id": "FM-0015",
+    "title": "Mapbox parcel visualization",
+    "description": "Install mapbox-gl — deliberately deferred during the foundation pass — and render parcel geometry as the first real map feature.",
+    "milestoneId": "M2",
+    "status": "backlog",
+    "priority": "medium",
+    "type": "feature",
+    "owner": null,
+    "dependencies": [{ "ticketId": "FM-0011" }],
+    "acceptanceCriteria": [
+      { "text": "mapbox-gl is installed.", "met": false },
+      { "text": "Parcel geometry renders on a map.", "met": false },
+      {
+        "text": "The map visualization does not imply a level of precision the underlying data does not support.",
+        "met": false
+      }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": null,
+    "completedAt": null,
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 0,
+    "lastUpdatedAt": "2026-07-30T12:00:00Z"
+  },
+  {
+    "id": "FM-0016",
+    "title": "Zoning data model and Zoning Overview",
+    "description": "Store zoning classification per parcel and surface it in a Zoning Overview.",
+    "milestoneId": "M3",
+    "status": "backlog",
+    "priority": "high",
+    "type": "feature",
+    "owner": null,
+    "dependencies": [{ "ticketId": "FM-0011" }],
+    "acceptanceCriteria": [
+      { "text": "Zoning classification is stored per parcel.", "met": false },
+      { "text": "A Zoning Overview surfaces the stored classification to the user.", "met": false }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": null,
+    "completedAt": null,
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 0,
+    "lastUpdatedAt": "2026-07-30T12:00:00Z"
+  },
+  {
+    "id": "FM-0017",
+    "title": "Development constraints analysis",
+    "description": "Surface development constraints such as setbacks, FAR, and height limits that bound what can likely be built.",
+    "milestoneId": "M3",
+    "status": "backlog",
+    "priority": "medium",
+    "type": "feature",
+    "owner": null,
+    "dependencies": [{ "ticketId": "FM-0016" }],
+    "acceptanceCriteria": [
+      { "text": "Setback constraints are surfaced.", "met": false },
+      { "text": "FAR constraints are surfaced.", "met": false },
+      { "text": "Height limit constraints are surfaced.", "met": false }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": null,
+    "completedAt": null,
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 0,
+    "lastUpdatedAt": "2026-07-30T12:00:00Z"
+  },
+  {
+    "id": "FM-0018",
+    "title": "Deterministic financial calculation engine",
+    "description": "Build a testable, traceable core financial calculation engine, kept separate from presentation.",
+    "milestoneId": "M4",
+    "status": "backlog",
+    "priority": "high",
+    "type": "infrastructure",
+    "owner": null,
+    "dependencies": [{ "ticketId": "FM-0011" }],
+    "acceptanceCriteria": [
+      {
+        "text": "Core financial calculations are implemented separately from UI/presentation code.",
+        "met": false
+      },
+      { "text": "Calculations are covered by automated tests.", "met": false },
+      { "text": "Calculation outputs are traceable to their inputs.", "met": false }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": null,
+    "completedAt": null,
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 0,
+    "lastUpdatedAt": "2026-07-30T12:00:00Z"
+  },
+  {
+    "id": "FM-0019",
+    "title": "Financial Snapshot and scenario analysis",
+    "description": "Build a Financial Snapshot UI surfacing inputs, methodology, output, and sensitivity for a property's financial viability, including scenario analysis.",
+    "milestoneId": "M4",
+    "status": "backlog",
+    "priority": "medium",
+    "type": "feature",
+    "owner": null,
+    "dependencies": [{ "ticketId": "FM-0018" }],
+    "acceptanceCriteria": [
+      { "text": "The Financial Snapshot displays input assumptions.", "met": false },
+      { "text": "The Financial Snapshot displays methodology.", "met": false },
+      { "text": "The Financial Snapshot displays output and sensitivity.", "met": false },
+      { "text": "Scenario analysis is supported.", "met": false }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": null,
+    "completedAt": null,
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 0,
+    "lastUpdatedAt": "2026-07-30T12:00:00Z"
+  },
+  {
+    "id": "FM-0020",
+    "title": "AI Recommendation module",
+    "description": "Build an explainable AI Recommendation module that synthesizes facts, calculations, and uncertainty into a pursue/don't-pursue recommendation, citing supporting data.",
+    "milestoneId": "M5",
+    "status": "backlog",
+    "priority": "high",
+    "type": "feature",
+    "owner": null,
+    "dependencies": [{ "ticketId": "FM-0017" }, { "ticketId": "FM-0019" }],
+    "acceptanceCriteria": [
+      { "text": "The module produces a pursue/don't-pursue recommendation.", "met": false },
+      { "text": "The recommendation cites supporting data.", "met": false },
+      {
+        "text": "The recommendation explainably synthesizes facts, calculations, and uncertainty.",
+        "met": false
+      }
+    ],
+    "createdAt": "2026-07-30T12:00:00Z",
+    "startedAt": null,
+    "completedAt": null,
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 0,
+    "lastUpdatedAt": "2026-07-30T12:00:00Z"
+  },
+  {
+    "id": "FM-0021",
+    "title": "Configure the Supabase application foundation",
+    "description": "Build out src/lib/supabase/ with a browser client, server client, a dormant session-refresh middleware utility, centralized config validation, and a manually-invoked health-check utility.",
+    "milestoneId": "M0",
+    "status": "completed",
+    "priority": "high",
+    "type": "infrastructure",
+    "owner": null,
+    "dependencies": [],
+    "acceptanceCriteria": [
+      {
+        "text": "src/lib/supabase/ contains client.ts, server.ts, middleware.ts, config.ts, and health-check.ts.",
+        "met": true
+      },
+      {
+        "text": "getSupabaseConfig() throws one aggregated, clear error naming every missing required Supabase environment variable.",
+        "met": true
+      },
+      {
+        "text": "checkSupabaseHealth() is exported but not invoked automatically anywhere in the codebase.",
+        "met": true
+      },
+      {
+        "text": ".env.example documents NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY with no real credentials.",
+        "met": true
+      },
+      {
+        "text": "No tables, migrations, RLS policies, or auth UI were created; lint/typecheck/build all pass.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-07-30T19:00:00Z",
+    "startedAt": "2026-07-30T19:00:00Z",
+    "completedAt": "2026-07-30T21:00:00Z",
+    "blockedReason": null,
+    "commitSha": "92d0b03",
+    "pullRequest": null,
+    "release": "0.1.0",
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T05:41:15Z"
+  },
+  {
+    "id": "FM-0022",
+    "title": "Define the Formetrix Core Domain Model",
+    "description": "Author docs/DOMAIN_MODEL.md, defining the implementation-independent business vocabulary that future schema, API, and UI work should draw from.",
+    "milestoneId": "M0",
+    "status": "completed",
+    "priority": "high",
+    "type": "documentation",
+    "owner": null,
+    "dependencies": [],
+    "acceptanceCriteria": [
+      { "text": "docs/DOMAIN_MODEL.md exists with all 15 required sections present.", "met": true },
+      { "text": "All required core concepts are evaluated.", "met": true },
+      {
+        "text": "Every concept in the Version 1 Boundary table carries an explicit label with reasoning.",
+        "met": true
+      },
+      {
+        "text": "Open Questions are listed and split into blocking vs. non-blocking.",
+        "met": true
+      },
+      { "text": "A conceptual relationship diagram is included and labeled as such.", "met": true },
+      { "text": "No application code, database schema, or migrations were changed.", "met": true }
+    ],
+    "createdAt": "2026-07-30T21:15:00Z",
+    "startedAt": "2026-07-30T21:15:00Z",
+    "completedAt": "2026-07-30T22:30:00Z",
+    "blockedReason": null,
+    "commitSha": "92d0b03",
+    "pullRequest": null,
+    "release": "0.1.0",
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T05:41:15Z"
+  },
+  {
+    "id": "FM-0023",
+    "title": "Resolve Founder Domain Decisions and Finalize the Version 1 Domain Boundary",
+    "description": "Incorporate Founder Decisions FD-0001 through FD-0009 into docs/DOMAIN_MODEL.md, resolving all blocking Open Questions, and record the decisions in management/FOUNDER_DECISIONS.md.",
+    "milestoneId": "M0",
+    "status": "completed",
+    "priority": "high",
+    "type": "documentation",
+    "owner": null,
+    "dependencies": [{ "ticketId": "FM-0022" }],
+    "acceptanceCriteria": [
+      { "text": "docs/DOMAIN_MODEL.md reflects all nine approved founder decisions.", "met": true },
+      {
+        "text": "All five previously-blocking Open Questions are resolved and moved, not deleted.",
+        "met": true
+      },
+      {
+        "text": "Property is documented as a long-lived workspace with a lifecycle status.",
+        "met": true
+      },
+      { "text": "management/FOUNDER_DECISIONS.md exists with FD-0001–FD-0009.", "met": true },
+      {
+        "text": "management/DECISIONS.md references the founder decisions' architectural consequences without duplicating their text.",
+        "met": true
+      },
+      { "text": "No application code, database schema, or migrations were changed.", "met": true }
+    ],
+    "createdAt": "2026-07-30T22:45:00Z",
+    "startedAt": "2026-07-30T22:45:00Z",
+    "completedAt": "2026-07-30T23:40:00Z",
+    "blockedReason": null,
+    "commitSha": "92d0b03",
+    "pullRequest": null,
+    "release": "0.1.0",
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T05:41:15Z"
+  },
+  {
+    "id": "FM-0024",
+    "title": "Design the Formetrix Project Control Dashboard",
+    "description": "Author docs/PROJECT_DASHBOARD_ARCHITECTURE.md — structured data schemas, dashboard information architecture, progress-calculation rules, and an automation design — without building any of it.",
+    "milestoneId": "M0",
+    "status": "completed",
+    "priority": "high",
+    "type": "documentation",
+    "owner": null,
+    "dependencies": [],
+    "acceptanceCriteria": [
+      {
+        "text": "docs/PROJECT_DASHBOARD_ARCHITECTURE.md exists covering source-of-truth rules, all six management/data/*.json schemas with examples, nine dashboard views, progress formulas, validation rules, audit trail, and automation design.",
+        "met": true
+      },
+      {
+        "text": "The source-of-truth recommendation is validated, not accepted uncritically, with risks identified.",
+        "met": true
+      },
+      {
+        "text": "No dashboard UI, populated production JSON, active hook, Excel workbook, or PDF template was created.",
+        "met": true
+      },
+      {
+        "text": "management/DECISIONS.md records the genuine engineering-level decisions made (ADR-0017–ADR-0019).",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-07-31T06:00:00Z",
+    "startedAt": "2026-07-31T06:00:00Z",
+    "completedAt": "2026-07-31T07:15:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T07:15:00Z"
+  },
+  {
+    "id": "FM-0025",
+    "title": "Build the Formetrix Project Control Dashboard MVP",
+    "description": "Build a working internal browser dashboard at /internal/project-dashboard, populated from real management/data/*.json, showing milestones, tickets, decisions, releases, activity, and risks.",
+    "milestoneId": "M0",
+    "status": "completed",
+    "priority": "high",
+    "type": "feature",
+    "owner": null,
+    "dependencies": [{ "ticketId": "FM-0024" }],
+    "acceptanceCriteria": [
+      { "text": "The internal dashboard route exists and loads successfully.", "met": true },
+      {
+        "text": "Current milestones, tickets, decisions, releases, activity, and blockers are displayed.",
+        "met": true
+      },
+      {
+        "text": "Structured JSON data exists, is typed, and is validated before rendering; invalid data shows a clear error instead of failing silently.",
+        "met": true
+      },
+      { "text": "Dark and light themes both work.", "met": true },
+      {
+        "text": "No Excel, PDF, authentication, Claude Code hooks, or GitHub Issues integration exists.",
+        "met": true
+      },
+      { "text": "lint, typecheck, format:check, and build all pass.", "met": true }
+    ],
+    "createdAt": "2026-07-31T07:20:00Z",
+    "startedAt": "2026-07-31T07:20:00Z",
+    "completedAt": "2026-07-31T12:00:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T12:00:00Z"
+  },
+  {
+    "id": "FM-0026",
+    "title": "Apply Formetrix branding and interactive dashboard details",
+    "description": "Apply the official Formetrix brand system (colors, typography) and build a reusable detail-drawer system so every dashboard item (tickets, milestones, decisions, activity, releases, summary cards) is clickable and shows its full information.",
+    "milestoneId": "M0",
+    "status": "completed",
+    "priority": "high",
+    "type": "feature",
+    "owner": null,
+    "dependencies": [{ "ticketId": "FM-0025" }],
+    "acceptanceCriteria": [
+      {
+        "text": "The official Formetrix color palette is applied in both dark and light mode.",
+        "met": true
+      },
+      {
+        "text": "Inter is used for primary UI typography; Space Grotesk for metric/data emphasis.",
+        "met": true
+      },
+      { "text": "docs/DESIGN_SYSTEM.md exists and docs/UI.md references it.", "met": true },
+      {
+        "text": "Ticket, milestone, roadmap, decision, activity, and release items all open full detail panels.",
+        "met": true
+      },
+      { "text": "Summary cards open filtered ticket views or an explanatory panel.", "met": true },
+      {
+        "text": "Detail panels are reusable (one drawer + context, not bespoke modals per section), keyboard accessible, and work on desktop and mobile.",
+        "met": true
+      },
+      {
+        "text": "No data is fabricated; unavailable fields are hidden, not invented.",
+        "met": true
+      },
+      { "text": "No drag-and-drop or authentication was added.", "met": true },
+      { "text": "lint, typecheck, format:check, and build all pass.", "met": true }
+    ],
+    "createdAt": "2026-07-31T12:30:00Z",
+    "startedAt": "2026-07-31T12:30:00Z",
+    "completedAt": "2026-07-31T16:00:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T16:00:00Z"
+  },
+  {
+    "id": "FM-0026A",
+    "title": "Fix DashboardDetailProvider runtime error and verify dashboard stability",
+    "description": "Fix a reported 'useDashboardDetail must be used within a DashboardDetailProvider' runtime error by consolidating the dashboard's client-side rendering into a single client shell component. A bug-fix patch to FM-0026, not new feature work.",
+    "milestoneId": "M0",
+    "status": "completed",
+    "priority": "high",
+    "type": "bug",
+    "owner": null,
+    "dependencies": [{ "ticketId": "FM-0026" }],
+    "acceptanceCriteria": [
+      {
+        "text": "page.tsx only loads and validates data, then renders one client component.",
+        "met": true
+      },
+      {
+        "text": "ProjectDashboardShell renders DashboardDetailProvider and every section from within its own module — the page's sole client boundary.",
+        "met": true
+      },
+      {
+        "text": "lint, typecheck, format:check, and build all pass, including a clean build from a wiped .next/ directory.",
+        "met": true
+      },
+      {
+        "text": "Verified via next start (production) and three consecutive fresh next dev requests — HTTP 200, no provider or data-integrity errors, clean server logs.",
+        "met": true
+      },
+      {
+        "text": "No fallback context value or hook change was added; the fix is structural, not a suppression.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-07-31T17:00:00Z",
+    "startedAt": "2026-07-31T17:00:00Z",
+    "completedAt": "2026-07-31T18:00:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T18:00:00Z"
+  },
+  {
+    "id": "FM-0027",
+    "title": "Add Current Work Focus and Project Code Legend",
+    "description": "Add a prominent Current Work section to the top of /internal/project-dashboard that answers, within a few seconds, which milestone and engineering ticket are currently active, what product workstream is being built, and the clear next action — plus a Project Codes legend that explains what identifiers such as M0, FM-0027, ADR-0022, FD-0009, and v0.1.0 mean. Current work is resolved from typed structured data, never guessed; the active milestone and ticket are highlighted throughout the dashboard.",
+    "milestoneId": "M0",
+    "status": "completed",
+    "priority": "medium",
+    "type": "feature",
+    "owner": "AI Engineering Agent",
+    "dependencies": [
+      {
+        "ticketId": "FM-0026A",
+        "note": "Reuses the reusable detail-drawer system (FM-0026) and the single client-shell structure (FM-0026A); both Completed."
+      }
+    ],
+    "acceptanceCriteria": [
+      {
+        "text": "management/data/project-status.json is extended with currentTicketId, currentWorkstream, currentFocusSummary, and currentNextAction (currentMilestoneId already existed), and the active milestone/ticket resolve to real records.",
+        "met": true
+      },
+      {
+        "text": "A prominent Current Work section renders after the dashboard header and before the executive summary, showing the active milestone, active ticket, status, priority, computed progress, workstream, short description, dependencies, blocker (when present), last-updated time, and a clear next action.",
+        "met": true
+      },
+      {
+        "text": "Current Work is resolved from typed structured sources; if currentTicketId/currentMilestoneId are inconsistent (missing record, wrong milestone, non-active status, out-of-range progress) a visible integrity warning is shown instead of invented values.",
+        "met": true
+      },
+      {
+        "text": "The Current Work card opens the existing reusable detail drawer with the full active-ticket details, and the milestone identifier inside the drawer opens the milestone panel.",
+        "met": true
+      },
+      {
+        "text": "The active milestone is highlighted in the milestone progress list and roadmap, and the active ticket is highlighted with a \"Current\" badge in its Kanban column.",
+        "met": true
+      },
+      {
+        "text": "A \"Project Codes\" trigger opens the existing drawer and explains M, FM, ADR, FD, v, PR, and commit SHA — including numbering and where each record is stored — sourced from a typed config file (src/features/project-dashboard/config/project-codes.ts).",
+        "met": true
+      },
+      {
+        "text": "Accessibility: the Current Work card and Project Codes trigger are real buttons with visible keyboard focus; the drawer supports Escape-to-close and restores focus; status is never conveyed by color alone; reduced motion is respected.",
+        "met": true
+      },
+      {
+        "text": "npm run lint, npm run typecheck, npm run format:check, and npm run build all pass.",
+        "met": true
+      },
+      {
+        "text": "Verified at http://localhost:3000/internal/project-dashboard via dev/production server requests (HTTP 200) and rendered-markup assertions; a full interactive browser session was not available in this environment (see FM-0026A caveat).",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-07-31T19:00:00Z",
+    "startedAt": "2026-07-31T19:00:00Z",
+    "completedAt": "2026-07-31T20:00:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T20:00:00Z"
+  },
+  {
+    "id": "FM-0028",
+    "title": "Add Dashboard Intelligence Automation MVP",
+    "description": "Add a deterministic, local dashboard-intelligence system (scripts/update-dashboard-intelligence.ts + a validation-health recorder) that recomputes the Mission Control snapshot from repository-controlled data — progress, counts, current work, integrity, and local project health — reducing manually maintained values, and record a Definition of Done that requires running it before any ticket is marked Completed.",
+    "milestoneId": "M0",
+    "status": "completed",
+    "priority": "high",
+    "type": "infrastructure",
+    "owner": "AI Engineering Agent",
+    "dependencies": [
+      {
+        "ticketId": "FM-0027",
+        "note": "Completed — builds on the Current Work model and structured project-status fields FM-0027 introduced."
+      }
+    ],
+    "acceptanceCriteria": [
+      { "text": "npm run dashboard:update exists and writes only calculated fields.", "met": true },
+      {
+        "text": "npm run dashboard:check exists and validates without writing, failing on stale calculated fields or hard integrity errors.",
+        "met": true
+      },
+      {
+        "text": "Active work is determined from explicit ticket status (in_progress/review/blocked); no next planned ticket is auto-selected.",
+        "met": true
+      },
+      {
+        "text": "The current milestone is validated to match the active ticket's milestone.",
+        "met": true
+      },
+      {
+        "text": "Milestone and overall progress are calculated deterministically (completed / total scoped tickets), documented in docs/MISSION_CONTROL.md.",
+        "met": true
+      },
+      {
+        "text": "Project health distinguishes known passing/failing from unknown and not_configured, never claiming GitHub/Vercel/Supabase healthy without evidence.",
+        "met": true
+      },
+      {
+        "text": "Integrity problems (missing/duplicate/mislinked records, out-of-range progress, count discrepancies) are detected and rendered in Mission Control.",
+        "met": true
+      },
+      {
+        "text": "Running the update repeatedly with no source change produces no file changes.",
+        "met": true
+      },
+      {
+        "text": "The future-ticket Definition of Done (dashboard update + check + validation + records before Completed) is added to the Cursor rule and repository documentation.",
+        "met": true
+      },
+      {
+        "text": "FM-0028 is shown as the active current ticket during implementation and correctly Completed afterward, with no next ticket auto-activated.",
+        "met": true
+      },
+      { "text": "lint, typecheck, format:check, and build all pass.", "met": true },
+      {
+        "text": "Verified at http://localhost:3000/internal/project-dashboard via server requests and rendered-markup assertions; full interactive browser session not available in this environment.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-07-31T20:15:00Z",
+    "startedAt": "2026-07-31T20:15:00Z",
+    "completedAt": "2026-07-31T21:00:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T21:00:00Z"
+  },
+  {
+    "id": "FM-0029",
+    "title": "Build the Property Workspace Foundation",
+    "description": "Build the first investor-facing product feature: a /properties list and a /property/[id] workspace, backed by typed mock data only (no Supabase). The workspace shows an Overview panel of 5 cards (Property Facts, Parcel Facts, Development Snapshot, Current Recommendation, Unknowns) plus a left navigation for 9 future sections, 8 of which render a shared Coming Soon stub.",
+    "milestoneId": "M2",
+    "status": "completed",
+    "priority": "high",
+    "type": "feature",
+    "owner": "AI Engineering Agent",
+    "dependencies": [],
+    "acceptanceCriteria": [
+      {
+        "text": "/properties lists all mock properties and links into each workspace.",
+        "met": true
+      },
+      {
+        "text": "/property/[id] renders the persistent workspace chrome: property name, address, parcel/APN, city, state, acres, zoning, current status, map placeholder, and property summary.",
+        "met": true
+      },
+      {
+        "text": "A left navigation lists all 9 future sections (Overview, Parcel, Zoning, Constraints, Assumptions, Financial, Recommendation, Documents, Activity); only Overview has real content, the other 8 render a shared Coming Soon panel via real sub-routes.",
+        "met": true
+      },
+      {
+        "text": "The Overview panel shows exactly 5 cards (Property Facts, Parcel Facts, Development Snapshot, Current Recommendation, Unknowns), every value sourced from typed mock data (src/features/properties/data/mock-properties.ts).",
+        "met": true
+      },
+      {
+        "text": "Domain components are reusable (FactRow shared by Property Facts and Parcel Facts; Badge promoted to src/components/ui after a second feature needed it); no business logic lives in page.tsx/layout.tsx files.",
+        "met": true
+      },
+      {
+        "text": "Styling uses the Formetrix Design System: dark mode first, brand colors via theme tokens, 8px-radius cards, Inter for prose and font-metric for data emphasis.",
+        "met": true
+      },
+      {
+        "text": "The workspace architecture supports Scenario tabs, multiple recommendations, a financial engine, a real map, and documents without redesign: each section is a real bookmarkable route, Recommendation is already modeled as one-of-possibly-many, and MapPlaceholder reserves the map's position for FM-0015.",
+        "met": true
+      },
+      {
+        "text": "Authentication, Supabase, calculations, reports, PDF, and AI are not implemented — mock data only.",
+        "met": true
+      },
+      {
+        "text": "An unknown property id (e.g. /property/nonexistent) returns a real HTTP 404, not a 200 with not-found content — required generateStaticParams + dynamicParams = false (ADR-0026) to route around a Next.js streaming/notFound() status-code limitation caused by the pre-existing root loading.tsx.",
+        "met": true
+      },
+      {
+        "text": "npm run dashboard:update, dashboard:check, lint, typecheck, format:check, build, and dashboard:health all pass.",
+        "met": true
+      },
+      {
+        "text": "Verified at http://localhost:3000/properties and /property/demo (and all 3 mock ids, all 9 sections, and the 404 case) via dev/production server requests and rendered-markup assertions; a full interactive browser session was not available in this environment (same caveat as FM-0026A).",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-07-31T21:00:00Z",
+    "startedAt": "2026-07-31T21:00:00Z",
+    "completedAt": "2026-07-31T22:00:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-07-31T22:00:00Z"
+  }
+]

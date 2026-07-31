@@ -216,3 +216,231 @@ Each entry uses the following fields, in this order:
 - **Alternatives Considered:**
   - Keeping the Founder Pack directory as a live reference indefinitely, treating `platform/docs/` as a synced copy (rejected — two sources of truth for the same content is exactly the drift risk this decision exists to close off)
 - **Impact:** `docs/PRODUCT.md`, `docs/ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/DATABASE.md`, `docs/UI.md`, and `.cursor/rules/formetrix.mdc` are now read directly from this repository, not the Founder Pack — see FM-0002. Any future gap between what a ticket references and what actually exists in this repository should be reported, not silently patched by reading an external folder.
+
+### ADR-0017
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** In the project-dashboard data model (`docs/PROJECT_DASHBOARD_ARCHITECTURE.md`), a ticket's `milestoneId` is the authoritative link to its milestone; a milestone's `ticketIds` array is derived — recomputed from scanning tickets, never independently hand-set.
+- **Reason:** A bidirectional link that both sides can independently edit is exactly the kind of two-sources-of-truth-for-one-fact problem this project has repeatedly had to catch and fix by hand (FM-0021's missing file, FM-0022's milestone-name mismatch). Picking one authoritative direction and deriving the other removes the possibility of the two disagreeing.
+- **Alternatives Considered:**
+  - Making both fields independently authored and validating they agree (rejected — validation catches drift after it happens; a single-writer direction prevents it from being possible)
+- **Impact:** Any future dashboard/validation tooling must compute `milestones.json`'s `ticketIds` from `tickets.json`, never accept it as direct input.
+
+### ADR-0018
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** `management/data/decisions.json` holds both architecture decisions (ADR-XXXX) and founder decisions (FD-XXXX) in one file, distinguished by a discriminated `kind` field, rather than two separate JSON files.
+- **Reason:** The ticket that requested this schema named one `decisions.json` file. Splitting it into two would contradict that without a strong reason; merging the two Markdown documents' _governance_ distinction (who may approve what) into the same file is safe as long as the `kind` field and its associated validation rules keep the two conceptually separate at read time.
+- **Alternatives Considered:**
+  - Two files (`architecture-decisions.json`, `founder-decisions.json`), mirroring the two Markdown documents exactly (rejected — not what was requested, and the single-file version loses nothing given the `kind` discriminator)
+- **Impact:** Any consumer of `decisions.json` must branch on `kind` before assuming which fields are present — `alternativesConsidered`/`impact` only exist for `kind: architecture`; `productImpact`/`deferredImplications` only for `kind: founder`.
+
+### ADR-0019
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** `management/data/activity.json` is an append-only, immutable event log. Entries are never edited or deleted after creation; corrections are made via a new corrective entry.
+- **Reason:** This is the same discipline `management/DECISIONS.md` and `management/FOUNDER_DECISIONS.md` already enforce for their own entries ("do not renumber, reorder, delete, or rewrite the substance of an existing entry"), applied to a log instead of a decision register — an audit trail that can be silently rewritten isn't an audit trail.
+- **Alternatives Considered:**
+  - Allowing in-place correction of activity entries for minor errors (rejected — even a "minor" correction to a log entry undermines the guarantee that the log reflects what was recorded at the time)
+- **Impact:** The future validation script (`docs/PROJECT_DASHBOARD_ARCHITECTURE.md` §10) must treat any change to an existing `activity.json` entry's content as a hard validation failure, not a warning.
+
+### ADR-0020
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** In light mode, `--primary`/`--info` resolve to `#0E7490` (a darkened, same-hue variant of the official Electric Cyan `#00D4FF`), not the literal brand hex. The literal `#00D4FF` is preserved as `--primary-accent` for low-opacity fills/tints where contrast math doesn't apply. Dark mode uses the literal brand hex directly.
+- **Reason:** Electric Cyan as text or a thin UI stroke on white/Light Gray measures roughly 1.8:1 contrast — far below the 3:1 WCAG AA minimum for UI components, let alone 4.5:1 for text. Shipping the literal hex as light-mode `--primary` would have satisfied the brand brief's letter while failing FM-0026's own accessibility requirement (§14: "sufficient color contrast"). Dark mode needs no adjustment — the same hex reads clearly against Deep Navy, which is the primary branded presentation the brief calls for.
+- **Alternatives Considered:**
+  - Using the literal `#00D4FF` unconditionally in both themes (rejected — fails contrast in light mode)
+  - Using a completely different color family for light-mode interactivity (rejected — breaks brand continuity between themes; a lightness adjustment preserves the hue identity, a hue change doesn't)
+- **Impact:** `docs/DESIGN_SYSTEM.md` §2 documents this as the canonical explanation. Any future component that reads "use brand cyan" should use the `--primary`/`--info` tokens (theme-aware) rather than hardcoding `#00D4FF`, except for the specific low-opacity-fill case `--primary-accent` exists for.
+
+### ADR-0021
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** The dashboard's detail-drawer focus trap (`components/details/use-focus-trap.ts`) is hand-rolled — a ~50-line hook — rather than adding a focus-trap dependency (e.g. `focus-trap-react`).
+- **Reason:** The full requirement (trap Tab/Shift+Tab within one panel, focus in on open, restore on close, Escape closes) is small, well-understood, and fully covered by native DOM APIs (`querySelectorAll` for focusable elements, a `keydown` listener). FORMETRIX.md §21 asks that a dependency earn its place over an equivalent amount of plain code; one panel type does not.
+- **Alternatives Considered:**
+  - `focus-trap-react` or a similar library (rejected — meaningfully more surface area and a new dependency for a requirement fully met by ~50 lines already written and tested against this ticket's manual interaction checklist)
+- **Impact:** If the dashboard later needs nested drawers, multiple simultaneously-trapped regions, or other edge cases a library handles out of the box, revisit this decision rather than extending the hand-rolled version indefinitely.
+
+### ADR-0022
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** `/internal/project-dashboard` has exactly one server→client boundary: `page.tsx` (a Server Component) loads and validates data, then renders a single Client Component, `ProjectDashboardShell`, which itself renders `DashboardDetailProvider` and every section component from within its own module. `page.tsx` no longer independently authors JSX for client section components and passes that mixed tree as `children` into another Client Component.
+- **Reason:** FM-0026A reported `useDashboardDetail must be used within a DashboardDetailProvider` at runtime, despite the tree being structurally wrapped correctly and server-rendering successfully (verified via `curl` during FM-0026 — the crash was not visible in SSR output). Passing Server-Component-authored JSX (mixing nine independent "use client" components) as `children` into another Client Component is valid Next.js, but it is a more advanced composition pattern than necessary here, and is exactly the shape that's fragile under React Fast Refresh in dev mode — editing any one of those nine files independently can leave a stale module reference for the Context. Collapsing to one client boundary removes that failure mode entirely rather than working around a symptom of it.
+- **Alternatives Considered:**
+  - Leaving the multi-boundary structure and adding a defensive fallback/null-check in `useDashboardDetail()` (rejected — FM-0026A explicitly ruled this out: "do not add a fake fallback context value," "do not modify the hook so it silently works outside the provider" — masking the symptom instead of removing the structural fragility)
+  - Restarting the dev server as the fix (rejected — would not address a real, if dev-mode-specific, class of fragility; the next multi-file edit session could reproduce it)
+- **Impact:** Any future dashboard section component should be added inside `ProjectDashboardShell`, not authored independently by `page.tsx`. If the dashboard is later split across multiple routes/layouts, each one needing `useDashboardDetail()` should get its own single shell component following this same pattern, not a shared provider spanning multiple independent client boundaries.
+
+### ADR-0023
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** Add `tsx` as a dev-only dependency to run repository-management TypeScript scripts (`scripts/*.ts`), and make `scripts/update-dashboard-intelligence.ts` the authoritative writer of all calculated dashboard fields.
+- **Reason:** The dashboard-intelligence and health scripts must reuse the exact same typed logic the app renders with (`src/features/project-dashboard/lib`), imported via the `@/` tsconfig path alias. Node 24 strips types natively but does not resolve tsconfig path aliases; `tsx` does, and it is dev-only (never enters the client bundle), so it earns its place under FORMETRIX.md §21. Centralizing calculated-field writes in one script is what removes the hand-maintained drift FM-0028 exists to fix.
+- **Alternatives Considered:**
+  - Native `node --experimental-strip-types` with relative imports (rejected — the shared `src` modules use the `@/` alias, which Node does not resolve)
+  - A dependency-free `.mjs` script duplicating the compute/validate logic (rejected — duplicates business logic, violating FORMETRIX.md §11)
+  - `ts-node` (heavier, slower startup than `tsx` for this use)
+- **Impact:** `package.json` gains a `tsx` devDependency and `dashboard:update`/`dashboard:check`/`dashboard:health` scripts. Calculated dashboard fields must be produced by the intelligence script, never hand-edited.
+
+### ADR-0024
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** Milestone completion is computed as completed tickets ÷ total scoped tickets; overall completion is the equal-weighted mean of milestone completion. This supersedes the earlier acceptance-criteria-mean milestone formula in `docs/PROJECT_DASHBOARD_ARCHITECTURE.md` §5.2.
+- **Reason:** FM-0028 adopts the simplest defensible baseline — a ticket either is or isn't done — which also matches the "X of Y tickets completed" label already shown under each milestone bar (the criteria-mean did not). Overall keeps §5.3's equal-weighting per milestone rather than a global completed/total, so Milestone 0's large ticket count doesn't dominate and overstate whole-product progress. This resolves architecture §15.1's open question in favor of the simple ratio. Per-ticket progress keeps the acceptance-criteria ratio for in-progress granularity.
+- **Alternatives Considered:**
+  - Keeping the acceptance-criteria met-ratio mean at the milestone level (rejected — more complex and diverged from the completed/total label)
+  - Global completed/total for overall (rejected — Milestone 0's ticket volume dominates)
+- **Impact:** `computeMilestoneProgress` changed; `ProgressExplanationDetail` and `docs/MISSION_CONTROL.md` document the formula. Displayed milestone percentages shift to match the completed/total label.
+
+### ADR-0025
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** Local project-health signals distinguish `passing`/`failing` from `unknown`/`not_configured`, and never report an unverified integration (GitHub, Vercel, Supabase) as healthy. Command health (lint/typecheck/formatting/build) is recorded from real runs by `scripts/record-validation-health.ts`; git/deployment/supabase health that cannot be verified locally stays `unknown` or `not_configured`.
+- **Reason:** FORMETRIX.md §7 forbids presenting uncertain information as confirmed. A dashboard claiming green health for systems it never checked would violate that. Recording only evidence-backed health, and preferring `unknown`/`not_configured` over invented success, keeps Mission Control trustworthy.
+- **Alternatives Considered:**
+  - Deriving git health from the hand-recorded `repositoryState` (rejected — that is recorded data, not live evidence)
+  - Defaulting integrations to healthy until proven otherwise (rejected — fabricates success)
+- **Impact:** `project-status.json` gains a `health` block with a fixed set of states; the Mission Control status panel renders them with text labels, never color alone.
+
+### ADR-0026
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** `/property/[id]` uses `generateStaticParams()` (returning every mock property id) with `dynamicParams = false`, so an unknown id is rejected by the router before rendering starts, rather than relying solely on a runtime `notFound()` call inside the layout/page.
+- **Reason:** The root-level `src/app/loading.tsx` wraps every route in a streaming Suspense boundary. Requesting `/property/nonexistent` streamed the not-found UI correctly but the HTTP status locked at 200, not 404 — a documented Next.js App Router limitation (calling `notFound()` after a streamed response has begun cannot change the already-sent status code; see github.com/vercel/next.js/issues/76474). Rejecting the id at the router level, before any rendering or streaming begins, has no such boundary to race against. This is also a reasonable fit for FM-0029's scope: the mock property set is small and fully known at build time, so treating it as static is not premature.
+- **Alternatives Considered:**
+  - Removing or overriding `loading.tsx` for this route segment (rejected — the boundary is created by the root `loading.tsx` around the entire app tree; a child segment cannot opt out of a parent's streaming boundary)
+  - Leaving the route fully dynamic and accepting the HTTP 200 on a not-found id (rejected — an investor-facing route returning success for a request that failed is a real correctness defect, not a cosmetic one)
+  - Restructuring the component tree to avoid any `async` work before the `notFound()` check (rejected — already true in this code, and does not address the actual cause, which is the parent streaming boundary, not component ordering)
+- **Impact:** `/property/[id]` and its 8 sub-routes are prerendered (`● SSG`) for the 3 known mock ids at build time instead of rendered on demand. When real, Supabase-backed properties replace the mock set (post-FM-0029), this must be revisited — either regenerating static params from the live property list on a build/revalidate cadence, or moving the id-validity check earlier in the routing layer (e.g. a `middleware.ts` check) so the same before-render-starts guarantee holds for a dynamic, non-enumerable id space.
+
+### ADR-0027
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** The core schema (`docs/DATABASE_SCHEMA.md`) introduces **PropertyWorkspace** as a distinct entity, 1:1 with Property in Version 1, that future analysis modules (Parcel links, Zoning, Constraints, Assumptions, Scenario/Financial, Recommendation, Documents, Activity) attach to via `propertyWorkspaceId` — a deliberate refinement of `docs/DOMAIN_MODEL.md` §5.4's "Property is the workspace."
+- **Reason:** Keeping Property small and stable (identity, Organization ownership, lifecycle status) while the mutable, module-heavy evaluation data hangs off a separate workspace record avoids overloading Property with every module's foreign key, and lets a Property later hold more than one independent evaluation workspace without migrating every module. It matches the `/property/[id]` workspace already shipped in FM-0029, whose nine sections are exactly these extension points. PropertyWorkspace is not a Project (ADR-0013): it carries no lifecycle or ownership, only evaluation attachment.
+- **Alternatives Considered:**
+  - Attaching every module directly to Property (rejected — overloads the core record and blocks multiple evaluations per Property without a later migration)
+  - Treating Property itself as the only workspace, per the literal DOMAIN_MODEL §5.4 wording (rejected — both the FM-0007 brief and the shipped FM-0029 UI treat the evaluation surface as a distinct "workspace")
+- **Impact:** `docs/DATABASE_SCHEMA.md` defines PropertyWorkspace; `docs/DOMAIN_MODEL.md` §4/§5.4a add it to the vocabulary. Every future analysis-module ticket FKs to `propertyWorkspaceId` and carries `organizationId` for RLS.
+
+### ADR-0028
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** User↔Organization membership is modeled as a many-to-many join (**OrganizationMember**) with a composite unique `(organizationId, userId)`; Version 1's one-organization-per-user rule (FD-0002) is enforced at the application layer, not by the schema. Parcel-specific facts (APN, acreage, zoning) are modeled on the future **Parcel** record, not duplicated onto Property.
+- **Reason:** A join table is the correct multi-tenant SaaS structure and is what the FM-0007 brief asks for ("one user may belong to multiple organizations"); shaping it for multi-org now means enabling that later is an app-policy change, not a migration, while FD-0002's V1 single-org rule is honored by allowing only one `active` membership per user. Placing APN/acreage/zoning on Parcel (not Property) follows ADR-0011/ADR-0012 (Property↔Parcel is many-to-many, Parcel is the shareable land record) and matches the shipped FM-0029 `Parcel` type; putting them on Property would be lossy for multi-parcel properties and create a second source of truth.
+- **Alternatives Considered:**
+  - A flat `organizationId` column on User (rejected — cannot represent invite-before-accept, a membership ending, or future multi-org without a breaking change)
+  - Duplicating `parcelNumber`/`acreage`/`zoning` onto Property as the brief's field list suggests (rejected — violates normalization and ADR-0012; a Property can span multiple parcels)
+- **Impact:** OrganizationMember carries `role` (stored, unenforced in V1) and `status` (`invited`/`active`/`revoked`); Property omits parcel-owned fields and reaches them through its workspace's Parcel links.
+
+### ADR-0029
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** Organization membership roles are the closed set `owner` | `admin` | `member` | `viewer`, with permissions and responsibilities defined in `docs/AUTH_FLOW.md`; invite flows may grant `admin`/`member`/`viewer` only (ownership transfer is a separate Owner action).
+- **Reason:** FM-0008 requires a concrete role model for authentication/organization architecture. Four roles cover org lifecycle (Owner), team administration (Admin), day-to-day evaluation work (Member), and read-only stakeholder access (Viewer) without inventing fine-grained grants yet. Adding `viewer` extends the earlier three-value sketch in `DATABASE_SCHEMA.md` so schema and auth design stay aligned before migrations land.
+- **Alternatives Considered:**
+  - Only `owner`/`member` (rejected — insufficient for admin vs read-only stakeholders)
+  - Fully custom permission grants from day one (rejected — overbuilds V1; FD-0002 defers fine-grained permissions)
+  - Deferring all role definitions until enforcement (rejected — invite UX and RLS design need a stable enum now)
+- **Impact:** `OrganizationMember.role` includes `viewer`; UI/API capability matrices and future RLS policies follow AUTH_FLOW §3; module-scoped grants remain a later expansion on top of these four roles.
+
+### ADR-0030
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** Authenticated requests that touch business data resolve an **active organization** from a persisted user preference (falling back to the user's sole active membership); organization switching updates that preference and reloads org-scoped context. Under FD-0002's V1 one-org policy the preference is always that single membership; multi-org switching UI appears only when multiple active memberships are allowed.
+- **Reason:** ADR-0028 already shapes membership as many-to-many. Without an explicit active-org context, multi-org (and even invite-accept edge cases) would ambiguously scope queries. Separating "which orgs am I in" from "which org am I working in" matches standard SaaS tenancy and keeps FD-0002's single-org rule as an application constraint rather than a schema one.
+- **Alternatives Considered:**
+  - Inferring org solely from URL path with no preference (rejected — deep links still need a default; shell chrome needs a current org)
+  - Storing active org only in client memory (rejected — breaks refresh and server-side RLS context)
+  - Requiring org id on every route with no global preference (rejected — poor UX for list/home surfaces)
+- **Impact:** Auth implementation and middleware must establish session + `activeOrganizationId` before Property routes; org switcher behavior is specified in `docs/AUTH_FLOW.md` §5–§6.
+
+### ADR-0031
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** `/internal/project-dashboard` (Mission Control) remains accessible without authentication for now; application workspace routes (`/properties`, `/property/*`, `/settings`, `/organization/*`) require a verified Supabase session when Auth is configured.
+- **Reason:** Mission Control is an internal engineering surface driven by local `management/data/*.json`, used continuously during development and ticket workflow. Gating it behind Auth before sign-in forms exist would block the project's own operating loop. Application product routes must still be protected so workspace data is never silently exposed. The policy is an explicit temporary exception (`INTERNAL_DASHBOARD_REQUIRES_AUTH = false`), not an accidental public product surface.
+- **Alternatives Considered:**
+  - Require Auth for Mission Control immediately (rejected — no sign-in UI yet; would strand local workflow)
+  - Leave all routes public until forms ship (rejected — Property workspace would be unprotected by default)
+  - Hard-code a local-only IP/host check (rejected — brittle across machines/tunnels; Auth is the eventual control)
+- **Impact:** Documented in `docs/AUTH_FLOW.md` §12 and `src/lib/auth/routes.ts`. A later ticket may flip `INTERNAL_DASHBOARD_REQUIRES_AUTH` (or add a separate internal auth gate) before any non-local deployment exposes Mission Control.
+
+### ADR-0032
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** Ship migration-ready tables `user_profiles`, `organizations`, and `organization_memberships` where profile `id` equals `auth.users.id` (TypeScript `authUserId` aliases `id`); membership statuses are `invited` \| `active` \| `suspended` \| `removed`; V1 enforces at most one `active` membership per user via a partial unique index; active org preference is stored on `user_profiles.active_organization_id` and always re-verified against memberships; RLS uses small `SECURITY DEFINER` helpers (`is_active_org_member`, `has_org_role`) plus a trigger that blocks self role changes.
+- **Reason:** FM-0010 needs concrete DDL and access helpers without expanding into onboarding UI. Keeping profile PK = Auth id avoids a second identity map. Expanding statuses beyond the FM-0007 `revoked` sketch adds temporary suspension without inventing a second table. A partial unique index encodes FD-0002 in the database while leaving the join table multi-org-ready. SECURITY DEFINER membership checks avoid circular RLS (memberships policies that need to read memberships). Self-role-change trigger + app helpers prevent privilege escalation even if a client crafts an update.
+- **Alternatives Considered:**
+  - Separate `auth_user_id` column distinct from profile `id` (rejected — unnecessary join and drift risk for 1:1 profiles)
+  - Keeping only `invited`/`active`/`revoked` (rejected — ticket requires suspended/removed; `removed` clarifies soft-delete vs invite revoke)
+  - Enforcing one-org only in application code (rejected alone — DB index is a hard safety net for V1; can be dropped later)
+  - RLS without definer helpers (rejected — circular policy dependencies on `organization_memberships`)
+- **Impact:** SQL under `supabase/migrations/`; TypeScript helpers under `src/lib/organizations/`; `docs/DATABASE_SCHEMA.md` and `docs/AUTH_FLOW.md` updated. Migrations are never auto-applied. Multi-org switching UI remains deferred (FD-0002).
+
+### ADR-0033
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** Store parcel source boundaries as `geometry(MultiPolygon, 4326)` with a companion `geometry(Point, 4326)` centroid (auto-synced), keep Property `latitude`/`longitude` as an optional non-authoritative display pin, link Properties to shared Parcels via `property_parcels` (m:n, at most one primary per Property), and use provider-scoped identity `(provider, provider_parcel_id)` with JSONB `raw_source_metadata` for provenance — without implementing derived development geometry or Regrid ingestion in this ticket.
+- **Reason:** FM-0011 needs a nationally scalable PostGIS model that matches FD-0005/ADR-0012 (shared Parcel, private Property). EPSG:4326 is the web-map default and avoids state-plane fragmentation for a multi-jurisdiction product. MultiPolygon covers multiparts; centroid supports map pins when a Property has no manual lat/lng. Linking at Property (not only Workspace) lets intake attach land before analysis modules exist. Provider+id uniqueness preserves Regrid and future providers without treating APN as globally unique.
+- **Alternatives Considered:**
+  - `geography` type instead of `geometry` (rejected for V1 — geometry + explicit 4326 is simpler for GIST and ST_IsValid; geography can be revisited for geodesic area later)
+  - Simple `Polygon` only (rejected — real parcels are often multiparts)
+  - Authoritative geometry only on Property (rejected — violates Parcel shareability and FORMETRIX.md §14 source vs derived separation)
+  - Join only via PropertyWorkspace (rejected for now — blocks Property-before-parcel and before workspace table)
+- **Impact:** Migrations `20260731210000`–`20260731210200`; helpers in `src/lib/properties/`; docs updated. Derived site/building footprints remain future work. Regrid writes through service-role ingestion (FM-0012).
+
+### ADR-0034
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** Ingest Regrid parcels through a typed server-only client (`src/lib/regrid`) and service-layer upsert keyed by `(provider, provider_parcel_id)` via a `service_role`-only RPC (`upsert_parcel_from_provider`), then create Organization Properties and `property_parcels` links with typed Result unions — without shipping search UI, maps, or workspace wiring.
+- **Reason:** FM-0012 is the first real data-ingestion path. Provider-scoped identity avoids APN collisions; service-role writes match FM-0011 RLS (authenticated users cannot mutate shared parcels). An RPC accepts GeoJSON and stores MultiPolygon 4326 so PostgREST does not need ad-hoc geometry casting. Injectable fetch/store keeps CI free of live Regrid credentials while preserving retry/rate-limit behavior.
+- **Alternatives Considered:**
+  - Authenticated client inserts into `parcels` (rejected — violates shared-parcel RLS design and would require open write policies)
+  - Store geometry only inside `raw_source_metadata` (rejected — blocks PostGIS queries and map readiness)
+  - Soft-fail duplicates by always inserting new parcel rows (rejected — ticket requires reuse by provider id)
+- **Impact:** Migration `20260731220000_upsert_parcel_from_provider.sql`; modules under `src/lib/regrid/` and `src/lib/properties/ingestion/`; env `REGRID_API_TOKEN`; docs/README updated. UI search remains a later ticket; Property Workspace UI is FM-0013.
+
+### ADR-0035
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** Ship the Version 1 Property Workspace as a dynamic, service-backed App Router surface (`/properties`, `/property/[id]`) that reads only live Property/Parcel/Organization data, uses empty states instead of mock records, keeps future analysis sections as lazy-load-ready Coming Soon modules, and centralizes status display in `PropertyStatusBadge` backed by `@/lib/properties` status labels.
+- **Reason:** FM-0013 is the first investor-demo application screen. Mock data from FM-0029 proved the shell; continuing to show invented properties would violate FORMETRIX.md honesty rules once ingestion exists. Dynamic rendering replaces ADR-0026's static mock params because property ids are no longer a closed build-time set. Module registry imports keep the shell stable while Zoning/Financial/AI remain unimplemented.
+- **Alternatives Considered:**
+  - Keep mock properties when Supabase is empty (rejected — invents investor-facing records)
+  - Block all workspace routes until Regrid + search UI ship (rejected — Overview can show an imported Property without search)
+  - Single-page client tabs without routes (rejected — bookmarkable sections and lazy module boundaries)
+- **Impact:** Removed `mock-properties.ts`; workspace under `src/features/properties/`; ADR-0026 static-param approach superseded for live ids. Mapbox/zoning/financial/AI remain out of scope.
+
+### ADR-0036
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** Treat `/property/[id]` Overview as the Property Dashboard — a composition of identity/location, data-availability inventory, dataset/analysis status, summaries, timeline, recommendation placeholder, and module quick-nav — derived only from live `WorkspaceView` helpers (`buildDashboardInventory`), with future modules explicitly marked `not_built` rather than stubbed with fake values.
+- **Reason:** FM-0014 requires the primary screen to show what the property is, where it is, and what data is available. Extending the FM-0013 Overview avoids a second competing home surface. Honest `not_built`/`missing` states keep investors from mistaking empty zoning/financial slots for completed analysis.
+- **Alternatives Considered:**
+  - Separate `/property/[id]/dashboard` route (rejected — splits the default landing)
+  - Hard-coded “available” chips for future modules (rejected — invents capability)
+  - Defer availability UI until zoning ships (rejected — ticket acceptance needs “what data is available” now)
+- **Impact:** `PropertyDashboard` + `dashboard-availability` under `src/features/properties/`; nav label Overview → Dashboard. Mapbox/zoning/financial engines remain later tickets.

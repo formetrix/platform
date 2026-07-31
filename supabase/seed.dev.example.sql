@@ -1,0 +1,35 @@
+-- DEVELOPMENT-ONLY EXAMPLE — do not run in production.
+-- Not referenced by npm scripts or CI. Copy/adapt locally after applying
+-- migrations to a disposable Supabase project, and only with test Auth users.
+--
+-- Prerequisites:
+-- 1. Apply supabase/migrations/*.sql to a local/dev Supabase project.
+-- 2. Create an Auth user in the Supabase dashboard (or Auth Admin API).
+-- 3. Replace the placeholder UUIDs below with that Auth user's id.
+
+-- \set auth_user_id '00000000-0000-0000-0000-000000000001'
+
+-- insert into public.user_profiles (id, email, display_name)
+-- values (:'auth_user_id', 'dev@example.com', 'Dev User');
+--
+-- insert into public.organizations (id, name, slug, created_by)
+-- values (
+--   '11111111-1111-1111-1111-111111111111',
+--   'Dev Organization',
+--   'dev-organization',
+--   :'auth_user_id'
+-- );
+--
+-- insert into public.organization_memberships (
+--   organization_id, user_id, role, status, joined_at
+-- ) values (
+--   '11111111-1111-1111-1111-111111111111',
+--   :'auth_user_id',
+--   'owner',
+--   'active',
+--   timezone('utc', now())
+-- );
+--
+-- update public.user_profiles
+-- set active_organization_id = '11111111-1111-1111-1111-111111111111'
+-- where id = :'auth_user_id';

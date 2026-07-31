@@ -1,0 +1,53 @@
+{
+  "generatedAt": "2026-07-31T22:02:26Z",
+  "lastIntelligenceUpdate": "2026-07-31T22:02:26Z",
+  "currentMilestoneId": "M0",
+  "currentTicketId": null,
+  "currentWorkstream": null,
+  "currentFocusSummary": null,
+  "currentNextAction": null,
+  "overallProgressPercent": 44,
+  "activeTicketCount": 0,
+  "milestonesSummary": [
+    { "id": "M0", "name": "Repository Foundation", "status": "in_progress", "progressPercent": 80 },
+    { "id": "M1", "name": "Authentication", "status": "not_started", "progressPercent": 100 },
+    { "id": "M2", "name": "Property Workspace", "status": "not_started", "progressPercent": 83 },
+    {
+      "id": "M3",
+      "name": "Development Intelligence",
+      "status": "not_started",
+      "progressPercent": 0
+    },
+    { "id": "M4", "name": "Financial Intelligence", "status": "not_started", "progressPercent": 0 },
+    { "id": "M5", "name": "AI Copilot", "status": "not_started", "progressPercent": 0 }
+  ],
+  "ticketCounts": {
+    "backlog": 6,
+    "planned": 3,
+    "inProgress": 0,
+    "review": 0,
+    "blocked": 0,
+    "completed": 21,
+    "total": 30
+  },
+  "blockedTicketIds": [],
+  "repositoryState": {
+    "localCommit": "92d0b03",
+    "remoteCommit": "92d0b03",
+    "ahead": 0,
+    "pushed": true
+  },
+  "health": {
+    "dataIntegrity": "passing",
+    "lint": "passing",
+    "typecheck": "passing",
+    "formatting": "passing",
+    "build": "passing",
+    "gitSync": "unknown",
+    "deployment": "not_configured",
+    "supabase": "not_configured"
+  },
+  "dataIntegrityWarningCount": 0,
+  "integrityWarnings": [],
+  "recentActivityIds": ["ACT-000047", "ACT-000046", "ACT-000045", "ACT-000044", "ACT-000043"]
+}

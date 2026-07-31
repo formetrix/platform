@@ -33,6 +33,12 @@ export const env = {
   mapbox: {
     accessToken: () => readPublicEnv("NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN"),
   },
+  regrid: {
+    /** Server-only Regrid API token — never expose to the client. */
+    apiToken: () => readServerEnv("REGRID_API_TOKEN"),
+    /** Optional override; defaults to https://app.regrid.com */
+    apiBaseUrl: () => readServerEnv("REGRID_API_BASE_URL"),
+  },
   site: {
     url: () => readPublicEnv("NEXT_PUBLIC_SITE_URL"),
   },
