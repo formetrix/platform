@@ -1,0 +1,47 @@
+[
+  {
+    "version": "0.1.0",
+    "status": "unreleased",
+    "workStartedDate": "2026-07-29",
+    "releaseDate": null,
+    "note": "Foundation and management-system work committed and pushed as 92d0b03. Work since FM-0024 (this dashboard) is not yet committed.",
+    "added": [
+      { "summary": "Repository created on GitHub (Formetrix/platform)." },
+      {
+        "summary": "Founder Pack established as the source constitution and initial reference docs.",
+        "ticketId": "FM-0002"
+      },
+      {
+        "summary": "FORMETRIX.md adopted into the platform repository as the binding project constitution.",
+        "decisionId": "ADR-0009"
+      },
+      {
+        "summary": "Next.js 15 application foundation scaffolded and verified.",
+        "ticketId": "FM-0003"
+      },
+      { "summary": "Formetrix Project Management System created.", "ticketId": "FM-0001" },
+      { "summary": "Configured Supabase application foundation.", "ticketId": "FM-0021" },
+      { "summary": "Defined the initial conceptual domain model.", "ticketId": "FM-0022" },
+      {
+        "summary": "Founder domain decisions finalized; Version 1 domain boundary clarified.",
+        "ticketId": "FM-0023"
+      },
+      { "summary": "Founder decision log created.", "ticketId": "FM-0023" },
+      {
+        "summary": "Founder Pack governing docs and Cursor rule copied into the repository and committed.",
+        "ticketId": "FM-0002"
+      },
+      {
+        "summary": "Established platform/ as the sole canonical Formetrix repository.",
+        "decisionId": "ADR-0016"
+      },
+      { "summary": "Designed the Project Control Dashboard architecture.", "ticketId": "FM-0024" },
+      {
+        "summary": "Built the Project Control Dashboard MVP at /internal/project-dashboard.",
+        "ticketId": "FM-0025"
+      }
+    ],
+    "changed": [],
+    "fixed": []
+  }
+]

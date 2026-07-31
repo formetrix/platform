@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Inter, Space_Grotesk } from "next/font/google";
 
 import { siteConfig } from "@/config/site";
 import { Providers } from "@/components/providers/providers";
@@ -8,8 +8,18 @@ import { SiteFooter } from "@/components/layout/site-footer";
 
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Primary UI font (Formetrix brand system, FM-0026). Loaded as a variable
+// font; components should stick to weights 500/600/700
+// (font-medium/font-semibold/font-bold) per docs/DESIGN_SYSTEM.md §3.
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+// Metric/data-emphasis font — used for stat numbers, percentages, and
+// ticket IDs, distinct from prose (Inter) and code (Geist Mono).
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
 });
 
@@ -37,7 +47,7 @@ export default function RootLayout({
     // would warn about a mismatch it did not cause.
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
+        className={`${inter.variable} ${spaceGrotesk.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
       >
         <Providers>
           <SiteHeader />
