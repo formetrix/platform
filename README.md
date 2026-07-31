@@ -9,13 +9,13 @@ this project and governs every architectural and product decision here.
 > application shell — routing, theming, error handling, and the integration points for Supabase
 > and Mapbox — so feature work has a stable base to build on.
 
-## Missing governing documents
+## Governing documents
 
-The following documents are referenced by project process but do not exist in this repository yet:
 `docs/PRODUCT.md`, `docs/ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/DATABASE.md`, `docs/UI.md`,
-`.cursor/rules/formetrix.mdc`. This foundation was built from `FORMETRIX.md` alone; nothing here
-invents content those documents would have defined (e.g. no product scope, roadmap, or UI
-decisions beyond what `FORMETRIX.md` §17 already states). Create them when that content exists.
+and `.cursor/rules/formetrix.mdc` now live in this repository (FM-0002) — not yet committed to
+git, see `management/TICKETS.md`. `platform/` is the sole canonical Formetrix repository; no
+other directory (including any sibling "Founder Pack" folder) is an active reference for this
+project going forward.
 
 ## Stack
 
@@ -39,7 +39,7 @@ advance.
 
 ```bash
 npm install
-cp .env.local.example .env.local   # fill in when Supabase/Mapbox credentials exist
+cp .env.example .env.local   # fill in when Supabase/Mapbox credentials exist
 npm run dev
 ```
 
@@ -74,7 +74,7 @@ src/
   features/                  Feature modules go here (empty — see features/README.md).
 
   lib/
-    supabase/                Browser + server Supabase client factories (not connected yet).
+    supabase/                Browser/server/middleware clients, config validation, health check (not connected yet).
     mapbox/                  Mapbox config placeholder (env var only, no SDK installed yet).
     utils/                   Small, generic helpers (currently: cn()).
     env.ts                   Typed, lazy environment variable access.
@@ -103,6 +103,15 @@ This follows `FORMETRIX.md` §24: feature code will live under `src/features/<do
 - **Supabase client is split by environment.** `src/lib/supabase/client.ts` (browser) and
   `server.ts` (Server Components/Route Handlers, cookie-based) are separate because they have
   different lifecycles — the server client must be created per-request, not shared.
+- **Supabase config validation is centralized in `src/lib/supabase/config.ts`.** `getSupabaseConfig()`
+  aggregates the required env vars into one clear error instead of each call site throwing separately;
+  `isSupabaseConfigured()` lets code (like the middleware utility) skip Supabase calls gracefully before
+  a real project is connected. `src/lib/supabase/health-check.ts` provides `checkSupabaseHealth()` —
+  hits Supabase's documented `/auth/v1/health` endpoint, touches no tables, and is never called
+  automatically; it exists to be called manually once real credentials are in `.env.local`.
+- **`src/lib/supabase/middleware.ts` is a dormant utility, not live middleware.** `updateSession()`
+  follows Supabase's current session-refresh pattern (`getClaims()`, not `getSession()`) but nothing
+  imports it yet — no root `src/middleware.ts` exists, so it has no effect until FM-0009 wires it in.
 - **Environment variables are read lazily and typed.** `src/lib/env.ts` doesn't validate at
   import time, so the app doesn't crash at build/boot before real credentials exist; a
   `requireEnv()` guard throws a descriptive error only when a code path that truly needs a value
@@ -127,8 +136,8 @@ This follows `FORMETRIX.md` §24: feature code will live under `src/features/<do
 ## Intentionally left for future implementation
 
 - Supabase project connection (env vars are placeholders; nothing has been provisioned).
-- Any actual authentication: login/signup flows, session middleware, protected routes,
-  `supabase.auth.onAuthStateChange` wiring into `AuthProvider`.
+- Any actual authentication: login/signup flows, protected routes, wiring `src/lib/supabase/middleware.ts`'s
+  `updateSession()` into a live root `src/middleware.ts`, `supabase.auth.onAuthStateChange` wiring into `AuthProvider`.
 - Row Level Security policies, database schema, and migrations (§13, §19).
 - `mapbox-gl` installation and an actual map component.
 - Generated Supabase TypeScript types (`supabase gen types typescript`) — Supabase clients are
@@ -136,5 +145,6 @@ This follows `FORMETRIX.md` §24: feature code will live under `src/features/<do
 - All product features: properties, parcels, zoning, feasibility, financial modeling, AI
   recommendations, reports (§4–5).
 - Automated tests — none exist yet; §20 requires them once there is meaningful logic to cover.
-- `docs/PRODUCT.md`, `docs/ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/DATABASE.md`, `docs/UI.md`,
-  `.cursor/rules/formetrix.mdc` — referenced but not present in this repository.
+- Committing `docs/PRODUCT.md`, `docs/ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/DATABASE.md`,
+  `docs/UI.md`, and `.cursor/rules/formetrix.mdc` to git — present in the working tree, not yet
+  committed (FM-0002).

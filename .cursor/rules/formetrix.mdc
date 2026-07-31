@@ -1,0 +1,13 @@
+# Cursor Rules
+
+Always read FORMETRIX.md before coding.
+
+Follow these rules:
+- Use TypeScript.
+- Use Next.js.
+- Use Supabase.
+- Keep code modular.
+- Avoid unnecessary libraries.
+- Explain architectural tradeoffs.
+- Do not expand Version 1 scope.
+- Never fabricate business logic.

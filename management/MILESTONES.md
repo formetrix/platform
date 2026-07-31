@@ -50,21 +50,24 @@ Each milestone entry uses the following fields, in this order:
 **Objective:** Establish the technical and organizational foundation the product will be built on — repository, constitution, engineering standards, application shell, and the project management system itself — before any business feature work begins.
 
 **Deliverables:**
+
 - Repository initialized on GitHub (Formetrix/platform)
 - FORMETRIX.md adopted as the binding project constitution (ADR-0009)
-- Founder Pack reference materials established as source of product/architecture/database/UI docs (import into this repo tracked as FM-0002)
+- Founder Pack governing docs (`docs/PRODUCT.md`, `ROADMAP.md`, `ARCHITECTURE.md`, `DATABASE.md`, `UI.md`) and `.cursor/rules/formetrix.mdc` imported into this repository, content verified to match the source exactly — not yet committed (FM-0002)
 - Next.js 15 application foundation scaffolded and verified: routing, theming, error handling, Supabase/Mapbox integration points, basic auth structure placeholder
 - Formetrix Project Management System created (this directory) (FM-0001)
+- Supabase application foundation configured: browser/server/middleware clients, config validation, manual health check — not connected to a live project (FM-0021)
+- `platform/` established as the sole canonical repository — no external directory (including the former Founder Pack reference folder) is an active project reference going forward (ADR-0016)
 - Remaining:
-  - Import remaining Founder Pack docs into this repository (FM-0002)
-  - Commit foundation work to git (FM-0003)
+  - Commit the imported Founder Pack docs and Cursor rule to git (FM-0002)
+  - Push the local foundation commit to GitHub (FM-0003 — committed locally as `7e0db87`, not yet pushed)
   - CI pipeline (FM-0004)
   - Supabase project provisioned (FM-0005)
   - Vercel deployment connected (FM-0006)
 
 **Status:** In Progress
 
-**Completion %:** 70 — basis: the constitution is adopted, the application scaffold is built and verified (lint/typecheck/build/dev smoke test all pass), and the management system itself is complete; what remains (FM-0002–FM-0006) is operational setup (import, commit, CI, Supabase, Vercel) rather than unbuilt foundation work. This is a qualitative judgment about how much of the milestone's substance is done, not a raw count of the 6 tickets tracked under it (1 of 6 Completed).
+**Completion %:** 80 — basis: the constitution is adopted, the application scaffold is built and verified (lint/typecheck/build/dev smoke test all pass), the Supabase code-level foundation is built (client/server/middleware/config/health-check), the Founder Pack docs and Cursor rule are now present in the repository (content verified, not yet committed), and the management system itself is complete; what remains (FM-0002–FM-0006) is committing and connecting work, not unbuilt foundation work. This is a qualitative judgment about how much of the milestone's substance is done, not a raw count of the 7 tickets tracked under it (2 Completed, 2 In Progress, 3 Planned).
 
 ---
 
@@ -73,6 +76,7 @@ Each milestone entry uses the following fields, in this order:
 **Objective:** Allow a developer to create an account, sign in, and access a workspace, with sessions and data properly scoped per organization.
 
 **Deliverables:**
+
 - Initial database schema: users, organizations (FM-0007)
 - Supabase Auth sign-up / sign-in flows (FM-0008)
 - Session refresh middleware and protected routes (FM-0009)
@@ -89,6 +93,7 @@ Each milestone entry uses the following fields, in this order:
 **Objective:** Let a developer search for and open a property, seeing verified parcel data and its location on a map — the entry point to the acquisition decision.
 
 **Deliverables:**
+
 - Property/parcel database schema on PostGIS (FM-0011)
 - Regrid integration for parcel data ingestion (FM-0012)
 - Property Search (FM-0013)
@@ -106,6 +111,7 @@ Each milestone entry uses the following fields, in this order:
 **Objective:** Surface what can likely be built on a property — zoning classification and development constraints — so a developer can gauge feasibility.
 
 **Deliverables:**
+
 - Zoning data model and Zoning Overview (FM-0016)
 - Development constraints analysis: setbacks, FAR, height limits (FM-0017)
 
@@ -120,6 +126,7 @@ Each milestone entry uses the following fields, in this order:
 **Objective:** Give a developer a traceable, assumption-explicit view of whether a property is financially viable.
 
 **Deliverables:**
+
 - Deterministic, testable financial calculation engine (FM-0018)
 - Financial Snapshot UI with scenario/sensitivity analysis (FM-0019)
 
@@ -134,6 +141,7 @@ Each milestone entry uses the following fields, in this order:
 **Objective:** Synthesize verified facts, calculations, and known unknowns into an explainable recommendation on whether to pursue a property.
 
 **Deliverables:**
+
 - AI Recommendation module with explicit fact/assumption/uncertainty separation and source citation (FM-0020)
 
 **Status:** Not Started

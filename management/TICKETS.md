@@ -59,24 +59,24 @@ Each ticket is a heading of the form `### [ID] — [Title]`, grouped under a mil
 ### FM-0002 — Import Founder Pack governing docs into the platform repository
 
 - **Priority:** High
-- **Status:** Planned
-- **Description:** Copy the Founder Pack's governing docs — `docs/PRODUCT.md`, `docs/ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/DATABASE.md`, `docs/UI.md`, and `.cursor/rules/formetrix.mdc` — into this repository so they are version-controlled next to the code that implements them, instead of living only in a separate reference directory.
+- **Status:** In Progress
+- **Description:** Copy the Founder Pack's governing docs — `docs/PRODUCT.md`, `docs/ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/DATABASE.md`, `docs/UI.md`, and `.cursor/rules/formetrix.mdc` — into this repository so they are version-controlled next to the code that implements them, instead of living only in a separate reference directory. Per the Founder's Repository Root Rule (2026-07-30, see ADR-0016), `platform/` is now the sole canonical repository — this ticket is what makes that true for the documents that previously lived only in the Founder Pack.
 - **Dependencies:** None
 - **Acceptance Criteria:**
-  - `docs/PRODUCT.md`, `docs/ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/DATABASE.md`, and `docs/UI.md` exist in the platform repository.
-  - `.cursor/rules/formetrix.mdc` exists in the platform repository.
-  - The imported files are committed to version control in this repository.
+  - `docs/PRODUCT.md`, `docs/ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/DATABASE.md`, and `docs/UI.md` exist in the platform repository. — Met, content verified to match the source exactly.
+  - `.cursor/rules/formetrix.mdc` exists in the platform repository. — Met.
+  - The imported files are committed to version control in this repository. — Not yet met; `docs/` and `.cursor/` are present but untracked (`git status`).
 
 ### FM-0003 — Commit and push the Next.js application foundation
 
 - **Priority:** High
-- **Status:** Planned
-- **Description:** Commit and push the scaffolded App Router foundation — layout, theming, error boundaries, and Supabase/Mapbox integration points — which has been verified locally (lint, typecheck, build, and dev smoke test all pass) but is not yet committed to git or pushed to GitHub.
+- **Status:** In Progress
+- **Description:** Commit and push the scaffolded App Router foundation — layout, theming, error boundaries, and Supabase/Mapbox integration points — which has been verified locally (lint, typecheck, build, and dev smoke test all pass). Committed locally as `7e0db87` ("FM-0001: Initialize Formetrix foundation"); not yet pushed to GitHub, and further work has landed on top of that commit since (FM-0021).
 - **Dependencies:** None
 - **Acceptance Criteria:**
-  - The App Router foundation (layout, theming, error boundaries, Supabase/Mapbox integration points) is committed to git.
-  - The commit is pushed to GitHub.
-  - `npm run lint`, `npm run typecheck`, and `npm run build` pass on the pushed state.
+  - The App Router foundation (layout, theming, error boundaries, Supabase/Mapbox integration points) is committed to git. — Met (commit `7e0db87`).
+  - The commit is pushed to GitHub. — Not yet met; local `main` is ahead of `origin/main` by at least one commit.
+  - `npm run lint`, `npm run typecheck`, and `npm run build` pass on the pushed state. — Not yet verifiable until pushed.
 
 ### FM-0004 — Set up continuous integration
 
@@ -93,12 +93,12 @@ Each ticket is a heading of the form `### [ID] — [Title]`, grouped under a mil
 
 - **Priority:** High
 - **Status:** Planned
-- **Description:** Create the real Supabase project, generate real API keys, and fill in `.env.local` per `.env.local.example`. This is connection setup only — no schema or auth logic.
+- **Description:** Create the real Supabase project, generate real API keys, and fill in `.env.local` per `.env.example`. This is connection setup only — no schema or auth logic.
 - **Dependencies:** FM-0003 — not yet Completed; provisioning the Supabase project itself doesn't require the foundation to be committed first, but wiring its keys into this codebase does, so this stays Planned rather than In Progress until FM-0003 merges.
 - **Acceptance Criteria:**
   - A Supabase project is created.
   - Real API keys are generated for the project.
-  - `.env.local` is filled in per `.env.local.example`.
+  - `.env.local` is filled in per `.env.example`.
   - No database schema or authentication logic is added as part of this ticket.
 
 ### FM-0006 — Connect Vercel deployment for the platform repository
@@ -110,6 +110,50 @@ Each ticket is a heading of the form `### [ID] — [Title]`, grouped under a mil
 - **Acceptance Criteria:**
   - The GitHub repository is linked to a Vercel project.
   - Deploys trigger automatically from approved branches.
+
+### FM-0021 — Configure the Supabase application foundation
+
+- **Priority:** High
+- **Status:** Completed
+- **Description:** Build out `src/lib/supabase/` with a browser client, server client, a dormant session-refresh middleware utility, centralized config validation, and a manually-invoked health-check utility — preparing the codebase for future authentication, database access, and storage without connecting to a live project or implementing any business logic.
+- **Dependencies:** None
+- **Acceptance Criteria:**
+  - `src/lib/supabase/` contains `client.ts`, `server.ts`, `middleware.ts`, `config.ts`, and `health-check.ts`.
+  - `getSupabaseConfig()` throws one aggregated, clear error naming every missing required Supabase environment variable.
+  - `checkSupabaseHealth()` is exported but not invoked automatically anywhere in the codebase.
+  - `.env.example` documents `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` with no real credentials.
+  - No tables, migrations, Row Level Security policies, or authentication UI were created; `npm run lint`, `npm run typecheck`, and `npm run build` all pass.
+
+> **Note on this ticket's ID:** the request that produced this ticket self-labeled it "FM-0002." That ID was already assigned (see FM-0002 above — Founder Pack doc import — filed when FM-0001 was completed and still Planned). Per this document's own rule against reusing or renumbering IDs, this work was filed as FM-0021, the next unused ID, instead. FM-0002 was left untouched.
+
+### FM-0022 — Define the Formetrix Core Domain Model
+
+- **Priority:** High
+- **Status:** Completed
+- **Description:** Author `docs/DOMAIN_MODEL.md`, defining the implementation-independent business vocabulary (Organization, User, Membership, Property, Parcel, Scenario, Assumption, Analysis, Constraint, Result, Recommendation, Report, Data Source) that future schema, API, and UI work should draw from, with explicit Version 1 boundary recommendations and unresolved questions flagged for founder review rather than silently resolved.
+- **Dependencies:** None
+- **Acceptance Criteria:**
+  - `docs/DOMAIN_MODEL.md` exists with all 15 required sections present.
+  - All required core concepts are evaluated, each stating what it is, what it is not, and its relationships.
+  - Every concept in the Version 1 Boundary table carries an explicit Required/Likely/Deferred/Requires-founder-decision label with reasoning.
+  - Open Questions are listed and split into blocking vs. non-blocking.
+  - A conceptual (not physical-schema) relationship diagram is included and labeled as such.
+  - The fact/assumption/calculation/interpretation/recommendation distinction is addressed as its own section.
+  - No application code, database schema, or migrations were added or changed; `npm run lint`, `npm run typecheck`, and `npm run build` remain unaffected.
+
+### FM-0023 — Resolve Founder Domain Decisions and Finalize the Version 1 Domain Boundary
+
+- **Priority:** High
+- **Status:** Completed
+- **Description:** Incorporate Founder Decisions FD-0001 through FD-0009 into `docs/DOMAIN_MODEL.md` — resolving all five previously-blocking Open Questions and two non-blocking ones, adding Property's lifecycle/status concept, and finalizing the Version 1 domain boundary — and record the decisions themselves in a new `management/FOUNDER_DECISIONS.md`.
+- **Dependencies:** FM-0022
+- **Acceptance Criteria:**
+  - `docs/DOMAIN_MODEL.md` reflects all nine approved founder decisions with no concept still labeled "Requires founder decision."
+  - All five previously-blocking Open Questions are resolved and moved out of §13's blocking section into the relevant entity's clarifications, not deleted.
+  - Property is documented as a long-lived workspace with a lifecycle status, without expanding Version 1 feature scope.
+  - `management/FOUNDER_DECISIONS.md` exists with FD-0001–FD-0009, each carrying date, status, decision, rationale, product impact, and deferred implications.
+  - `management/DECISIONS.md` references the founder decisions' architectural consequences without duplicating their text.
+  - No application code, database schema, or migrations were added or changed; `npm run lint`, `npm run typecheck`, and `npm run build` remain unaffected.
 
 ---
 
