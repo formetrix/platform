@@ -92,14 +92,16 @@ Each ticket is a heading of the form `### [ID] — [Title]`, grouped under a mil
 ### FM-0005 — Provision the Supabase project and wire environment variables
 
 - **Priority:** High
-- **Status:** Planned
-- **Description:** Create the real Supabase project, generate real API keys, and fill in `.env.local` per `.env.example`. This is connection setup only — no schema or auth logic.
-- **Dependencies:** FM-0003 — Completed. Nothing further blocks this ticket other than actually provisioning a Supabase project.
+- **Status:** In Progress
+- **Owner:** Cursor Grok 4.5
+- **Description:** Connect Formetrix to the Founder's hosted Supabase project: env contract (publishable/anon compatibility), local `.env.local` wiring, CLI link, migration review/dry-run/push with Founder approval, connection health, and readable `supabase_unconfigured` auth screen. No sign-in forms.
+- **Dependencies:** FM-0003 — Completed.
+- **Blocked reason:** Waiting on Founder: local `.env.local` credentials, CLI login/link, dry-run review, and explicit approval to `db push`.
 - **Acceptance Criteria:**
-  - A Supabase project is created.
-  - Real API keys are generated for the project.
-  - `.env.local` is filled in per `.env.example`.
-  - No database schema or authentication logic is added as part of this ticket.
+  - Local env contract documents `NEXT_PUBLIC_SUPABASE_URL` + `PUBLISHABLE_KEY` (anon fallback) and `.env.local` is git-ignored. (met)
+  - Hosted Supabase project is linked via CLI; connection health succeeds with local credentials. (pending Founder)
+  - Migrations reviewed; dry-run completed; push applied only with Founder approval (or pending status recorded honestly). (pending Founder)
+  - Unconfigured auth screen is branded (not global error); no sign-in forms; no secrets committed. (met)
 
 ### FM-0006 — Connect Vercel deployment for the platform repository
 

@@ -24,6 +24,24 @@ Design Principles
 - Testable
 - Maintainable
 
+## Supabase project wiring (FM-0005)
+
+- **Public env:** `NEXT_PUBLIC_SUPABASE_URL` +
+  `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (prefer); legacy
+  `NEXT_PUBLIC_SUPABASE_ANON_KEY` accepted when publishable is unset (ADR-0037).
+  Resolution: `src/lib/supabase/public-key.ts` → `getSupabaseConfig()`.
+- **Server-only:** `SUPABASE_SERVICE_ROLE_KEY` — never `NEXT_PUBLIC_`; used by
+  `createServiceRoleClient()` for trusted ingestion only.
+- **Local:** `.env.example` placeholders; `.env.local` git-ignored; restart
+  `npm run dev` after edits. Do not overwrite an existing `.env.local` without
+  Founder approval.
+- **CLI:** `npx supabase login` → `link --project-ref` → `migration list` →
+  `db push --dry-run` → Founder-approved `db push`. Never `db reset` on hosted.
+- **Health:** `checkSupabaseHealth()` (manual) hits Auth `/auth/v1/health`.
+- **Unconfigured UX:** protected routes → branded `/auth/sign-in?error=supabase_unconfigured`.
+
+See README (Founder checklist) and `docs/AUTH_FLOW.md` §12.5.
+
 ## Authentication session layer (FM-0009)
 
 - **Session refresh:** root `src/middleware.ts` calls

@@ -138,36 +138,40 @@
   {
     "id": "FM-0005",
     "title": "Provision the Supabase project and wire environment variables",
-    "description": "Create the real Supabase project, generate real API keys, and fill in .env.local per .env.example. Connection setup only — no schema or auth logic.",
+    "description": "Connect Formetrix to the Founder's hosted Supabase project: env contract (publishable/anon compatibility), local .env.local wiring, CLI link, migration review/dry-run/push with Founder approval, connection health, and readable supabase_unconfigured auth screen. No sign-in forms.",
     "milestoneId": "M0",
-    "status": "planned",
+    "status": "in_progress",
     "priority": "high",
     "type": "infrastructure",
-    "owner": null,
-    "dependencies": [
-      {
-        "ticketId": "FM-0003",
-        "note": "Completed — nothing further blocks this ticket other than actually provisioning a Supabase project."
-      }
-    ],
+    "owner": "Cursor Grok 4.5",
+    "dependencies": [{ "ticketId": "FM-0003", "note": "Completed — foundation is on GitHub." }],
     "acceptanceCriteria": [
-      { "text": "A Supabase project is created.", "met": false },
-      { "text": "Real API keys are generated for the project.", "met": false },
-      { "text": ".env.local is filled in per .env.example.", "met": false },
       {
-        "text": "No database schema or authentication logic is added as part of this ticket.",
+        "text": "Local env contract documents NEXT_PUBLIC_SUPABASE_URL + PUBLISHABLE_KEY (anon fallback) and .env.local is git-ignored.",
+        "met": true
+      },
+      {
+        "text": "Hosted Supabase project is linked via CLI; connection health succeeds with local credentials.",
         "met": false
+      },
+      {
+        "text": "Migrations reviewed; dry-run completed; push applied only with Founder approval (or pending status recorded honestly).",
+        "met": false
+      },
+      {
+        "text": "Unconfigured auth screen is branded (not global error); no sign-in forms; no secrets committed.",
+        "met": true
       }
     ],
     "createdAt": "2026-07-30T12:00:00Z",
-    "startedAt": null,
+    "startedAt": "2026-07-31T22:25:00Z",
     "completedAt": null,
-    "blockedReason": null,
+    "blockedReason": "Waiting on Founder: local .env.local credentials, CLI login/link, dry-run review, and explicit approval to db push.",
     "commitSha": null,
     "pullRequest": null,
     "release": null,
-    "progressPercent": 0,
-    "lastUpdatedAt": "2026-07-31T12:00:00Z"
+    "progressPercent": 50,
+    "lastUpdatedAt": "2026-07-31T22:45:00Z"
   },
   {
     "id": "FM-0006",

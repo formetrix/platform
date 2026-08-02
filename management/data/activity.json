@@ -454,5 +454,27 @@
     "relatedMilestoneId": "M2",
     "previousValue": "in_progress",
     "newValue": "completed"
+  },
+  {
+    "id": "ACT-000048",
+    "timestamp": "2026-07-31T22:25:00Z",
+    "type": "ticket_status_changed",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0005 status changed: planned -> in_progress (Provision the Supabase project and wire environment variables)",
+    "relatedTicketId": "FM-0005",
+    "relatedMilestoneId": "M0",
+    "previousValue": "planned",
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000049",
+    "timestamp": "2026-07-31T22:45:00Z",
+    "type": "note",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0005 progress: publishable-key resolver (ADR-0037), docs/Founder checklist, supabase init, migration review ready; blocked on Founder .env.local + CLI link/dry-run/push approval",
+    "relatedTicketId": "FM-0005",
+    "relatedMilestoneId": "M0",
+    "previousValue": null,
+    "newValue": null
   }
 ]

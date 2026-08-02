@@ -120,15 +120,16 @@
     "id": "ADR-0010",
     "kind": "architecture",
     "date": "2026-07-30",
-    "status": "approved",
+    "status": "superseded",
     "decision": "Name the Supabase public API key environment variable NEXT_PUBLIC_SUPABASE_ANON_KEY, not NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.",
     "rationale": "Supabase's newer project dashboards and official Next.js example have moved to calling this a \"publishable\" key. Both name the same kind of key. ANON_KEY was kept because it was explicitly specified by name in the ticket that requested this configuration.",
     "alternativesConsidered": [
       "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, matching Supabase's current default naming for newly-created projects"
     ],
-    "impact": ".env.example, src/lib/env.ts, and everything under src/lib/supabase/ read NEXT_PUBLIC_SUPABASE_ANON_KEY. Check which key name the real project issues when FM-0005 provisions it.",
+    "impact": "Superseded by ADR-0037 during FM-0005: prefer publishable with centralized anon fallback.",
     "relatedTicketIds": ["FM-0005", "FM-0021"],
-    "lastUpdatedAt": "2026-07-30T12:00:00Z"
+    "supersededBy": "ADR-0037",
+    "lastUpdatedAt": "2026-07-31T22:40:00Z"
   },
   {
     "id": "ADR-0011",
@@ -517,6 +518,22 @@
     "impact": "PropertyDashboard + dashboard-availability under src/features/properties/; nav label Overview → Dashboard. Mapbox/zoning/financial engines remain later tickets.",
     "relatedTicketIds": ["FM-0014"],
     "lastUpdatedAt": "2026-07-31T22:15:00Z"
+  },
+  {
+    "id": "ADR-0037",
+    "kind": "architecture",
+    "date": "2026-07-31",
+    "status": "approved",
+    "decision": "Prefer NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY; accept legacy NEXT_PUBLIC_SUPABASE_ANON_KEY only when publishable is unset, via resolveSupabasePublicKey. Do not require both.",
+    "rationale": "FM-0005 and current Supabase dashboards use publishable naming; ADR-0010 anon-only created a conflicting convention. Centralized fallback keeps older .env.local files working.",
+    "alternativesConsidered": [
+      "Keep anon-only (ADR-0010)",
+      "Require both names",
+      "Hard cutover with no fallback"
+    ],
+    "impact": ".env.example, env.ts, config.ts, health-check, and unconfigured auth screen document publishable first; service-role remains SUPABASE_SERVICE_ROLE_KEY (server-only).",
+    "relatedTicketIds": ["FM-0005"],
+    "lastUpdatedAt": "2026-07-31T22:40:00Z"
   },
   {
     "id": "FD-0001",

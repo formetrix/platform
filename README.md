@@ -4,9 +4,10 @@ Formetrix is an AI-powered real estate development intelligence platform. This r
 application codebase. **Read [`FORMETRIX.md`](./FORMETRIX.md) first** — it is the constitution for
 this project and governs every architectural and product decision here.
 
-> **Status:** foundation + Property Workspace mock UI + auth session infrastructure. Sign-in/sign-up
+> **Status:** foundation + Property Workspace/Dashboard + auth session infrastructure. Sign-in/sign-up
 > forms are not built yet. Protected application routes require Supabase env vars; without them,
 > those routes redirect to an explicit configuration message rather than simulating a session.
+> Hosted Supabase wiring is tracked in **FM-0005**.
 
 ## Governing documents
 
@@ -23,7 +24,7 @@ project going forward.
 | Framework     | Next.js 15 (App Router)                  | Required by `FORMETRIX.md` §9.                                                                       |
 | Language      | TypeScript (strict)                      | Required by §9/§12.                                                                                  |
 | Styling       | Tailwind CSS v4                          | Required by §9. CSS-first config (no `tailwind.config.ts`; see `src/app/globals.css`).               |
-| Data          | Supabase (Postgres/PostGIS)              | Required by §9. Client scaffolding only — not connected yet.                                         |
+| Data          | Supabase (Postgres/PostGIS)              | Required by §9. Env + clients ready; hosted project link tracked in FM-0005.                         |
 | Maps          | Mapbox                                   | Required by §9. Placeholder only — no `mapbox-gl` dependency until a map feature exists.             |
 | Theming       | `next-themes`                            | Small, well-maintained, solves SSR flash-of-wrong-theme correctly; not worth hand-rolling.           |
 | Class merging | `clsx` + `tailwind-merge`                | Standard pairing for conditional Tailwind class composition without duplicate/conflicting utilities. |
@@ -46,25 +47,53 @@ npm run dev
 
 Session refresh and protected routes (FM-0009) use Supabase Auth via `@supabase/ssr`.
 
-1. Copy `.env.example` → `.env.local`.
-2. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from a Supabase project
-   (Project Settings → API). Leave them empty for local UI work that does not need Auth.
-3. Restart `npm run dev` after changing env vars.
+1. Copy `.env.example` → `.env.local` (never commit `.env.local`).
+2. Set values from the **hosted** Supabase project (see Founder checklist below).
+3. Restart `npm run dev` after changing env vars (Next.js does not hot-reload env).
+
+| Variable                               | Where to get it                                         | Notes                                         |
+| -------------------------------------- | ------------------------------------------------------- | --------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Dashboard → **Project Settings → API** (or **Connect**) | Project URL                                   |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Same panel — **publishable** / anon public key          | Preferred (ADR-0037)                          |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`        | Same key if dashboard still labels it “anon”            | Legacy fallback only                          |
+| `SUPABASE_SERVICE_ROLE_KEY`            | API → **service_role** (secret)                         | Server-only; parcel ingestion                 |
+| Project ref                            | Settings → General → **Reference ID**                   | For `npx supabase link`                       |
+| Database password                      | Settings → Database (or Connect)                        | CLI link / DB connection — not an app env var |
+
+**Secret-handling:** never paste keys into chat, tickets, screenshots, or git. Only
+placeholders belong in `.env.example`.
 
 Behavior without credentials:
 
 - `/` and `/internal/project-dashboard` keep working (Mission Control stays public — ADR-0031).
 - `/properties`, `/property/*`, `/settings`, `/organization/*` redirect to
-  `/auth/sign-in?error=supabase_unconfigured` with a safe `next` return path.
+  `/auth/sign-in?error=supabase_unconfigured` with a safe `next` return path and a
+  branded configuration screen (not the global error page).
 - No signed-in user is simulated and auth is never silently bypassed.
 
 Sign-in/sign-up **forms are not implemented** yet — `/auth/sign-in` and `/auth/sign-up` are
 minimal placeholders so redirects do not 404. See `docs/AUTH_FLOW.md` §12.
 
+### Supabase CLI (link + migrations)
+
+CLI via `npx supabase` (no global install required). From the repo root:
+
+```bash
+npx supabase login
+npx supabase link --project-ref <PROJECT_REF>
+npx supabase migration list
+npx supabase db push --dry-run
+```
+
+- Link before `db push`. Review the dry-run output with the Founder.
+- Apply with `npx supabase db push` **only after explicit Founder approval**.
+- Never run `db reset` against the hosted project.
+- Do not edit the remote schema only in the Dashboard — keep `supabase/migrations/` authoritative.
+
 ### Database migrations
 
 Migration-ready SQL under `supabase/migrations/` (never auto-applied by
-`npm run dev` / `build` / CI):
+`npm run dev` / `build` / CI). Apply order (timestamp):
 
 **Organization membership (FM-0010)**
 
@@ -82,9 +111,8 @@ Migration-ready SQL under `supabase/migrations/` (never auto-applied by
 1. `20260731220000_upsert_parcel_from_provider.sql` — service-role
    `upsert_parcel_from_provider` (GeoJSON → MultiPolygon)
 
-Apply manually to a disposable Supabase project (CLI or SQL editor) when ready.
 `supabase/seed.dev.example.sql` is a commented development-only example — never
-production.
+production. Do not push seed data unless explicitly approved.
 
 Server helpers (no live DB / Regrid required to import/build):
 

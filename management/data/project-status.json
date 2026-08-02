@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-07-31T22:02:26Z",
-  "lastIntelligenceUpdate": "2026-07-31T22:02:26Z",
+  "generatedAt": "2026-07-31T22:25:58Z",
+  "lastIntelligenceUpdate": "2026-07-31T22:25:58Z",
   "currentMilestoneId": "M0",
-  "currentTicketId": null,
-  "currentWorkstream": null,
-  "currentFocusSummary": null,
-  "currentNextAction": null,
+  "currentTicketId": "FM-0005",
+  "currentWorkstream": "Milestone 0 — Provision Supabase & Wire Environment",
+  "currentFocusSummary": "FM-0005: env contract + docs ready; waiting on Founder local credentials, CLI login/link, dry-run approval, and migration push.",
+  "currentNextAction": "Founder: create .env.local from .env.example with hosted URL + publishable (or anon) key; then approve CLI link + db push dry-run.",
   "overallProgressPercent": 44,
-  "activeTicketCount": 0,
+  "activeTicketCount": 1,
   "milestonesSummary": [
     { "id": "M0", "name": "Repository Foundation", "status": "in_progress", "progressPercent": 80 },
     { "id": "M1", "name": "Authentication", "status": "not_started", "progressPercent": 100 },
@@ -23,8 +23,8 @@
   ],
   "ticketCounts": {
     "backlog": 6,
-    "planned": 3,
-    "inProgress": 0,
+    "planned": 2,
+    "inProgress": 1,
     "review": 0,
     "blocked": 0,
     "completed": 21,
@@ -49,5 +49,5 @@
   },
   "dataIntegrityWarningCount": 0,
   "integrityWarnings": [],
-  "recentActivityIds": ["ACT-000047", "ACT-000046", "ACT-000045", "ACT-000044", "ACT-000043"]
+  "recentActivityIds": ["ACT-000049", "ACT-000048", "ACT-000047", "ACT-000046", "ACT-000045"]
 }

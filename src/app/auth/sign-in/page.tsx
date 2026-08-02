@@ -6,6 +6,7 @@ import { sanitizeReturnPath } from "@/lib/auth/return-path";
 import {
   isSupabaseUnconfiguredError,
   REQUIRED_SUPABASE_AUTH_ENV_VARS,
+  SUPABASE_AUTH_ENV_FALLBACK_NOTE,
 } from "@/lib/auth/supabase-unconfigured";
 
 type SignInPageProps = {
@@ -52,10 +53,11 @@ export default async function SignInPlaceholderPage({ searchParams }: SignInPage
                     </li>
                   ))}
                 </ul>
+                <p className="text-muted mt-2 text-xs">{SUPABASE_AUTH_ENV_FALLBACK_NOTE}</p>
                 <p className="text-muted mt-3 text-xs">
                   Copy <code className="text-foreground">.env.example</code> to{" "}
-                  <code className="text-foreground">.env.local</code>, set the values from your
-                  Supabase project (Settings → API), then restart{" "}
+                  <code className="text-foreground">.env.local</code>, set values from your hosted
+                  Supabase project (Settings → API / Connect), then restart{" "}
                   <code className="text-foreground">npm run dev</code>. Secret values are never
                   shown here.
                 </p>

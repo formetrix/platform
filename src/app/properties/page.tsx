@@ -19,7 +19,7 @@ export default async function PropertiesPage() {
         <PageIntro />
         <EmptyState
           title="Supabase is not configured"
-          description="Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to load real Properties. Formetrix does not show fake property records."
+          description="Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (or legacy NEXT_PUBLIC_SUPABASE_ANON_KEY) to load real Properties. Formetrix does not show fake property records."
         />
       </div>
     );

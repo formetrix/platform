@@ -148,12 +148,12 @@ Each entry uses the following fields, in this order:
 ### ADR-0010
 
 - **Date:** 2026-07-30
-- **Status:** Accepted
+- **Status:** Superseded by ADR-0037
 - **Decision:** Name the Supabase public API key environment variable `NEXT_PUBLIC_SUPABASE_ANON_KEY`, not `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 - **Reason:** Supabase's newer project dashboards and official Next.js example (`vercel/next.js/examples/with-supabase`, checked against the `canary` branch while building FM-0021) have moved to calling this a "publishable" key rather than an "anon" key. Both name the same kind of key: public, safe for the browser, constrained by Row Level Security rather than secrecy. `ANON_KEY` was kept because it was explicitly specified by name in the ticket that requested this configuration, and it remains a fully valid, functional name for this key on Supabase projects that issue one.
 - **Alternatives Considered:**
   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, matching Supabase's current default naming for newly-created projects
-- **Impact:** `.env.example`, `src/lib/env.ts`, and everything under `src/lib/supabase/` read `NEXT_PUBLIC_SUPABASE_ANON_KEY`. When the real Supabase project is provisioned (FM-0005), check which key name its dashboard actually issues — if it's a "publishable" key, either rename this variable or map it explicitly rather than assuming the two are interchangeable in every SDK code path.
+- **Impact:** Superseded during FM-0005: prefer publishable with centralized anon fallback (ADR-0037).
 
 ### ADR-0011
 
@@ -444,3 +444,15 @@ Each entry uses the following fields, in this order:
   - Hard-coded “available” chips for future modules (rejected — invents capability)
   - Defer availability UI until zoning ships (rejected — ticket acceptance needs “what data is available” now)
 - **Impact:** `PropertyDashboard` + `dashboard-availability` under `src/features/properties/`; nav label Overview → Dashboard. Mapbox/zoning/financial engines remain later tickets.
+
+### ADR-0037
+
+- **Date:** 2026-07-31
+- **Status:** Accepted
+- **Decision:** Prefer `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` as the public Supabase API key env name; accept legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY` only when publishable is unset, via one resolver (`resolveSupabasePublicKey`). Do not require both or invent a third convention. Mark anon-only setups for future cleanup once all environments use publishable.
+- **Reason:** FM-0005 and current Supabase dashboards/docs use “publishable”; ADR-0010’s anon-only name created a conflicting convention. Centralized fallback keeps older `.env.local` files working without dual-key confusion.
+- **Alternatives Considered:**
+  - Keep anon-only (ADR-0010) — rejected; mismatches official naming
+  - Require both names — rejected; two conflicting sources of truth
+  - Hard cutover with no fallback — rejected; breaks existing local env files abruptly
+- **Impact:** `.env.example`, `env.ts`, `config.ts`, health-check, and unconfigured auth screen document publishable first; service-role remains `SUPABASE_SERVICE_ROLE_KEY` (server-only).

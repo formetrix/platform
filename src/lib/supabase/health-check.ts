@@ -1,4 +1,8 @@
 import { env } from "@/lib/env";
+import {
+  missingSupabasePublicKeyMessage,
+  resolveSupabasePublicKey,
+} from "@/lib/supabase/public-key";
 
 export interface SupabaseHealthCheckResult {
   ok: boolean;
@@ -20,18 +24,18 @@ export interface SupabaseHealthCheckResult {
  */
 export async function checkSupabaseHealth(): Promise<SupabaseHealthCheckResult> {
   const url = env.supabase.url();
-  const anonKey = env.supabase.anonKey();
+  const resolved = resolveSupabasePublicKey();
 
-  if (!url || !anonKey) {
+  if (!url || !resolved) {
     return {
       ok: false,
-      detail: "NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY is not set.",
+      detail: `NEXT_PUBLIC_SUPABASE_URL or ${missingSupabasePublicKeyMessage()} is not set.`,
     };
   }
 
   try {
     const response = await fetch(`${url}/auth/v1/health`, {
-      headers: { apikey: anonKey },
+      headers: { apikey: resolved.key },
     });
     return { ok: response.ok, status: response.status };
   } catch (error) {

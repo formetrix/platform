@@ -593,7 +593,16 @@ fall back to `/properties`.
 
 - Public routes (including home and Mission Control) continue to load.
 - Protected routes never open as if the user were signed in.
-- Sign-in placeholder explains missing `NEXT_PUBLIC_SUPABASE_*` env vars.
+- `/auth/sign-in?error=supabase_unconfigured` renders a **branded configuration
+  screen** (not the global unexpected-error page): required env var **names**,
+  safe return path, restart-dev-server note. No secret values. No sign-in form.
+- Required public vars: `NEXT_PUBLIC_SUPABASE_URL` and
+  `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  accepted as fallback — ADR-0037). Server-only: `SUPABASE_SERVICE_ROLE_KEY`
+  (ingestion; never `NEXT_PUBLIC_`).
+- After editing `.env.local`, restart `npm run dev`. See README Founder checklist
+  for where to copy URL / publishable / service_role / project ref / DB password
+  from the hosted dashboard — never paste secrets into chat.
 
 ### 12.6 Organization membership (FM-0010)
 
@@ -635,3 +644,4 @@ fall back to `/properties`.
 | 2026-07-31 | Initial architecture for FM-0008                                       |
 | 2026-07-31 | FM-0009: session middleware, route policy, `/auth/*` paths, §12 status |
 | 2026-07-31 | FM-0010: membership DDL/RLS, org helpers, statuses, §12.6              |
+| 2026-07-31 | FM-0005: publishable key + unconfigured screen + env/CLI docs §12.5    |
