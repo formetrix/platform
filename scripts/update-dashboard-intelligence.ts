@@ -173,9 +173,14 @@ function computeHealth(
   const dataIntegrity: HealthState = hasError ? "failing" : hasWarning ? "warning" : "passing";
 
   const statusOf = (id: string) => tickets.find((t) => t.id === id)?.status;
-  // "configured" (ticket completed) but health not independently verified → unknown,
-  // never a fabricated "healthy". Not-yet-provisioned → not_configured.
-  const supabase: HealthState = statusOf("FM-0005") === "completed" ? "unknown" : "not_configured";
+  // Not-yet-provisioned → not_configured. Once FM-0005 is completed, preserve an
+  // independently-verified health value already recorded on disk (e.g. "passing"
+  // from a real connection check) rather than discarding it; fall back to "unknown"
+  // when the connection was never verified. Never fabricates "passing".
+  const supabaseCompleted: HealthState =
+    existing?.supabase && existing.supabase !== "not_configured" ? existing.supabase : "unknown";
+  const supabase: HealthState =
+    statusOf("FM-0005") === "completed" ? supabaseCompleted : "not_configured";
   const deployment: HealthState =
     statusOf("FM-0006") === "completed" ? "unknown" : "not_configured";
 

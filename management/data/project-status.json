@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-07-31T22:25:58Z",
-  "lastIntelligenceUpdate": "2026-07-31T22:25:58Z",
+  "generatedAt": "2026-08-03T01:49:59Z",
+  "lastIntelligenceUpdate": "2026-08-03T01:49:59Z",
   "currentMilestoneId": "M0",
-  "currentTicketId": "FM-0005",
+  "currentTicketId": null,
   "currentWorkstream": "Milestone 0 — Provision Supabase & Wire Environment",
-  "currentFocusSummary": "FM-0005: env contract + docs ready; waiting on Founder local credentials, CLI login/link, dry-run approval, and migration push.",
-  "currentNextAction": "Founder: create .env.local from .env.example with hosted URL + publishable (or anon) key; then approve CLI link + db push dry-run.",
-  "overallProgressPercent": 44,
-  "activeTicketCount": 1,
+  "currentFocusSummary": "FM-0005 Complete: hosted Supabase linked, GoTrue health verified, migrations applied and schema verified (PostGIS + org/property/parcel tables + RLS + upsert RPC). Milestone 0 ready for next planned infra (FM-0006 Vercel) when Founder starts it.",
+  "currentNextAction": "No active ticket. Do not start FM-0006 until the Founder explicitly requests it.",
+  "overallProgressPercent": 45,
+  "activeTicketCount": 0,
   "milestonesSummary": [
-    { "id": "M0", "name": "Repository Foundation", "status": "in_progress", "progressPercent": 80 },
+    { "id": "M0", "name": "Repository Foundation", "status": "in_progress", "progressPercent": 87 },
     { "id": "M1", "name": "Authentication", "status": "not_started", "progressPercent": 100 },
     { "id": "M2", "name": "Property Workspace", "status": "not_started", "progressPercent": 83 },
     {
@@ -24,10 +24,10 @@
   "ticketCounts": {
     "backlog": 6,
     "planned": 2,
-    "inProgress": 1,
+    "inProgress": 0,
     "review": 0,
     "blocked": 0,
-    "completed": 21,
+    "completed": 22,
     "total": 30
   },
   "blockedTicketIds": [],
@@ -45,9 +45,9 @@
     "build": "passing",
     "gitSync": "unknown",
     "deployment": "not_configured",
-    "supabase": "not_configured"
+    "supabase": "passing"
   },
   "dataIntegrityWarningCount": 0,
   "integrityWarnings": [],
-  "recentActivityIds": ["ACT-000049", "ACT-000048", "ACT-000047", "ACT-000046", "ACT-000045"]
+  "recentActivityIds": ["ACT-000052", "ACT-000051", "ACT-000050", "ACT-000049", "ACT-000048"]
 }

@@ -92,16 +92,16 @@ Each ticket is a heading of the form `### [ID] — [Title]`, grouped under a mil
 ### FM-0005 — Provision the Supabase project and wire environment variables
 
 - **Priority:** High
-- **Status:** In Progress
+- **Status:** Completed
 - **Owner:** Cursor Grok 4.5
 - **Description:** Connect Formetrix to the Founder's hosted Supabase project: env contract (publishable/anon compatibility), local `.env.local` wiring, CLI link, migration review/dry-run/push with Founder approval, connection health, and readable `supabase_unconfigured` auth screen. No sign-in forms.
 - **Dependencies:** FM-0003 — Completed.
-- **Blocked reason:** Waiting on Founder: local `.env.local` credentials, CLI login/link, dry-run review, and explicit approval to `db push`.
 - **Acceptance Criteria:**
   - Local env contract documents `NEXT_PUBLIC_SUPABASE_URL` + `PUBLISHABLE_KEY` (anon fallback) and `.env.local` is git-ignored. (met)
-  - Hosted Supabase project is linked via CLI; connection health succeeds with local credentials. (pending Founder)
-  - Migrations reviewed; dry-run completed; push applied only with Founder approval (or pending status recorded honestly). (pending Founder)
+  - Hosted Supabase project is linked via CLI (ref `pdzokayrbvihjavkrcze`); connection health verified (GoTrue `/auth/v1/health` 200 via publishable key). (met)
+  - Migrations reviewed; dry-run shown; all 6 migrations applied with Founder approval — `migration list` confirms local == remote. (met)
   - Unconfigured auth screen is branded (not global error); no sign-in forms; no secrets committed. (met)
+- **Notes:** Service-role key remains server-only and was not required (left unset locally). PostGIS enabled before spatial tables; org tables/RLS before property RLS; no seeds or dev users applied. Post-push schema verification (2026-08-03): hosted tables `user_profiles`, `organizations`, `organization_memberships`, `properties`, `parcels`, `property_parcels` with RLS; PostGIS 3.3.7; functions `set_updated_at`, `can_access_property`, `upsert_parcel_from_provider`.
 
 ### FM-0006 — Connect Vercel deployment for the platform repository
 

@@ -140,7 +140,7 @@
     "title": "Provision the Supabase project and wire environment variables",
     "description": "Connect Formetrix to the Founder's hosted Supabase project: env contract (publishable/anon compatibility), local .env.local wiring, CLI link, migration review/dry-run/push with Founder approval, connection health, and readable supabase_unconfigured auth screen. No sign-in forms.",
     "milestoneId": "M0",
-    "status": "in_progress",
+    "status": "completed",
     "priority": "high",
     "type": "infrastructure",
     "owner": "Cursor Grok 4.5",
@@ -152,11 +152,11 @@
       },
       {
         "text": "Hosted Supabase project is linked via CLI; connection health succeeds with local credentials.",
-        "met": false
+        "met": true
       },
       {
         "text": "Migrations reviewed; dry-run completed; push applied only with Founder approval (or pending status recorded honestly).",
-        "met": false
+        "met": true
       },
       {
         "text": "Unconfigured auth screen is branded (not global error); no sign-in forms; no secrets committed.",
@@ -165,13 +165,13 @@
     ],
     "createdAt": "2026-07-30T12:00:00Z",
     "startedAt": "2026-07-31T22:25:00Z",
-    "completedAt": null,
-    "blockedReason": "Waiting on Founder: local .env.local credentials, CLI login/link, dry-run review, and explicit approval to db push.",
+    "completedAt": "2026-08-02T20:12:00Z",
+    "blockedReason": null,
     "commitSha": null,
     "pullRequest": null,
     "release": null,
-    "progressPercent": 50,
-    "lastUpdatedAt": "2026-07-31T22:45:00Z"
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-08-03T01:48:00Z"
   },
   {
     "id": "FM-0006",

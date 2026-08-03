@@ -5,3 +5,7 @@ build
 coverage
 public
 package-lock.json
+
+# Supabase CLI-generated local state (git-ignored; not source)
+supabase/.temp
+supabase/.branches
