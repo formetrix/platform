@@ -8,10 +8,10 @@ import { getSupabaseConfig } from "@/lib/supabase/config";
  * Server Actions. Must be created per-request (it reads the request's
  * cookies) — do not cache or share the returned client across requests.
  *
- * Session refresh is available as a utility in `./middleware.ts` but is
- * not wired into a live `src/middleware.ts` yet (see FM-0009 in
- * management/TICKETS.md — no authentication implementation in this
- * pass, per FORMETRIX.md §23).
+ * Session refresh is performed by root `src/middleware.ts` via
+ * `./middleware.ts` `updateSession` (FM-0009). Server Components should
+ * prefer `getAuthenticatedUser()` from `@/lib/auth` over trusting cookies
+ * alone.
  */
 export async function createClient() {
   const cookieStore = await cookies();

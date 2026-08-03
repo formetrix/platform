@@ -4,10 +4,10 @@ Formetrix is an AI-powered real estate development intelligence platform. This r
 application codebase. **Read [`FORMETRIX.md`](./FORMETRIX.md) first** — it is the constitution for
 this project and governs every architectural and product decision here.
 
-> **Status:** foundation only. No product features (properties, parcels, zoning, feasibility,
-> financial analysis, AI recommendations) have been built yet. This repo currently proves out the
-> application shell — routing, theming, error handling, and the integration points for Supabase
-> and Mapbox — so feature work has a stable base to build on.
+> **Status:** foundation + Property Workspace/Dashboard + auth session infrastructure. Sign-in/sign-up
+> forms are not built yet. Protected application routes require Supabase env vars; without them,
+> those routes redirect to an explicit configuration message rather than simulating a session.
+> Hosted Supabase wiring is tracked in **FM-0005**.
 
 ## Governing documents
 
@@ -24,7 +24,7 @@ project going forward.
 | Framework     | Next.js 15 (App Router)                  | Required by `FORMETRIX.md` §9.                                                                       |
 | Language      | TypeScript (strict)                      | Required by §9/§12.                                                                                  |
 | Styling       | Tailwind CSS v4                          | Required by §9. CSS-first config (no `tailwind.config.ts`; see `src/app/globals.css`).               |
-| Data          | Supabase (Postgres/PostGIS)              | Required by §9. Client scaffolding only — not connected yet.                                         |
+| Data          | Supabase (Postgres/PostGIS)              | Required by §9. Env + clients ready; hosted project link tracked in FM-0005.                         |
 | Maps          | Mapbox                                   | Required by §9. Placeholder only — no `mapbox-gl` dependency until a map feature exists.             |
 | Theming       | `next-themes`                            | Small, well-maintained, solves SSR flash-of-wrong-theme correctly; not worth hand-rolling.           |
 | Class merging | `clsx` + `tailwind-merge`                | Standard pairing for conditional Tailwind class composition without duplicate/conflicting utilities. |
@@ -43,6 +43,106 @@ cp .env.example .env.local   # fill in when Supabase/Mapbox credentials exist
 npm run dev
 ```
 
+### Local authentication configuration
+
+Session refresh and protected routes (FM-0009) use Supabase Auth via `@supabase/ssr`.
+
+1. Copy `.env.example` → `.env.local` (never commit `.env.local`).
+2. Set values from the **hosted** Supabase project (see Founder checklist below).
+3. Restart `npm run dev` after changing env vars (Next.js does not hot-reload env).
+
+| Variable                               | Where to get it                                         | Notes                                         |
+| -------------------------------------- | ------------------------------------------------------- | --------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Dashboard → **Project Settings → API** (or **Connect**) | Project URL                                   |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Same panel — **publishable** / anon public key          | Preferred (ADR-0037)                          |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`        | Same key if dashboard still labels it “anon”            | Legacy fallback only                          |
+| `SUPABASE_SERVICE_ROLE_KEY`            | API → **service_role** (secret)                         | Server-only; parcel ingestion                 |
+| Project ref                            | Settings → General → **Reference ID**                   | For `npx supabase link`                       |
+| Database password                      | Settings → Database (or Connect)                        | CLI link / DB connection — not an app env var |
+
+**Secret-handling:** never paste keys into chat, tickets, screenshots, or git. Only
+placeholders belong in `.env.example`.
+
+Behavior without credentials:
+
+- `/` and `/internal/project-dashboard` keep working (Mission Control stays public — ADR-0031).
+- `/properties`, `/property/*`, `/settings`, `/organization/*` redirect to
+  `/auth/sign-in?error=supabase_unconfigured` with a safe `next` return path and a
+  branded configuration screen (not the global error page).
+- No signed-in user is simulated and auth is never silently bypassed.
+
+Sign-in/sign-up **forms are not implemented** yet — `/auth/sign-in` and `/auth/sign-up` are
+minimal placeholders so redirects do not 404. See `docs/AUTH_FLOW.md` §12.
+
+### Supabase CLI (link + migrations)
+
+CLI via `npx supabase` (no global install required). From the repo root:
+
+```bash
+npx supabase login
+npx supabase link --project-ref <PROJECT_REF>
+npx supabase migration list
+npx supabase db push --dry-run
+```
+
+- Link before `db push`. Review the dry-run output with the Founder.
+- Apply with `npx supabase db push` **only after explicit Founder approval**.
+- Never run `db reset` against the hosted project.
+- Do not edit the remote schema only in the Dashboard — keep `supabase/migrations/` authoritative.
+
+### Database migrations
+
+Migration-ready SQL under `supabase/migrations/` (never auto-applied by
+`npm run dev` / `build` / CI). Apply order (timestamp):
+
+**Organization membership (FM-0010)**
+
+1. `20260731200000_organization_membership.sql`
+2. `20260731200100_organization_membership_rls.sql`
+
+**Property / Parcel + PostGIS (FM-0011)**
+
+1. `20260731210000_enable_postgis.sql` — `CREATE EXTENSION IF NOT EXISTS postgis`
+2. `20260731210100_properties_parcels.sql` — `properties`, `parcels`, `property_parcels`
+3. `20260731210200_properties_parcels_rls.sql` — RLS (+ `can_access_property`)
+
+**Regrid parcel upsert RPC (FM-0012)**
+
+1. `20260731220000_upsert_parcel_from_provider.sql` — service-role
+   `upsert_parcel_from_provider` (GeoJSON → MultiPolygon)
+
+`supabase/seed.dev.example.sql` is a commented development-only example — never
+production. Do not push seed data unless explicitly approved.
+
+Server helpers (no live DB / Regrid required to import/build):
+
+- `@/lib/organizations` — profile, active org, membership/role checks
+- `@/lib/properties` — property CRUD boundaries, parcel attach/list, status rules
+- `@/lib/regrid` — typed Regrid API client (token via `REGRID_API_TOKEN`)
+- `@/lib/properties` ingestion — `searchParcels`, `importParcel`,
+  `createPropertyFromParcel`, `refreshParcel` (mocked in unit tests)
+
+Without credentials or before migrations are applied, helpers return explicit
+`unconfigured` / error results rather than inventing data.
+
+### Regrid configuration (server-only)
+
+1. Set `REGRID_API_TOKEN` in `.env.local` (never `NEXT_PUBLIC_`).
+2. Optionally set `REGRID_API_BASE_URL` (default `https://app.regrid.com`).
+3. Parcel writes also need `SUPABASE_SERVICE_ROLE_KEY` for the upsert RPC.
+
+Unit tests mock `fetch` and an in-memory parcel store — CI does not call Regrid.
+
+### Property Workspace (FM-0013) & Dashboard (FM-0014)
+
+- `/properties` — lists real Properties for the active Organization (empty state if none).
+- `/property/[id]` — Property Dashboard (central overview): identity, location, data
+  availability, dataset/analysis inventory, parcel/property summaries, timeline,
+  recommendation placeholder, and module quick-nav. Section nav routes remain live
+  (Coming Soon modules are lazy-load ready).
+- **No mock property records.** Requires Supabase Auth + membership; Regrid token is optional
+  (parcel empty state explains when import is unavailable).
+
 Scripts:
 
 - `npm run dev` — start the dev server (webpack; add `--turbopack` yourself if you want it)
@@ -50,6 +150,9 @@ Scripts:
 - `npm run lint` / `npm run lint:fix` — ESLint (Next.js core-web-vitals + TypeScript rules)
 - `npm run typecheck` — `tsc --noEmit`
 - `npm run format` / `npm run format:check` — Prettier
+- `npm run test` — focused Node tests for auth routes/return-paths and organization role/slug/active-org helpers
+- `npm run dashboard:update` / `npm run dashboard:check` — recompute / validate the Mission Control snapshot in `management/data/` (see `docs/MISSION_CONTROL.md`)
+- `npm run dashboard:health` — run the validation commands and record their results into project health
 
 ## Folder structure
 
@@ -71,10 +174,15 @@ src/
     providers/               Providers composition root; AuthProvider placeholder.
     error/                   ErrorFallback, shared by error.tsx boundaries.
 
-  features/                  Feature modules go here (empty — see features/README.md).
+  features/
+    properties/              Property Workspace UI (list + /property/[id] shell, Overview, modules/).
+    project-dashboard/       Mission Control (/internal/project-dashboard).
 
   lib/
-    supabase/                Browser/server/middleware clients, config validation, health check (not connected yet).
+    supabase/                Browser/server/middleware/admin clients, config validation, health check.
+    regrid/                  Typed Regrid parcel API client (FM-0012; server-only token).
+    properties/              Property/parcel helpers + ingestion services (search/import/create).
+    organizations/           Membership and active-org helpers.
     mapbox/                  Mapbox config placeholder (env var only, no SDK installed yet).
     utils/                   Small, generic helpers (currently: cn()).
     env.ts                   Typed, lazy environment variable access.
@@ -109,9 +217,10 @@ This follows `FORMETRIX.md` §24: feature code will live under `src/features/<do
   a real project is connected. `src/lib/supabase/health-check.ts` provides `checkSupabaseHealth()` —
   hits Supabase's documented `/auth/v1/health` endpoint, touches no tables, and is never called
   automatically; it exists to be called manually once real credentials are in `.env.local`.
-- **`src/lib/supabase/middleware.ts` is a dormant utility, not live middleware.** `updateSession()`
-  follows Supabase's current session-refresh pattern (`getClaims()`, not `getSession()`) but nothing
-  imports it yet — no root `src/middleware.ts` exists, so it has no effect until FM-0009 wires it in.
+- **Root `src/middleware.ts` refreshes sessions and enforces route policy (FM-0009).** It calls
+  `updateSession()` from `src/lib/supabase/middleware.ts` (`getClaims()`, not `getSession()`),
+  then applies `src/lib/auth/routes.ts` / `return-path.ts`. Server code should resolve identity via
+  `getAuthenticatedUser()` (`getUser()`), not client-controlled values.
 - **Environment variables are read lazily and typed.** `src/lib/env.ts` doesn't validate at
   import time, so the app doesn't crash at build/boot before real credentials exist; a
   `requireEnv()` guard throws a descriptive error only when a code path that truly needs a value
@@ -136,15 +245,16 @@ This follows `FORMETRIX.md` §24: feature code will live under `src/features/<do
 ## Intentionally left for future implementation
 
 - Supabase project connection (env vars are placeholders; nothing has been provisioned).
-- Any actual authentication: login/signup flows, protected routes, wiring `src/lib/supabase/middleware.ts`'s
-  `updateSession()` into a live root `src/middleware.ts`, `supabase.auth.onAuthStateChange` wiring into `AuthProvider`.
+- Sign-in/sign-up forms, password reset UI, OAuth, and wiring `supabase.auth.onAuthStateChange`
+  into the client `AuthProvider` placeholder (session middleware + protected routes already exist).
 - Row Level Security policies, database schema, and migrations (§13, §19).
 - `mapbox-gl` installation and an actual map component.
 - Generated Supabase TypeScript types (`supabase gen types typescript`) — Supabase clients are
   currently untyped rather than typed with `any`, per §12.
 - All product features: properties, parcels, zoning, feasibility, financial modeling, AI
   recommendations, reports (§4–5).
-- Automated tests — none exist yet; §20 requires them once there is meaningful logic to cover.
+- Broader automated tests — focused Node tests cover auth route/return-path helpers; expand as
+  features grow (§20).
 - Committing `docs/PRODUCT.md`, `docs/ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/DATABASE.md`,
   `docs/UI.md`, and `.cursor/rules/formetrix.mdc` to git — present in the working tree, not yet
   committed (FM-0002).

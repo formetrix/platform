@@ -7,9 +7,14 @@ export function SiteHeader() {
   return (
     <header className="border-border border-b">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link href="/" className="text-sm font-semibold tracking-tight">
-          {siteConfig.name}
-        </Link>
+        <div className="flex items-center gap-6">
+          <Link href="/" className="text-sm font-semibold tracking-tight">
+            {siteConfig.name}
+          </Link>
+          <Link href="/properties" className="text-muted hover:text-foreground text-sm">
+            Properties
+          </Link>
+        </div>
         <ThemeToggle />
       </div>
     </header>

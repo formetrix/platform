@@ -53,21 +53,25 @@ Each milestone entry uses the following fields, in this order:
 
 - Repository initialized on GitHub (Formetrix/platform)
 - FORMETRIX.md adopted as the binding project constitution (ADR-0009)
-- Founder Pack governing docs (`docs/PRODUCT.md`, `ROADMAP.md`, `ARCHITECTURE.md`, `DATABASE.md`, `UI.md`) and `.cursor/rules/formetrix.mdc` imported into this repository, content verified to match the source exactly — not yet committed (FM-0002)
-- Next.js 15 application foundation scaffolded and verified: routing, theming, error handling, Supabase/Mapbox integration points, basic auth structure placeholder
+- Founder Pack governing docs (`docs/PRODUCT.md`, `ROADMAP.md`, `ARCHITECTURE.md`, `DATABASE.md`, `UI.md`) and `.cursor/rules/formetrix.mdc` imported into this repository and committed (FM-0002)
+- Next.js 15 application foundation scaffolded, verified, committed, and pushed to `origin/main` as `92d0b03` (FM-0003)
 - Formetrix Project Management System created (this directory) (FM-0001)
 - Supabase application foundation configured: browser/server/middleware clients, config validation, manual health check — not connected to a live project (FM-0021)
 - `platform/` established as the sole canonical repository — no external directory (including the former Founder Pack reference folder) is an active project reference going forward (ADR-0016)
+- Project Control Dashboard architecture designed (FM-0024) and MVP built at `/internal/project-dashboard` (FM-0025), populated from real `management/data/*.json`
+- Formetrix brand system and reusable interactive detail-drawer system applied to the dashboard (FM-0026)
+- Dashboard `DashboardDetailProvider` runtime error fixed by consolidating to a single client-boundary shell; verified stable via production build and repeated fresh dev requests (FM-0026A)
+- Current Work focus and Project Codes legend added to the dashboard (FM-0027)
+- Dashboard Intelligence Automation MVP: deterministic `dashboard:update`/`dashboard:check`/`dashboard:health` scripts, project-health signals, and a Definition of Done (FM-0028)
 - Remaining:
-  - Commit the imported Founder Pack docs and Cursor rule to git (FM-0002)
-  - Push the local foundation commit to GitHub (FM-0003 — committed locally as `7e0db87`, not yet pushed)
   - CI pipeline (FM-0004)
   - Supabase project provisioned (FM-0005)
   - Vercel deployment connected (FM-0006)
+  - Committing this milestone's own most recent work (FM-0024 through FM-0028) — verified locally, not yet committed
 
 **Status:** In Progress
 
-**Completion %:** 80 — basis: the constitution is adopted, the application scaffold is built and verified (lint/typecheck/build/dev smoke test all pass), the Supabase code-level foundation is built (client/server/middleware/config/health-check), the Founder Pack docs and Cursor rule are now present in the repository (content verified, not yet committed), and the management system itself is complete; what remains (FM-0002–FM-0006) is committing and connecting work, not unbuilt foundation work. This is a qualitative judgment about how much of the milestone's substance is done, not a raw count of the 7 tickets tracked under it (2 Completed, 2 In Progress, 3 Planned).
+**Completion %:** 80 — **computed**, not hand-set, per `docs/MISSION_CONTROL.md` §4 (completed ÷ total scoped tickets): 12 of the 15 tickets under this milestone are complete (`management/data/project-status.json` is the live source, recomputed by `npm run dashboard:update`). Do not edit this figure by hand; recompute from `management/data/tickets.json` instead.
 
 ---
 
@@ -78,9 +82,9 @@ Each milestone entry uses the following fields, in this order:
 **Deliverables:**
 
 - Initial database schema: users, organizations (FM-0007)
-- Supabase Auth sign-up / sign-in flows (FM-0008)
-- Session refresh middleware and protected routes (FM-0009)
-- Organization/workspace membership model with Row Level Security (FM-0010)
+- Authentication & organization architecture (`docs/AUTH_FLOW.md`) (FM-0008)
+- Session refresh middleware and protected routes (`src/middleware.ts`) (FM-0009)
+- Organization/workspace membership model with RLS (`supabase/migrations`) (FM-0010)
 
 **Status:** Not Started
 
@@ -94,7 +98,7 @@ Each milestone entry uses the following fields, in this order:
 
 **Deliverables:**
 
-- Property/parcel database schema on PostGIS (FM-0011)
+- Property/parcel database schema on PostGIS (`supabase/migrations`) (FM-0011)
 - Regrid integration for parcel data ingestion (FM-0012)
 - Property Search (FM-0013)
 - Property Dashboard (FM-0014)

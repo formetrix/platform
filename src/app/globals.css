@@ -8,40 +8,77 @@
  */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Formetrix brand system (FM-0026, docs/DESIGN_SYSTEM.md). Official
+ * colors: Deep Navy #0A2540, Charcoal #1F2A44, Electric Cyan #00D4FF,
+ * Light Gray #F5F7FA, White #FFFFFF.
+ *
+ * Electric Cyan is used verbatim as --primary/--info in dark mode (the
+ * primary branded presentation), where it reads clearly against navy.
+ * In light mode, raw #00D4FF text/borders on white fail WCAG contrast
+ * (~1.8:1 — far below the 3:1 minimum for UI components) — see
+ * docs/DESIGN_SYSTEM.md §14. Light mode uses a deeper, same-hue cyan
+ * (#0E7490) for anything read as text or a thin stroke, and reserves
+ * literal #00D4FF for low-opacity fills/accents where contrast math
+ * doesn't apply. This is a deliberate accessibility adjustment, not a
+ * deviation from the brand — the hue is identical, only the light-mode
+ * lightness is tuned to stay legible.
+ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5f7fa; /* Light Gray */
+  --foreground: #0a2540; /* Deep Navy */
 
-  --surface: #f7f7f8;
-  --surface-foreground: #171717;
+  --surface: #ffffff; /* White */
+  --surface-foreground: #0a2540;
 
-  --border: #e5e5e5;
+  --border: #e2e8f0;
 
-  --muted: #6b7280;
+  --muted: #1f2a44; /* Charcoal — secondary text, per brand spec */
 
-  --primary: #171717;
+  --primary: #0e7490; /* Accessible cyan (see note above); #00d4ff reserved for fills/accents */
   --primary-foreground: #ffffff;
+  --primary-accent: #00d4ff; /* literal brand cyan, for low-opacity fills only */
 
   --danger: #b91c1c;
   --danger-foreground: #ffffff;
+
+  --success: #15803d;
+  --success-foreground: #ffffff;
+
+  --warning: #c2410c;
+  --warning-foreground: #ffffff;
+
+  --info: #0e7490;
+  --info-foreground: #ffffff;
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #0a2540; /* Deep Navy */
+  --foreground: #ffffff; /* White */
 
-  --surface: #171717;
-  --surface-foreground: #ededed;
+  --surface: #1f2a44; /* Charcoal */
+  --surface-foreground: #ffffff;
 
-  --border: #2a2a2a;
+  --border: #2a3a54;
 
-  --muted: #9ca3af;
+  --muted: #a8b5c8;
 
-  --primary: #ededed;
-  --primary-foreground: #0a0a0a;
+  --primary: #00d4ff; /* Electric Cyan, literal — dark mode is the primary branded presentation */
+  --primary-foreground: #0a2540;
+  --primary-accent: #00d4ff;
 
   --danger: #f87171;
-  --danger-foreground: #0a0a0a;
+  --danger-foreground: #2a0a0a;
+
+  --success: #4ade80;
+  --success-foreground: #0a2416;
+
+  --warning: #fb923c;
+  --warning-foreground: #2a1608;
+
+  --info: #00d4ff;
+  --info-foreground: #0a2540;
 }
 
 @theme inline {
@@ -53,13 +90,42 @@
   --color-muted: var(--muted);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-accent: var(--primary-accent);
   --color-danger: var(--danger);
   --color-danger-foreground: var(--danger-foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
+  --font-metric: var(--font-space-grotesk);
 }
 
 body {
   background: var(--color-background);
   color: var(--color-foreground);
+}
+
+/* Soft elevation for Property Workspace cards (FM-0013) — restrained, not multi-layer glow. */
+@utility shadow-soft {
+  box-shadow:
+    0 1px 2px rgba(10, 37, 64, 0.06),
+    0 4px 12px -2px rgba(10, 37, 64, 0.08);
+}
+
+/* Respect the OS-level motion preference app-wide — covers every
+   hover-lift/transition utility used by the dashboard's interactive
+   cards and the detail drawer, without annotating each one individually. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

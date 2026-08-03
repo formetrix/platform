@@ -93,6 +93,7 @@ below:
 | **User**                            | A person who authenticates into Formetrix.                                                                     |
 | **Membership**                      | The relationship connecting a User to an Organization.                                                         |
 | **Property**                        | A long-lived acquisition/development opportunity and workspace, carried through its lifecycle.                 |
+| **PropertyWorkspace**               | The evaluation surface of a Property (1:1 in V1) that analysis modules attach to — schema refinement, §5.4a.   |
 | **Parcel**                          | A legal or data-provider record of a specific piece of land.                                                   |
 | **Project** _(deferred — see §5.5)_ | Not part of the Version 1 vocabulary; Property serves this role.                                               |
 | **Scenario**                        | A named set of assumptions used to evaluate one possible outcome for a Property.                               |
@@ -126,10 +127,11 @@ exactly one Organization; Organization is not proof of multiple people.
 - **Can a User eventually belong to multiple Organizations?** Not in
   Version 1 — one User belongs to one Organization. Multi-organization
   membership is deferred (§12).
-- **Are organization-level permissions expected later?** Yes, explicitly
-  deferred rather than open — FD-0002 states permissions "may be added
-  later," meaning role-based access _within_ an Organization (e.g., an
-  analyst who can't see financials) is future scope, not Version 1.
+- **Are organization-level permissions expected later?** Yes — FD-0002
+  defers fine-grained permissions. Architecture planning (`docs/AUTH_FLOW.md`,
+  ADR-0029) now defines four membership roles (Owner, Admin, Member, Viewer)
+  for invite/RLS design; module-scoped grants (e.g., financials-only) remain
+  future scope beyond those roles.
 
 ### 5.2 User
 
@@ -224,6 +226,29 @@ though only the Version 1 statuses are implemented now.
   these must not cause Version 1 feature expansion — no screens, workflows,
   or logic for these phases should be built now. They are named here only
   so the status field's shape doesn't need to change later.
+
+### 5.4a PropertyWorkspace — schema refinement (FM-0007 / ADR-0027)
+
+**Is:** the **evaluation surface** of a Property — the container that analysis
+modules (Parcel links, Zoning, Constraints, Assumptions, Scenario/Financial,
+Recommendation, Documents, Activity) attach to. Introduced by the core schema
+design (FM-0007, `docs/DATABASE_SCHEMA.md`) as a **1:1 refinement** of §5.4: it
+does not replace Property or contradict "Property is the primary workspace" —
+Property remains the long-lived, Organization-owned opportunity record, and
+PropertyWorkspace is the mutable evaluation container hung off it so the core
+Property record stays small and analysis modules have a single, stable
+attachment point.
+
+**Is not:** a Project (§5.5) — it carries no lifecycle or ownership, only
+evaluation attachment. It is 1:1 with Property in Version 1; modeling it as its
+own entity leaves room for more than one evaluation workspace per Property later
+without a breaking change, but that is deferred.
+
+**Clarification:** this concept is a downstream schema/organizational construct,
+not a new business concept the user names — a user still reasons about "the
+Property." It is recorded here per this document's change-control rule (§15)
+because the schema and the shipped `/property/[id]` workspace (FM-0029) both use
+it.
 
 ### 5.5 Project — deferred
 

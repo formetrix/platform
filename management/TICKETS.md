@@ -59,31 +59,31 @@ Each ticket is a heading of the form `### [ID] — [Title]`, grouped under a mil
 ### FM-0002 — Import Founder Pack governing docs into the platform repository
 
 - **Priority:** High
-- **Status:** In Progress
+- **Status:** Completed
 - **Description:** Copy the Founder Pack's governing docs — `docs/PRODUCT.md`, `docs/ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/DATABASE.md`, `docs/UI.md`, and `.cursor/rules/formetrix.mdc` — into this repository so they are version-controlled next to the code that implements them, instead of living only in a separate reference directory. Per the Founder's Repository Root Rule (2026-07-30, see ADR-0016), `platform/` is now the sole canonical repository — this ticket is what makes that true for the documents that previously lived only in the Founder Pack.
 - **Dependencies:** None
 - **Acceptance Criteria:**
   - `docs/PRODUCT.md`, `docs/ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/DATABASE.md`, and `docs/UI.md` exist in the platform repository. — Met, content verified to match the source exactly.
   - `.cursor/rules/formetrix.mdc` exists in the platform repository. — Met.
-  - The imported files are committed to version control in this repository. — Not yet met; `docs/` and `.cursor/` are present but untracked (`git status`).
+  - The imported files are committed to version control in this repository. — Met; committed in `92d0b03` ("FM-0001: Establish Formetrix engineering foundation"), pushed to `origin/main`.
 
 ### FM-0003 — Commit and push the Next.js application foundation
 
 - **Priority:** High
-- **Status:** In Progress
-- **Description:** Commit and push the scaffolded App Router foundation — layout, theming, error boundaries, and Supabase/Mapbox integration points — which has been verified locally (lint, typecheck, build, and dev smoke test all pass). Committed locally as `7e0db87` ("FM-0001: Initialize Formetrix foundation"); not yet pushed to GitHub, and further work has landed on top of that commit since (FM-0021).
+- **Status:** Completed
+- **Description:** Commit and push the scaffolded App Router foundation — layout, theming, error boundaries, and Supabase/Mapbox integration points — which has been verified locally (lint, typecheck, build, and dev smoke test all pass).
 - **Dependencies:** None
 - **Acceptance Criteria:**
-  - The App Router foundation (layout, theming, error boundaries, Supabase/Mapbox integration points) is committed to git. — Met (commit `7e0db87`).
-  - The commit is pushed to GitHub. — Not yet met; local `main` is ahead of `origin/main` by at least one commit.
-  - `npm run lint`, `npm run typecheck`, and `npm run build` pass on the pushed state. — Not yet verifiable until pushed.
+  - The App Router foundation (layout, theming, error boundaries, Supabase/Mapbox integration points) is committed to git. — Met (`7e0db87`, then `92d0b03`).
+  - The commit is pushed to GitHub. — Met; `origin/main` matches local `main` at `92d0b03`.
+  - `npm run lint`, `npm run typecheck`, and `npm run build` pass on the pushed state. — Met, verified against the current working tree built on top of `92d0b03`.
 
 ### FM-0004 — Set up continuous integration
 
 - **Priority:** Medium
 - **Status:** Planned
 - **Description:** Add a GitHub Actions workflow that runs `npm run lint`, `npm run typecheck`, and `npm run build` on every pull request, per FORMETRIX.md engineering standards.
-- **Dependencies:** FM-0003 — not yet Completed; this ticket can be authored and tested independently, but the workflow only has something to run against once FM-0003's foundation is on GitHub, so it stays Planned rather than In Progress until FM-0003 merges.
+- **Dependencies:** FM-0003 — Completed (`92d0b03`, pushed to `origin/main`); the foundation this workflow would run against now exists on GitHub.
 - **Acceptance Criteria:**
   - A GitHub Actions workflow file exists that triggers on pull requests.
   - The workflow runs `npm run lint`, `npm run typecheck`, and `npm run build`.
@@ -92,21 +92,23 @@ Each ticket is a heading of the form `### [ID] — [Title]`, grouped under a mil
 ### FM-0005 — Provision the Supabase project and wire environment variables
 
 - **Priority:** High
-- **Status:** Planned
-- **Description:** Create the real Supabase project, generate real API keys, and fill in `.env.local` per `.env.example`. This is connection setup only — no schema or auth logic.
-- **Dependencies:** FM-0003 — not yet Completed; provisioning the Supabase project itself doesn't require the foundation to be committed first, but wiring its keys into this codebase does, so this stays Planned rather than In Progress until FM-0003 merges.
+- **Status:** Completed
+- **Owner:** Cursor Grok 4.5
+- **Description:** Connect Formetrix to the Founder's hosted Supabase project: env contract (publishable/anon compatibility), local `.env.local` wiring, CLI link, migration review/dry-run/push with Founder approval, connection health, and readable `supabase_unconfigured` auth screen. No sign-in forms.
+- **Dependencies:** FM-0003 — Completed.
 - **Acceptance Criteria:**
-  - A Supabase project is created.
-  - Real API keys are generated for the project.
-  - `.env.local` is filled in per `.env.example`.
-  - No database schema or authentication logic is added as part of this ticket.
+  - Local env contract documents `NEXT_PUBLIC_SUPABASE_URL` + `PUBLISHABLE_KEY` (anon fallback) and `.env.local` is git-ignored. (met)
+  - Hosted Supabase project is linked via CLI (ref `pdzokayrbvihjavkrcze`); connection health verified (GoTrue `/auth/v1/health` 200 via publishable key). (met)
+  - Migrations reviewed; dry-run shown; all 6 migrations applied with Founder approval — `migration list` confirms local == remote. (met)
+  - Unconfigured auth screen is branded (not global error); no sign-in forms; no secrets committed. (met)
+- **Notes:** Service-role key remains server-only and was not required (left unset locally). PostGIS enabled before spatial tables; org tables/RLS before property RLS; no seeds or dev users applied. Post-push schema verification (2026-08-03): hosted tables `user_profiles`, `organizations`, `organization_memberships`, `properties`, `parcels`, `property_parcels` with RLS; PostGIS 3.3.7; functions `set_updated_at`, `can_access_property`, `upsert_parcel_from_provider`.
 
 ### FM-0006 — Connect Vercel deployment for the platform repository
 
 - **Priority:** Medium
 - **Status:** Planned
 - **Description:** Wire the GitHub repository to a Vercel project so that approved branches deploy automatically.
-- **Dependencies:** FM-0003 — not yet Completed; connecting Vercel to the repository can be done in parallel, but the first real deploy requires FM-0003's foundation to be on GitHub, so this stays Planned rather than In Progress until FM-0003 merges.
+- **Dependencies:** FM-0003 — Completed; the foundation is on GitHub, so a Vercel project can now be connected and deploy from it.
 - **Acceptance Criteria:**
   - The GitHub repository is linked to a Vercel project.
   - Deploys trigger automatically from approved branches.
@@ -155,98 +157,207 @@ Each ticket is a heading of the form `### [ID] — [Title]`, grouped under a mil
   - `management/DECISIONS.md` references the founder decisions' architectural consequences without duplicating their text.
   - No application code, database schema, or migrations were added or changed; `npm run lint`, `npm run typecheck`, and `npm run build` remain unaffected.
 
+### FM-0024 — Design the Formetrix Project Control Dashboard
+
+- **Priority:** High
+- **Status:** Completed
+- **Description:** Author `docs/PROJECT_DASHBOARD_ARCHITECTURE.md` — the architecture for a single-source-of-truth project-control system: structured `management/data/*.json` schemas, dashboard information architecture, progress-calculation rules, an update/validation/audit workflow, and an automation design — without building any of it.
+- **Dependencies:** None
+- **Acceptance Criteria:**
+  - `docs/PROJECT_DASHBOARD_ARCHITECTURE.md` exists covering source-of-truth rules, all six `management/data/*.json` schemas with examples, nine dashboard views, progress-calculation formulas, validation rules, audit trail, and automation design.
+  - The source-of-truth recommendation is validated, not accepted uncritically, with risks identified.
+  - No dashboard UI, populated production JSON, active Claude Code hook, Excel workbook, or PDF template was created.
+  - `management/DECISIONS.md` records the genuine engineering-level data-modeling decisions made (ADR-0017–ADR-0019); product/process questions are left as founder decisions in the architecture doc itself, not prematurely recorded as settled.
+
+### FM-0025 — Build the Formetrix Project Control Dashboard MVP
+
+- **Priority:** High
+- **Status:** Completed
+- **Description:** Build a working internal browser dashboard at `/internal/project-dashboard`, populated from real `management/data/*.json` (not examples), showing milestones, tickets, decisions, releases, activity, and risks — per the architecture in `docs/PROJECT_DASHBOARD_ARCHITECTURE.md` (FM-0024).
+- **Dependencies:** FM-0024
+- **Acceptance Criteria:**
+  - The route exists, loads successfully, and shows current milestones, tickets (kanban-organized), decisions, releases, activity, and blockers.
+  - `management/data/{project-status,milestones,tickets,decisions,activity,releases}.json` exist, populated from the actual current project state — no invented statuses or completed work; uncertain timestamps are explicitly documented as approximate in `management/data/README.md`.
+  - JSON is typed (`src/features/project-dashboard/types/`) and validated (`lib/validate-dashboard-data.ts`) before rendering; invalid data renders a clear error instead of failing silently.
+  - Progress percentages are computed live from ticket/acceptance-criteria data (`lib/compute-dashboard-metrics.ts`), never trusted from a stored field — this is what surfaced Milestone 0's real progress as 73% (computed) rather than a hand-set number.
+  - Dark and light themes both work (inherited from the existing root `ThemeProvider`, verified, not reimplemented).
+  - No Excel, PDF, authentication, Claude Code hooks, or GitHub Issues integration exists.
+  - `npm run lint`, `npm run typecheck`, `npm run format:check`, and `npm run build` all pass; the route was confirmed to return HTTP 200 with real data rendered via a local dev-server request, not just a successful build.
+
+### FM-0026 — Apply Formetrix branding and interactive dashboard details
+
+- **Priority:** High
+- **Status:** Completed
+- **Description:** Apply the Founder-approved Formetrix brand system (Deep Navy/Charcoal/Electric Cyan/Light Gray/White, Inter + Space Grotesk) to `/internal/project-dashboard`, and build a reusable detail-drawer system so every dashboard item — tickets, milestones, roadmap entries, decisions, activity, releases, and summary cards — is clickable and shows its full available information.
+- **Dependencies:** FM-0025
+- **Acceptance Criteria:**
+  - The official color palette is applied in both themes; a deliberate, documented accessibility adjustment darkens Electric Cyan for light-mode text/UI use (raw `#00D4FF` on white fails WCAG contrast at ~1.8:1) while keeping the literal brand hex for dark mode and low-opacity fills.
+  - Inter (weights 500/600/700) is the primary UI font; Space Grotesk is used for metric/data emphasis — both loaded via the existing `next/font/google` mechanism, no new dependency.
+  - `docs/DESIGN_SYSTEM.md` exists covering all 15 required sections; `docs/UI.md` references it as authoritative.
+  - One reusable `DetailDrawer` + `DashboardDetailProvider` (not a bespoke modal per section) powers detail panels for tickets, milestones, decisions, activity, releases, filtered ticket lists, and a progress-formula explanation; cross-references (dependencies, included tickets, related decisions) open other panels in place.
+  - Panels are keyboard accessible: hand-rolled focus trap, Escape-to-close, focus moves in on open and restores to the trigger on close, `role="dialog"`/`aria-modal`/`aria-label`, semantic `<button>` triggers throughout (never a clickable `<div>`).
+  - The Kanban board deliberately keeps the project's real five ticket statuses rather than the ticket's suggested six — "Ready" and "Review" aren't tracked anywhere in `management/data/tickets.json`, and inventing them would violate this ticket's own "do not invent" instruction; documented in `docs/DESIGN_SYSTEM.md` §15.
+  - No data was fabricated — genuinely absent fields (e.g. `owner`, `commitSha`, `pullRequest`) are hidden, not shown empty; two schema extensions (`ActivityEntry.relatedRelease`/`previousValue`/`newValue`, `Release.tag`) were added and populated only from existing data, per the ticket's explicit extension rule.
+  - No drag-and-drop, authentication, Excel, PDF, active hooks, or GitHub Issues integration were added.
+  - `npm run lint`, `npm run typecheck`, `npm run format:check`, and `npm run build` all pass; verified against a running dev server (HTTP 200, interactive markup present).
+
+### FM-0026A — Fix DashboardDetailProvider runtime error and verify dashboard stability
+
+- **Priority:** High
+- **Status:** Completed
+- **Description:** Fix a reported runtime error (`useDashboardDetail must be used within a DashboardDetailProvider`, thrown from `executive-summary.tsx`) by consolidating the dashboard's nine independent server→client boundary crossings into a single client shell component (`ProjectDashboardShell`), per the ticket's specified structure. A bug-fix patch to FM-0026, not new feature work.
+- **Dependencies:** FM-0026
+- **Acceptance Criteria:**
+  - `page.tsx` (Server Component) only loads and validates data, then renders one client component; it no longer independently authors JSX for section components that get threaded through another client component's `children`.
+  - `ProjectDashboardShell` (new, "use client") renders `DashboardDetailProvider` and every section component from within its own module — the sole client boundary for the page.
+  - `npm run lint`, `npm run typecheck`, `npm run format:check`, and `npm run build` all pass, including a clean build from a wiped `.next/` directory.
+  - Verified via both `next start` (production, no HMR involved at all) and three consecutive fresh `next dev` requests — HTTP 200 each time, no provider error or data-integrity error in any response, clean server logs.
+  - **Caveat, stated explicitly rather than overclaimed:** this environment has no browser-automation tool available, so the original client-side/hydration error could not be directly reproduced or re-triggered in a real browser. The fix is verified by (a) confirming the original SSR output was already correct — meaning the bug was not a fundamental structural flaw — and (b) restructuring to eliminate the entire class of multi-boundary Fast-Refresh fragility the symptom matches, not by watching the original error disappear firsthand.
+
+### FM-0027 — Add Current Work Focus and Project Code Legend
+
+- **Priority:** Medium
+- **Status:** Completed
+- **Description:** Add a prominent Current Work section to the top of `/internal/project-dashboard` (after the header, before the executive summary) that answers immediately which milestone and engineering ticket are active, what product workstream is being built, and the clear next action — plus a Project Codes / Naming Key legend explaining what identifiers like M0, FM-0027, ADR-0022, FD-0009, and v0.1.0 mean. Current work is resolved from typed structured data (`management/data/project-status.json`), never guessed; the active milestone and ticket are highlighted throughout the dashboard.
+- **Dependencies:** FM-0026A — Completed. Reuses the existing reusable detail-drawer system (FM-0026) and single client-shell structure (FM-0026A).
+- **Acceptance Criteria:**
+  - `management/data/project-status.json` is extended with `currentTicketId`, `currentWorkstream`, `currentFocusSummary`, and `currentNextAction` (`currentMilestoneId` already existed); the active milestone and ticket resolve to real records.
+  - A prominent Current Work section renders after the dashboard header and before the executive summary, showing the active milestone, active ticket, status, priority, computed progress, workstream, short description, dependencies, blocker (when present), last-updated time, and a clear next action.
+  - Current Work is resolved from typed structured sources; if the current-work pointers are inconsistent (missing record, wrong milestone, non-active status, out-of-range progress) a visible integrity warning is shown instead of invented values.
+  - The Current Work card opens the existing reusable detail drawer with the full active-ticket details; the milestone identifier inside the drawer opens the milestone panel.
+  - The active milestone is highlighted in the milestone progress list and roadmap, and the active ticket is highlighted with a "Current" badge in its Kanban column.
+  - A "Project Codes" trigger opens the existing drawer and explains M, FM, ADR, FD, v, PR, and commit SHA — including numbering and where each record is stored — sourced from a typed config file (`src/features/project-dashboard/config/project-codes.ts`).
+  - Accessibility: the Current Work card and Project Codes trigger are real buttons with visible keyboard focus; the drawer supports Escape-to-close and restores focus; status is never conveyed by color alone; reduced motion is respected.
+  - `npm run lint`, `npm run typecheck`, `npm run format:check`, and `npm run build` all pass.
+  - Verified at `http://localhost:3000/internal/project-dashboard` via dev/production server requests (HTTP 200) and rendered-markup assertions; a full interactive browser session was not available in this environment (same caveat as FM-0026A). Closed out during FM-0028.
+
+### FM-0028 — Add Dashboard Intelligence Automation MVP
+
+- **Priority:** High
+- **Status:** Completed
+- **Description:** Add a deterministic, local dashboard-intelligence system — `scripts/update-dashboard-intelligence.ts` (with `npm run dashboard:update` / `npm run dashboard:check`) and a validation-health recorder (`npm run dashboard:health`) — that recomputes the Mission Control snapshot from repository-controlled data (progress, counts, current work, integrity, and local project health), reducing manually maintained values, and record a Definition of Done that requires running it before any ticket is marked Completed.
+- **Dependencies:** FM-0027 — Completed. Builds on the Current Work model and structured `project-status.json` fields FM-0027 introduced.
+- **Acceptance Criteria:**
+  - `npm run dashboard:update` exists and writes only calculated fields; `npm run dashboard:check` validates without writing and fails on stale calculated fields or hard integrity errors.
+  - Active work is determined from explicit ticket status (`in_progress`/`review`/`blocked`); no next planned ticket is auto-selected; multiple active tickets require an explicitly selected primary or produce an integrity warning.
+  - The current milestone is validated to match the active ticket's milestone.
+  - Milestone and overall progress are calculated deterministically (completed ÷ total scoped tickets, overall = equal-weighted mean of milestone completion), clamped to 0–100, and documented in `docs/MISSION_CONTROL.md`.
+  - Project health distinguishes `passing`/`failing` from `unknown`/`not_configured`, never claiming GitHub/Vercel/Supabase healthy without evidence.
+  - Integrity problems (missing/duplicate/mislinked records, out-of-range progress, completed-without-completedAt, Markdown/JSON count discrepancies, release/decision reference gaps) are detected and rendered in Mission Control.
+  - Running `dashboard:update` repeatedly with no source change produces no file changes.
+  - The future-ticket Definition of Done is added to `.cursor/rules/formetrix.mdc` and `docs/MISSION_CONTROL.md`.
+  - FM-0028 is shown as the active current ticket during implementation and Completed afterward, with no next ticket auto-activated.
+  - `npm run lint`, `npm run typecheck`, `npm run format:check`, and `npm run build` all pass.
+  - Verified at `http://localhost:3000/internal/project-dashboard` via server requests and rendered-markup assertions; a full interactive browser session was not available in this environment (same caveat as FM-0026A).
+
 ---
 
 ## Milestone 1: Authentication
 
-### FM-0007 — Design initial database schema: users, organizations
+### FM-0007 — Design the Initial Core Database Schema
 
 - **Priority:** High
-- **Status:** Backlog
-- **Description:** Design the baseline relational schema for user accounts and organizations/workspaces, with migrations.
-- **Dependencies:** FM-0005
+- **Status:** Completed
+- **Description:** Architecture-only design of the foundational database schema (User, Organization, OrganizationMember, Property, PropertyWorkspace) as `docs/DATABASE_SCHEMA.md` — entities, fields, relationships, cardinality, ownership/tenancy, and future extension points, with a Mermaid ER diagram. No SQL, Prisma, migrations, live tables, Supabase connection, or authentication code.
+- **Dependencies:** FM-0005 — not a blocker for this ticket: FM-0007 is architecture-only and does not require a live Supabase project. Implementation (schema, migrations) is deferred to a later ticket once FM-0005 is provisioned.
 - **Acceptance Criteria:**
-  - A schema for users exists.
-  - A schema for organizations/workspaces exists.
-  - Migrations are provided for the schema.
+  - `docs/DATABASE_SCHEMA.md` exists documenting the core entities (User, Organization, OrganizationMember, Property, PropertyWorkspace) with purpose, fields, data types, required/optional, primary key, foreign keys, unique constraints, and future extension points.
+  - Relationships, cardinality, and ownership/tenancy rules are documented and consistent with the founder-approved domain model (FD-0002–FD-0005) and FORMETRIX.md.
+  - A Mermaid ER diagram is included.
+  - `PropertyWorkspace` is defined as the evaluation surface that future modules (Parcel, Zoning, Constraints, Assumptions, Financial, Recommendation, Documents, Activity) attach to — extension points only, those modules not designed.
+  - No SQL, Prisma schema, Supabase migrations, live tables, or authentication code were produced; the model is normalized, multi-tenant, and production-ready.
 
-### FM-0008 — Implement Supabase Auth sign-up and sign-in flows
+### FM-0008 — Design Authentication & Organization Architecture
 
 - **Priority:** High
-- **Status:** Backlog
-- **Description:** Implement real authentication UI and logic for sign-up and sign-in using `@supabase/ssr`, replacing the current `AuthProvider` placeholder.
-- **Dependencies:** FM-0007
+- **Status:** Completed
+- **Description:** Architecture and UI planning for authentication and organization management — sign-in/up, password reset, email verification, organization creation/invitation/switching, membership roles (Owner/Admin/Member/Viewer), and account settings — documented as `docs/AUTH_FLOW.md`. No Supabase Auth configuration, OAuth providers, migrations, or React components.
+- **Dependencies:** FM-0007 — Completed. Builds on the User, Organization, and OrganizationMember schema.
 - **Acceptance Criteria:**
-  - Sign-up flow is implemented using `@supabase/ssr`.
-  - Sign-in flow is implemented using `@supabase/ssr`.
-  - The placeholder `AuthProvider` is replaced by the real implementation.
+  - [x] `docs/AUTH_FLOW.md` exists covering sign-in, sign-up, password reset, email verification, organization creation, invitation, switching, membership roles, and account settings.
+  - [x] Roles Owner, Admin, Member, and Viewer are defined with permissions, responsibilities, and future expansion.
+  - [x] Complete user journeys are documented with flow or sequence diagrams (new account → org → invite → join → multi-org → switch).
+  - [x] UI planning includes screen list, navigation, form fields, validation, error/empty states, and future MFA — no React components implemented.
+  - [x] Security considerations and future provider compatibility (Supabase Auth, Google/Microsoft, magic links, SSO) are documented; no providers or Auth implemented.
 
-### FM-0009 — Implement session refresh middleware and protected routes
+### FM-0009 — Implement Supabase Session Refresh Middleware and Protected Routes
 
 - **Priority:** High
-- **Status:** Backlog
-- **Description:** Implement Next.js middleware that keeps Supabase sessions fresh and gates authenticated routes.
-- **Dependencies:** FM-0008
+- **Status:** Completed
+- **Owner:** Cursor Grok 4.5
+- **Description:** Implement authentication session infrastructure — root middleware that refreshes Supabase sessions via the existing `updateSession` utility, centralized protected-route policy, verified server-side user resolution, and safe redirect behavior. No sign-up/sign-in forms, OAuth, migrations, or role enforcement.
+- **Dependencies:** FM-0008 — Completed. AUTH_FLOW.md defines redirect targets and session expectations.
 - **Acceptance Criteria:**
-  - Middleware refreshes Supabase sessions.
-  - Protected routes are inaccessible to unauthenticated users.
-  - Authenticated users can access gated routes.
+  - [x] Root middleware exists, uses `src/lib/supabase/middleware.ts` `updateSession`, and refreshes Supabase sessions with an appropriate matcher.
+  - [x] Protected-route policy is centralized; unauthenticated access redirects safely to `/auth/sign-in` with an open-redirect-safe return path.
+  - [x] Verified server-side authenticated-user resolution exists with typed results (authenticated / unauthenticated / unconfigured / error).
+  - [x] Public routes and static assets remain accessible; unconfigured Supabase does not crash public pages or silently bypass auth.
+  - [x] No sign-up/sign-in feature, OAuth, migrations, or role-based authorization was implemented.
 
-### FM-0010 — Implement organization/workspace membership model
+### FM-0010 — Implement Organization and Workspace Membership Model
 
 - **Priority:** Medium
-- **Status:** Backlog
-- **Description:** Implement Row Level Security policies that scope data access to the signed-in user's organization.
-- **Dependencies:** FM-0007
+- **Status:** Completed
+- **Owner:** Cursor Grok 4.5
+- **Description:** Implement foundational organization-membership data model — `user_profiles`, `organizations`, `organization_memberships` migrations with RLS, typed server access helpers, role hierarchy, and safe V1 active-organization context. No onboarding/invitation UI; migrations are not applied to a live project.
+- **Dependencies:** FM-0007, FM-0008, FM-0009 — Completed.
 - **Acceptance Criteria:**
-  - Row Level Security policies exist that scope data access by organization.
-  - A user can access data only within their own organization.
+  - [x] Migration-ready SQL exists for `user_profiles`, `organizations`, and `organization_memberships` with constraints, indexes, and updated-at handling.
+  - [x] RLS policies (or clearly separated SQL) cover profile self-access, org visibility for active members, and authorized membership management without self-elevation.
+  - [x] Typed server helpers exist for profile, current organization, membership/role checks, and listing organizations with explicit result types.
+  - [x] Active organization selection is safe for V1 (one active context); role hierarchy and slug validation are tested; no onboarding/invitation UI or live migration apply.
 
 ---
 
 ## Milestone 2: Property Workspace
 
-### FM-0011 — Property and parcel database schema on PostGIS
+### FM-0011 — Implement Property and Parcel Database Schema with PostGIS
 
 - **Priority:** High
-- **Status:** Backlog
-- **Description:** Design a spatial schema for properties/parcels, keeping source geometry separate from derived development geometry.
-- **Dependencies:** FM-0007
+- **Status:** Completed
+- **Owner:** Cursor Grok 4.5
+- **Description:** Implement foundational PostgreSQL/PostGIS schema for `properties`, shared `parcels`, and `property_parcels` with provenance, spatial indexes, RLS, typed server helpers, and property status transition logic. No Property Workspace UI, Regrid, or Mapbox; migrations are not auto-applied.
+- **Dependencies:** FM-0007, FM-0010 — Completed.
 - **Acceptance Criteria:**
-  - A PostGIS-based schema exists for properties/parcels.
-  - Source geometry is stored separately from derived development geometry.
+  - [x] PostGIS-enabled migrations define `properties`, `parcels`, and `property_parcels` with spatial indexes, provenance, and RLS.
+  - [x] One Property may link many Parcels; Parcels are shareable across Organizations without exposing private Property data.
+  - [x] Typed server helpers and centralized property status transition rules exist with pure tests; no UI/Regrid/Mapbox; migrations not auto-applied.
 
-### FM-0012 — Regrid API integration for parcel data ingestion
+### FM-0012 — Implement Regrid Parcel Search and Property Creation Service
 
 - **Priority:** High
-- **Status:** Backlog
-- **Description:** Build a wrapped integration that pulls parcel data from Regrid and preserves source attribution and retrieval date.
-- **Dependencies:** FM-0011
+- **Status:** Completed
+- **Owner:** Cursor Grok 4.5
+- **Description:** Build Regrid API client and server services for parcel search (address/APN/coordinates), parcel import/sync with provenance, and `createPropertyFromParcel` — no UI, Mapbox, or workspace changes.
+- **Dependencies:** FM-0011 — Completed.
 - **Acceptance Criteria:**
-  - Parcel data can be pulled from Regrid through a wrapped integration.
-  - Source attribution is preserved for ingested parcel data.
-  - Retrieval date is preserved for ingested parcel data.
+  - [x] Typed Regrid client exists with env validation, error handling, retry, and rate-limit handling.
+  - [x] `searchParcels` / `importParcel` / `createPropertyFromParcel` / `refreshParcel` services return typed results, reuse parcels by `(provider, provider_parcel_id)`, and preserve provenance.
+  - [x] Focused tests cover duplicates, API failures, rate limits, parcel reuse, and property creation; no UI; live credentials not required for build/tests.
 
-### FM-0013 — Property Search
+### FM-0013 — Build the Property Workspace (Version 1)
 
 - **Priority:** High
-- **Status:** Backlog
-- **Description:** Build a search UI that lets a developer find a property/parcel by address or location.
-- **Dependencies:** FM-0012
+- **Status:** Completed
+- **Owner:** Cursor Grok 4.5
+- **Description:** Replace mock Property Workspace with real service-backed `/properties` and `/property/[id]`: Overview with parcel provenance, timeline, recommendation placeholder, working section nav (Coming Soon for future modules), responsive investor-ready UI. No fake records. Address/location search UI remains out of scope for a later ticket.
+- **Dependencies:** FM-0012 — Completed; FM-0029 — Completed (mock shell).
 - **Acceptance Criteria:**
-  - A user can search for a property/parcel by address.
-  - A user can search for a property/parcel by location.
+  - [x] `/properties` and `/property/[id]` load from Property services with no mock records; empty states when unconfigured or no data.
+  - [x] Workspace header, left nav, Overview (facts, parcel card, timeline, recommendation placeholder), PropertyStatusBadge, and responsive layout ship investor-ready Formetrix design.
+  - [x] Lazy-load-ready extension points exist for Zoning, Financial, Constraints, Recommendation, Documents, Activity; no Mapbox/zoning engine/AI.
 
 ### FM-0014 — Property Dashboard
 
 - **Priority:** High
-- **Status:** Backlog
-- **Description:** Build the primary property overview screen showing what the property is, where it is, and what data is available.
-- **Dependencies:** FM-0013
+- **Status:** Completed
+- **Owner:** Cursor Grok 4.5
+- **Description:** Build the primary property overview screen showing what the property is, where it is, and what data is available. Central workspace dashboard with identity, parcel/property summary, data availability, dataset/analysis inventory, recommendation placeholder, timeline, and module quick-nav — real services only; no Mapbox, zoning engine, or financial calculations.
+- **Dependencies:** FM-0013 — Completed.
 - **Acceptance Criteria:**
-  - The dashboard shows what the property is.
-  - The dashboard shows where the property is.
-  - The dashboard shows what data is available for the property.
+  - [x] The dashboard shows what the property is.
+  - [x] The dashboard shows where the property is.
+  - [x] The dashboard shows what data is available for the property.
 
 ### FM-0015 — Mapbox parcel visualization
 
@@ -258,6 +369,24 @@ Each ticket is a heading of the form `### [ID] — [Title]`, grouped under a mil
   - `mapbox-gl` is installed.
   - Parcel geometry renders on a map.
   - The map visualization does not imply a level of precision the underlying data does not support.
+
+### FM-0029 — Build the Property Workspace Foundation
+
+- **Priority:** High
+- **Status:** Completed
+- **Description:** Build the first investor-facing product feature: a `/properties` list and a `/property/[id]` workspace, backed by typed mock data only (no Supabase). The workspace shows an Overview panel of 5 cards (Property Facts, Parcel Facts, Development Snapshot, Current Recommendation, Unknowns) plus a left navigation for 9 future sections, 8 of which render a shared Coming Soon stub.
+- **Dependencies:** None — deliberately built ahead of FM-0011/FM-0012/FM-0013 (real property/parcel data) on typed mock data only, so the workspace UI and architecture can be proven out before Supabase/PostGIS/Regrid exist.
+- **Acceptance Criteria:**
+  - `/properties` lists all mock properties and links into each workspace; `/property/[id]` renders the persistent workspace chrome (name, address, parcel/APN, city, state, acres, zoning, status, map placeholder, summary).
+  - A left navigation lists all 9 future sections (Overview, Parcel, Zoning, Constraints, Assumptions, Financial, Recommendation, Documents, Activity); only Overview has real content, the other 8 render a shared `ComingSoonPanel` via real, bookmarkable sub-routes rather than client-side tabs.
+  - The Overview panel shows exactly 5 cards (Property Facts, Parcel Facts, Development Snapshot, Current Recommendation, Unknowns), every value sourced from typed mock data (`src/features/properties/data/mock-properties.ts`), grounded in `docs/DOMAIN_MODEL.md`'s Property/Parcel/Constraint/Recommendation/Unknown model and its six-category fact taxonomy.
+  - Domain components are reusable and hold no duplicated UI (`FactRow` is shared by Property Facts and Parcel Facts cards; `Badge` and `interactiveCardClass` are promoted to `src/components/ui`/`src/lib/utils` per FORMETRIX.md §24, since the properties feature is a second real consumer); no business logic lives in `page.tsx`/`layout.tsx` files.
+  - Styling follows the Formetrix Design System: dark mode first, brand colors via theme tokens, 8px-radius cards, Inter for prose and `font-metric` for data emphasis.
+  - The workspace already supports Scenario tabs, multiple recommendations, a financial engine, a real map, and documents without redesign: every section is a real route (not a client-side tab), `Recommendation` is modeled as one-of-possibly-many rather than a single hardcoded slot, and `MapPlaceholder` reserves the map's position for FM-0015.
+  - Authentication, Supabase, calculations, reports, PDF, and AI are explicitly not implemented.
+  - An unknown property id (e.g. `/property/nonexistent`) returns a real HTTP 404, not a 200 with not-found content rendered inside it — this required `generateStaticParams` + `dynamicParams = false` (ADR-0026) to route around a Next.js App Router limitation where the pre-existing root `loading.tsx`'s streaming boundary locks the response status at 200 before a runtime `notFound()` call deeper in the tree can change it.
+  - `npm run dashboard:update`, `npm run dashboard:check`, `npm run lint`, `npm run typecheck`, `npm run format:check`, `npm run build`, and `npm run dashboard:health` all pass.
+  - Verified at `http://localhost:3000/properties` and `/property/demo` (plus all 3 mock property ids, all 9 sections, and the unknown-id 404 case) via dev/production server requests and rendered-markup assertions; a full interactive browser session was not available in this environment (same caveat as FM-0026A).
 
 ---
 

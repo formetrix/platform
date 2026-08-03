@@ -5,10 +5,10 @@ import { getSupabaseConfig } from "@/lib/supabase/config";
 /**
  * Supabase client for use in Client Components (browser context).
  *
- * This project is not connected to a live Supabase instance yet — see
- * `.env.example`. Calling this before `NEXT_PUBLIC_SUPABASE_URL` and
- * `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set will throw immediately
- * (via `getSupabaseConfig`) rather than fail silently later.
+ * Calling this before `NEXT_PUBLIC_SUPABASE_URL` and a public key
+ * (`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` or legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
+ * are set will throw immediately (via `getSupabaseConfig`) rather than fail
+ * silently later. See `.env.example` and ADR-0037.
  *
  * A typed `Database` generic should be added here once a schema exists
  * (via `supabase gen types typescript`); until then the client is

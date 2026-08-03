@@ -10,6 +10,8 @@
  * silent `undefined`.
  */
 
+import { resolveSupabasePublicKey } from "@/lib/supabase/public-key";
+
 function readPublicEnv(name: string): string | undefined {
   return process.env[name];
 }
@@ -25,13 +27,33 @@ function readServerEnv(name: string): string | undefined {
 
 export const env = {
   supabase: {
-    url: () => readPublicEnv("NEXT_PUBLIC_SUPABASE_URL"),
-    anonKey: () => readPublicEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+    url: () => {
+      const value = readPublicEnv("NEXT_PUBLIC_SUPABASE_URL");
+      if (typeof value !== "string") return undefined;
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : undefined;
+    },
+    /**
+     * Public browser/SSR key. Prefer `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`;
+     * fall back to `NEXT_PUBLIC_SUPABASE_ANON_KEY` (ADR-0037).
+     */
+    publicKey: () => resolveSupabasePublicKey()?.key,
+    /**
+     * @deprecated Prefer `publicKey()`. Alias kept for call sites that still
+     * name the key "anon" — resolution is identical.
+     */
+    anonKey: () => resolveSupabasePublicKey()?.key,
     /** Server-only. Bypasses Row Level Security — never expose to the client. */
     serviceRoleKey: () => readServerEnv("SUPABASE_SERVICE_ROLE_KEY"),
   },
   mapbox: {
     accessToken: () => readPublicEnv("NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN"),
+  },
+  regrid: {
+    /** Server-only Regrid API token — never expose to the client. */
+    apiToken: () => readServerEnv("REGRID_API_TOKEN"),
+    /** Optional override; defaults to https://app.regrid.com */
+    apiBaseUrl: () => readServerEnv("REGRID_API_BASE_URL"),
   },
   site: {
     url: () => readPublicEnv("NEXT_PUBLIC_SITE_URL"),

@@ -1,11 +1,13 @@
+import Link from "next/link";
+
 import { siteConfig } from "@/config/site";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 /**
- * Placeholder landing page. This intentionally shows nothing
- * business-specific — no property, parcel, or feasibility UI has been
- * built yet. It exists to confirm the foundation (layout, theming,
- * routing) renders correctly.
+ * Placeholder landing page. Still not a real dashboard/marketing page —
+ * it exists to confirm the foundation (layout, theming, routing) renders
+ * correctly, and to point at the one real feature that exists so far.
  */
 export default function Home() {
   return (
@@ -17,11 +19,18 @@ export default function Home() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Foundation ready</CardTitle>
-          <CardDescription>This screen is a placeholder, not a product feature.</CardDescription>
+          <CardTitle>Property Workspace (mock data)</CardTitle>
+          <CardDescription>
+            The first product feature: evaluate a property, its parcels, and open questions.
+          </CardDescription>
         </CardHeader>
-        <CardContent className="text-muted flex flex-col gap-1">
-          <p>Next up, per FORMETRIX.md: connect Supabase, then build the first real feature.</p>
+        <CardContent className="flex flex-col gap-4">
+          <p className="text-muted">
+            Backed by typed mock data only — Supabase, calculations, and AI are not connected yet.
+          </p>
+          <Link href="/properties" className={buttonVariants({ className: "self-start" })}>
+            View properties
+          </Link>
         </CardContent>
       </Card>
     </div>
