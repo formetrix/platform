@@ -24,7 +24,7 @@
       "FM-0027",
       "FM-0028"
     ],
-    "progressPercent": 80,
+    "progressPercent": 87,
     "deliverables": [
       "Repository initialized on GitHub (Formetrix/platform)",
       "FORMETRIX.md adopted as the binding project constitution (ADR-0009)",
