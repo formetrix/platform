@@ -1,39 +1,39 @@
 {
-  "generatedAt": "2026-08-03T01:49:59Z",
-  "lastIntelligenceUpdate": "2026-08-03T01:49:59Z",
+  "generatedAt": "2026-08-04T06:15:41Z",
+  "lastIntelligenceUpdate": "2026-08-04T06:15:41Z",
   "currentMilestoneId": "M0",
   "currentTicketId": null,
-  "currentWorkstream": "Milestone 0 — Provision Supabase & Wire Environment",
-  "currentFocusSummary": "FM-0005 Complete: hosted Supabase linked, GoTrue health verified, migrations applied and schema verified (PostGIS + org/property/parcel tables + RLS + upsert RPC). Milestone 0 ready for next planned infra (FM-0006 Vercel) when Founder starts it.",
-  "currentNextAction": "No active ticket. Do not start FM-0006 until the Founder explicitly requests it.",
-  "overallProgressPercent": 45,
+  "currentWorkstream": "Milestone 1 — Production Authentication UI",
+  "currentFocusSummary": "FM-0006A Complete: working sign-in, sign-up, forgot/reset password, sign-out, /auth/confirm email-link handler, and first-login organization setup, all as Server Actions with enumeration-safe errors and sanitized return paths (ADR-0040, ADR-0041). Also fixed NEXT_PUBLIC_* values never reaching client bundles (ADR-0042). No active ticket.",
+  "currentNextAction": "No active ticket. Before onboarding real users, configure a real SMTP provider in Supabase (the built-in sender allows 2 emails/hour) and repair the pre-existing migration-history drift from FM-0015/FM-0016 so `supabase db push` works again. Do not start FM-0016 follow-on work or FM-0017 until the Founder asks.",
+  "overallProgressPercent": 57,
   "activeTicketCount": 0,
   "milestonesSummary": [
-    { "id": "M0", "name": "Repository Foundation", "status": "in_progress", "progressPercent": 87 },
-    { "id": "M1", "name": "Authentication", "status": "not_started", "progressPercent": 100 },
-    { "id": "M2", "name": "Property Workspace", "status": "not_started", "progressPercent": 83 },
+    { "id": "M0", "name": "Repository Foundation", "status": "in_progress", "progressPercent": 93 },
+    { "id": "M1", "name": "Authentication", "status": "complete", "progressPercent": 100 },
+    { "id": "M2", "name": "Property Workspace", "status": "not_started", "progressPercent": 100 },
     {
       "id": "M3",
       "name": "Development Intelligence",
       "status": "not_started",
-      "progressPercent": 0
+      "progressPercent": 50
     },
     { "id": "M4", "name": "Financial Intelligence", "status": "not_started", "progressPercent": 0 },
     { "id": "M5", "name": "AI Copilot", "status": "not_started", "progressPercent": 0 }
   ],
   "ticketCounts": {
-    "backlog": 6,
-    "planned": 2,
+    "backlog": 4,
+    "planned": 1,
     "inProgress": 0,
     "review": 0,
     "blocked": 0,
-    "completed": 22,
-    "total": 30
+    "completed": 26,
+    "total": 31
   },
   "blockedTicketIds": [],
   "repositoryState": {
-    "localCommit": "92d0b03",
-    "remoteCommit": "92d0b03",
+    "localCommit": "e07d131",
+    "remoteCommit": "e07d131",
     "ahead": 0,
     "pushed": true
   },
@@ -43,11 +43,11 @@
     "typecheck": "passing",
     "formatting": "passing",
     "build": "passing",
-    "gitSync": "unknown",
-    "deployment": "not_configured",
+    "gitSync": "passing",
+    "deployment": "passing",
     "supabase": "passing"
   },
   "dataIntegrityWarningCount": 0,
   "integrityWarnings": [],
-  "recentActivityIds": ["ACT-000052", "ACT-000051", "ACT-000050", "ACT-000049", "ACT-000048"]
+  "recentActivityIds": ["ACT-000062", "ACT-000061", "ACT-000060", "ACT-000059", "ACT-000058"]
 }

@@ -6,19 +6,38 @@
  * definitions rather than duplicating path lists.
  *
  * Route classes:
- * - **public** — accessible without a session (home, auth placeholders, Mission Control)
- * - **auth** — sign-in / sign-up surfaces; authenticated users are redirected away
+ * - **public** — accessible without a session (home, Mission Control)
+ * - **auth** — every `/auth/*` surface
  * - **protected** — application workspace; requires a verified session when Supabase is configured
  * - **internal** — engineering Mission Control; policy decided in ADR-0031
  */
 
 export const SIGN_IN_PATH = "/auth/sign-in";
 export const SIGN_UP_PATH = "/auth/sign-up";
+export const FORGOT_PASSWORD_PATH = "/auth/forgot-password";
+export const RESET_PASSWORD_PATH = "/auth/reset-password";
+/** Route handler that turns an emailed verification/recovery link into a session. */
+export const AUTH_CONFIRM_PATH = "/auth/confirm";
+export const ORGANIZATION_SETUP_PATH = "/onboarding/organization";
 export const DEFAULT_AUTHENTICATED_LANDING = "/properties";
 export const INTERNAL_PROJECT_DASHBOARD_PATH = "/internal/project-dashboard";
 
-/** Auth UI routes (minimal placeholders until forms ship). */
-const AUTH_ROUTE_PREFIXES = ["/auth/sign-in", "/auth/sign-up"] as const;
+/** Every authentication surface lives under this prefix. */
+const AUTH_ROUTE_PREFIX = "/auth";
+
+/**
+ * Auth screens an already-signed-in visitor has no reason to see.
+ *
+ * Deliberately excludes `/auth/reset-password` and `/auth/confirm`: a password
+ * recovery link *establishes* a session, so bouncing authenticated visitors off
+ * those routes would make the reset flow unreachable for the only people
+ * entitled to use it.
+ */
+const REDIRECT_WHEN_AUTHENTICATED_PREFIXES = [
+  SIGN_IN_PATH,
+  SIGN_UP_PATH,
+  FORGOT_PASSWORD_PATH,
+] as const;
 
 /**
  * Application routes that require authentication once Supabase is configured.
@@ -29,6 +48,7 @@ const PROTECTED_ROUTE_PREFIXES = [
   "/property",
   "/settings",
   "/organization",
+  "/onboarding",
 ] as const;
 
 /**
@@ -50,9 +70,18 @@ function matchesPrefix(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
 }
 
+/** True for every `/auth/*` surface, including confirm and reset-password. */
 export function isAuthRoute(pathname: string): boolean {
+  return matchesPrefix(normalizePathname(pathname), AUTH_ROUTE_PREFIX);
+}
+
+/**
+ * True for auth screens a signed-in visitor should be redirected away from.
+ * Narrower than `isAuthRoute` — see REDIRECT_WHEN_AUTHENTICATED_PREFIXES.
+ */
+export function redirectsAuthenticatedAway(pathname: string): boolean {
   const path = normalizePathname(pathname);
-  return AUTH_ROUTE_PREFIXES.some((prefix) => matchesPrefix(path, prefix));
+  return REDIRECT_WHEN_AUTHENTICATED_PREFIXES.some((prefix) => matchesPrefix(path, prefix));
 }
 
 export function isProtectedRoute(pathname: string): boolean {

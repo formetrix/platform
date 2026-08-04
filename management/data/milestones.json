@@ -24,7 +24,7 @@
       "FM-0027",
       "FM-0028"
     ],
-    "progressPercent": 87,
+    "progressPercent": 93,
     "deliverables": [
       "Repository initialized on GitHub (Formetrix/platform)",
       "FORMETRIX.md adopted as the binding project constitution (ADR-0009)",
@@ -46,20 +46,21 @@
     "id": "M1",
     "name": "Authentication",
     "objective": "Allow a developer to create an account, sign in, and access a workspace, with sessions and data properly scoped per organization.",
-    "status": "not_started",
-    "startDate": null,
+    "status": "complete",
+    "startDate": "2026-08-04",
     "targetDate": null,
-    "completedDate": null,
-    "ticketIds": ["FM-0007", "FM-0008", "FM-0009", "FM-0010"],
+    "completedDate": "2026-08-04",
+    "ticketIds": ["FM-0007", "FM-0008", "FM-0009", "FM-0010", "FM-0006A"],
     "progressPercent": 100,
     "deliverables": [
       "Initial database schema: users, organizations (FM-0007)",
       "Authentication & organization architecture (docs/AUTH_FLOW.md) (FM-0008)",
       "Session refresh middleware and protected routes (src/middleware.ts) (FM-0009)",
-      "Organization/workspace membership model with RLS (supabase/migrations) (FM-0010)"
+      "Organization/workspace membership model with RLS (supabase/migrations) (FM-0010)",
+      "Production authentication UI and first-login organization setup (FM-0006A)"
     ],
     "blockers": [],
-    "lastUpdatedAt": "2026-07-31T12:00:00Z"
+    "lastUpdatedAt": "2026-08-04T07:00:00Z"
   },
   {
     "id": "M2",
@@ -70,7 +71,7 @@
     "targetDate": null,
     "completedDate": null,
     "ticketIds": ["FM-0011", "FM-0012", "FM-0013", "FM-0014", "FM-0015", "FM-0029"],
-    "progressPercent": 83,
+    "progressPercent": 100,
     "deliverables": [
       "Property/parcel database schema on PostGIS (supabase/migrations) (FM-0011)",
       "Regrid integration for parcel data ingestion (FM-0012)",
@@ -90,7 +91,7 @@
     "targetDate": null,
     "completedDate": null,
     "ticketIds": ["FM-0016", "FM-0017"],
-    "progressPercent": 0,
+    "progressPercent": 50,
     "deliverables": [
       "Zoning data model and Zoning Overview (FM-0016)",
       "Development constraints analysis: setbacks, FAR, height limits (FM-0017)"

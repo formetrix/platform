@@ -553,27 +553,42 @@ or invite tokens).
 
 ---
 
-## 12. Implementation Status (FM-0009)
+## 12. Implementation Status (FM-0009, FM-0006A)
 
 ### 12.1 What shipped
 
-| Piece                  | Location                                                         |
-| ---------------------- | ---------------------------------------------------------------- |
-| Root middleware        | `src/middleware.ts`                                              |
-| Session refresh        | `src/lib/supabase/middleware.ts` → `updateSession` (`getClaims`) |
-| Route policy           | `src/lib/auth/routes.ts`                                         |
-| Return-path safety     | `src/lib/auth/return-path.ts`                                    |
-| Server user resolution | `src/lib/auth/get-authenticated-user.ts` (`getUser`)             |
-| Auth placeholders      | `/auth/sign-in`, `/auth/sign-up` (no forms)                      |
+| Piece                    | Location                                                                                            |
+| ------------------------ | --------------------------------------------------------------------------------------------------- |
+| Root middleware          | `src/middleware.ts`                                                                                 |
+| Session refresh          | `src/lib/supabase/middleware.ts` → `updateSession` (`getClaims`)                                    |
+| Route policy             | `src/lib/auth/routes.ts`                                                                            |
+| Return-path safety       | `src/lib/auth/return-path.ts`                                                                       |
+| Server user resolution   | `src/lib/auth/get-authenticated-user.ts` (`getUser`)                                                |
+| **Auth screens**         | `/auth/sign-in`, `/auth/sign-up`, `/auth/forgot-password`, `/auth/reset-password` (FM-0006A)        |
+| **Emailed-link handler** | `/auth/confirm` route handler — `verifyOtp` (token_hash) or `exchangeCodeForSession` (PKCE code)    |
+| **Server Actions**       | `src/features/auth/actions/` — sign-in, sign-up, password reset, sign-out, organization setup       |
+| **Input validation**     | `src/lib/auth/validation.ts` (pure, unit-tested)                                                    |
+| **Error vocabulary**     | `src/lib/auth/messages.ts` — enumeration-safe, never echoes a provider string                       |
+| **Post-auth routing**    | `src/lib/auth/post-auth.ts` (pure) + `src/lib/auth/account-context.ts` (verified lookup)            |
+| **Organization setup**   | `/onboarding/organization` + `public.create_organization_with_owner` (atomic)                       |
+| **Profile provisioning** | `on_auth_user_created` trigger on `auth.users`, with `ensureUserProfile()` as a repair path         |
+| **Client session (UI)**  | `src/components/providers/auth-provider.tsx` → header account menu. Presentation only, never a gate |
 
 ### 12.2 Public vs protected
 
-| Class     | Paths                                                                                        | Behavior                                                                     |
-| --------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Public    | `/`, other non-protected paths                                                               | No session required                                                          |
-| Auth      | `/auth/sign-in`, `/auth/sign-up`                                                             | Placeholders; authenticated users redirect to `/properties` (or safe `next`) |
-| Protected | `/properties`, `/property/*`, `/settings`, `/settings/*`, `/organization`, `/organization/*` | Require verified session when Supabase is configured                         |
-| Internal  | `/internal/project-dashboard`                                                                | **Public for now** (ADR-0031) — Mission Control without Auth                 |
+| Class     | Paths                                                                           | Behavior                                                                      |
+| --------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Public    | `/`, other non-protected paths                                                  | No session required                                                           |
+| Auth      | `/auth/sign-in`, `/auth/sign-up`, `/auth/forgot-password`                       | Working forms; authenticated users redirect to `/properties` (or safe `next`) |
+| Auth      | `/auth/reset-password`, `/auth/confirm`                                         | Reachable **with** a session — a recovery link is what creates one            |
+| Protected | `/properties`, `/property/*`, `/settings/*`, `/organization/*`, `/onboarding/*` | Require verified session when Supabase is configured                          |
+| Internal  | `/internal/project-dashboard`                                                   | **Public for now** (ADR-0031) — Mission Control without Auth                  |
+
+`isAuthRoute()` covers every `/auth/*` path and is what return-path validation
+rejects. `redirectsAuthenticatedAway()` is the narrower set middleware bounces
+signed-in visitors off — it deliberately excludes reset-password and confirm,
+because redirecting an authenticated visitor away from those would make password
+recovery unreachable for the only people entitled to use it.
 
 ### 12.3 Middleware behavior
 
@@ -614,15 +629,110 @@ fall back to `/properties`.
   membership (V1 one-active index).
 - Role hierarchy and self-elevation rejection are centralized in
   `roles.ts` (+ SQL trigger).
-- Still deferred: onboarding UI, invitation email/accept pages, org switcher UI.
+- Onboarding UI shipped in FM-0006A; invitation email/accept pages and the org
+  switcher remain deferred.
 
-### 12.7 Still out of scope
+### 12.7 Authentication UI (FM-0006A)
 
-- Sign-in / sign-up forms, password reset, email verification UI
-- Organization onboarding UI, invitation delivery/acceptance pages
+**Why Server Actions rather than client-side `signInWithPassword`.** The
+password is posted straight to the server and never enters client JavaScript,
+and `@supabase/ssr` writes the session cookies through Next's cookie store in
+the same round-trip. A browser-side call would set the browser's copy of the
+session while the server learned about it only on some later request. Every form
+also works without JavaScript as a consequence (ADR-0040).
+
+**Credential lifecycle**
+
+| Flow            | Path                    | Outcome                                                                                               |
+| --------------- | ----------------------- | ----------------------------------------------------------------------------------------------------- |
+| Sign in         | `/auth/sign-in`         | Session, then the post-auth destination                                                               |
+| Sign up         | `/auth/sign-up`         | Auth user + `user_profiles` row; verification panel when confirmation is required                     |
+| Forgot password | `/auth/forgot-password` | Recovery email; identical confirmation whether or not the address has an account                      |
+| Reset password  | `/auth/reset-password`  | Requires a verified recovery session; updates the password, then the post-auth destination            |
+| Email link      | `/auth/confirm`         | `token_hash` → `verifyOtp`; `code` → `exchangeCodeForSession`; failures land on sign-in with a reason |
+| Sign out        | Server Action           | Clears cookies server-side, returns to `/auth/sign-in`                                                |
+
+**Post-authentication routing.** After sign-in, and after a confirmed email
+link, the server resolves the profile and membership and picks one of:
+
+1. no usable organization → `/onboarding/organization`
+2. otherwise → sanitized `next`, defaulting to `/properties`
+
+A _failed_ organization lookup is treated as "carry on", never as "no
+organization" — routing someone who already has an organization into setup would
+invite a duplicate one. `/properties` performs the same check as a safety net for
+direct navigation; that redirect is delivered in-band (HTTP 200 + client
+navigation) rather than as a 3xx, because the root `loading.tsx` streaming
+boundary has already fixed the status by then — the same App Router constraint
+recorded in ADR-0026.
+
+**Organization setup** collects a name and a URL slug and calls
+`public.create_organization_with_owner`, which creates the Organization, the
+owner Membership, and the `active_organization_id` preference in one
+transaction. Three separate client writes could strand an organization with no
+owner, which nobody could then administer without service-role access. The
+function derives its actor from `auth.uid()`; no user id crosses the wire.
+
+**Email templates.** The handler accepts both link shapes, so it works with the
+stock Supabase template (which redirects through `/auth/v1/verify` and arrives
+with a PKCE `code`) and with a template rewritten to
+`{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email`. The
+`token_hash` form is worth configuring: PKCE binds the exchange to the browser
+that started it, so opening the link on a different device fails.
+
+**Password rules.** Minimum 12 characters with a letter and a digit, maximum 72
+(bcrypt truncates beyond that, so a longer password would be silently shortened
+rather than honored). Sign-in validates presence only — an older password must
+not be blocked by a newer rule.
+
+**Not an authorization boundary.** `AuthProvider` now subscribes to
+`onAuthStateChange` so the header can show the signed-in email and a sign-out
+control without making every page dynamic. It reads the browser's cookie copy of
+the session; access decisions stay with middleware and each page's verified
+`getAuthenticatedUser()` call.
+
+### 12.7a Still out of scope
+
+- Invitation delivery/acceptance pages, organization switching
 - OAuth, magic links, MFA, SSO
+- Re-authentication before a password change (`secure_password_change`), which
+  would harden the case where a stolen session is used to change the password
+- Resend-verification control on the sign-in screen
 - Applying migrations to a live Supabase project from this repo's scripts
-- Replacing the client `AuthProvider` placeholder with live `onAuthStateChange`
+
+### 12.8 Hosted Auth URL configuration (FM-0006)
+
+Supabase Dashboard → **Authentication → URL Configuration** (Founder-managed; values
+are not secrets but must match the deployed origins):
+
+| Setting       | Value                                                                    |
+| ------------- | ------------------------------------------------------------------------ |
+| Site URL      | `https://platform-pi-olive-13.vercel.app`                                |
+| Redirect URLs | `https://platform-pi-olive-13.vercel.app/**`, `http://localhost:3000/**` |
+
+- Local development continues to use `http://localhost:3000`.
+- Vercel Preview deployments: add the specific Preview hostname to Redirect URLs
+  when Auth callbacks are required on that preview; prefer explicit hosts over
+  open wildcards.
+- When hosted env is configured, unauthenticated `/properties` redirects to
+  `/auth/sign-in?next=/properties` (**not** `supabase_unconfigured`).
+
+Emailed links are built from `NEXT_PUBLIC_SITE_URL` (then
+`VERCEL_PROJECT_PRODUCTION_URL`, then `VERCEL_URL`, then `http://localhost:3000`)
+and never from the request's `Host` header — a header an attacker controls would
+otherwise decide where a verification email points. Whatever origin is resolved
+must appear in the Redirect URLs list above, or Supabase rejects the callback.
+
+### 12.9 Document History addendum — hosted Auth settings that affect FM-0006A
+
+| Setting                                   | Current hosted value        | Effect                                                                     |
+| ----------------------------------------- | --------------------------- | -------------------------------------------------------------------------- |
+| Email confirmation (`mailer_autoconfirm`) | Off (confirmation required) | Sign-up returns no session; the verification panel is the expected outcome |
+| Email provider                            | Enabled                     | Email + password is the only credential path                               |
+| Default email rate limit                  | 2 per hour                  | Verification/recovery sends beyond this surface as "Too many attempts"     |
+
+The built-in SMTP sender is rate-limited and not intended for production volume;
+a dedicated SMTP provider should be configured before onboarding real users.
 
 ---
 
@@ -645,3 +755,4 @@ fall back to `/properties`.
 | 2026-07-31 | FM-0009: session middleware, route policy, `/auth/*` paths, §12 status |
 | 2026-07-31 | FM-0010: membership DDL/RLS, org helpers, statuses, §12.6              |
 | 2026-07-31 | FM-0005: publishable key + unconfigured screen + env/CLI docs §12.5    |
+| 2026-08-03 | FM-0006: Vercel production + Auth Site/Redirect URL config §12.8       |

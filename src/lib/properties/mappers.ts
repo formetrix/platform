@@ -43,8 +43,8 @@ type ParcelRow = {
   country_code: string | null;
   situs_address: string | null;
   acreage: number | string | null;
-  geometry: string | null;
-  centroid: string | null;
+  geometry: string | Record<string, unknown> | null;
+  centroid: string | Record<string, unknown> | null;
   geometry_source: string | null;
   source_retrieved_at: string | null;
   source_updated_at: string | null;
@@ -124,8 +124,16 @@ export function mapParcel(row: ParcelRow): Parcel {
     },
     geometry: {
       srid: PARCEL_GEOMETRY_SRID,
-      geometryWkt: row.geometry,
-      centroidWkt: row.centroid,
+      geometryWkt: typeof row.geometry === "string" ? row.geometry : null,
+      centroidWkt: typeof row.centroid === "string" ? row.centroid : null,
+      geometryGeoJson:
+        row.geometry && typeof row.geometry === "object"
+          ? (row.geometry as Record<string, unknown>)
+          : null,
+      centroidGeoJson:
+        row.centroid && typeof row.centroid === "object"
+          ? (row.centroid as Record<string, unknown>)
+          : null,
       hasGeometry: Boolean(row.geometry),
     },
     createdAt: row.created_at,

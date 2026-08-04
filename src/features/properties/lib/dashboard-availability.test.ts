@@ -36,6 +36,7 @@ function baseView(overrides: Partial<WorkspaceView> = {}): WorkspaceView {
     parcels: [],
     links: [],
     regridConfigured: false,
+    zoning: null,
     ...overrides,
   };
 }
@@ -62,6 +63,8 @@ const parcel: Parcel = {
     srid: 4326,
     geometryWkt: "MULTIPOLYGON(...)",
     centroidWkt: null,
+    geometryGeoJson: null,
+    centroidGeoJson: null,
     hasGeometry: true,
   },
   createdAt: "2026-07-15T00:00:00Z",
@@ -83,7 +86,7 @@ describe("buildDashboardInventory", () => {
     const zoning = inventory.datasets.find((i) => i.id === "zoning-dataset");
     const financial = inventory.datasets.find((i) => i.id === "financial-dataset");
     assert.equal(parcelItem?.state, "missing");
-    assert.equal(zoning?.state, "not_built");
+    assert.equal(zoning?.state, "missing");
     assert.equal(financial?.state, "not_built");
     assert.equal(availabilityLabel("not_built"), "Not built");
   });
@@ -105,7 +108,7 @@ describe("buildDashboardInventory", () => {
     const inventory = buildDashboardInventory(baseView());
     const zoning = inventory.analyses.find((i) => i.id === "zoning");
     const financial = inventory.analyses.find((i) => i.id === "financial");
-    assert.equal(zoning?.state, "not_built");
+    assert.equal(zoning?.state, "missing");
     assert.equal(financial?.state, "not_built");
     assert.ok(inventory.analyses.length >= 6);
   });

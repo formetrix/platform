@@ -482,6 +482,38 @@ blocks duplicate links.
 **Env:** `REGRID_API_TOKEN` (server-only); optional `REGRID_API_BASE_URL`.
 Live token not required for build/unit tests (mocked fetch).
 
+### 9c. Parcel GeoJSON for maps (FM-0015)
+
+| Artifact     | Location                                                         |
+| ------------ | ---------------------------------------------------------------- |
+| GeoJSON RPC  | `supabase/migrations/20260804050000_parcel_geometry_geojson.sql` |
+| Mapbox layer | `src/lib/mapbox/` + `ParcelMap` / `ParcelMapCard`                |
+
+**RPC:** `parcel_geometries_geojson(uuid[])` returns `ST_AsGeoJSON` for boundary
+and centroid as `jsonb`. `SECURITY INVOKER` so `parcels` RLS still applies.
+Called from `listPropertyParcels` to enrich `Parcel.geometry.geometryGeoJson` /
+`centroidGeoJson` for Mapbox. Never fabricates geometry when columns are null.
+
+**Env:** `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` (public Mapbox token).
+
+### 9d. Zoning model (FM-0016)
+
+| Artifact   | Location                                                                    |
+| ---------- | --------------------------------------------------------------------------- |
+| Tables     | `supabase/migrations/20260804060000_zoning_model.sql`                       |
+| RLS        | `supabase/migrations/20260804060100_zoning_model_rls.sql`                   |
+| Upsert RPC | `supabase/migrations/20260804060200_upsert_parcel_zoning_from_provider.sql` |
+| App layer  | `src/lib/zoning/` + `ZoningOverview`                                        |
+
+**Entities:** `zoning_municipalities` → `zoning_districts` / `zoning_overlays`;
+`zoning_land_uses` (permitted/conditional/prohibited); `zoning_dimensional_regulations`
+(FAR, density, height ft, lot coverage %, setbacks ft, parking text); `parcel_zoning`
+links a Parcel to a district with provider provenance (one primary per parcel).
+
+**Rules:** Null dimensional fields mean unknown — never coerce to zero. Writes via
+service_role RPC only; authenticated SELECT. Multiple providers identified by
+`(provider, provider_*_id)`.
+
 ---
 
 ## 10. Future Growth Considerations

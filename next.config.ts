@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   // root, and finds an unrelated one in the user's home directory
   // before this project's. Pin it explicitly to silence that warning.
   outputFileTracingRoot: path.join(__dirname),
+  // mapbox-gl ships modern ESM; keep it in the app transpile graph for
+  // consistent client bundling (FM-0015).
+  transpilePackages: ["mapbox-gl"],
 };
 
 export default nextConfig;

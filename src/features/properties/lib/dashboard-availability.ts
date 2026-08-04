@@ -51,6 +51,7 @@ export function buildDashboardInventory(view: WorkspaceView): DashboardInventory
   const hasAddress = Boolean(view.property.addressLine1 || view.primaryParcel?.situsAddress);
   const hasCoords = view.property.latitude != null && view.property.longitude != null;
   const hasProvenance = Boolean(view.primaryParcel?.provenance.sourceRetrievedAt);
+  const hasZoning = Boolean(view.zoning);
 
   const availability: DataAvailabilityItem[] = [
     {
@@ -126,8 +127,10 @@ export function buildDashboardInventory(view: WorkspaceView): DashboardInventory
     {
       id: "zoning-dataset",
       label: "Zoning classification",
-      state: "not_built",
-      detail: "Future — FM-0016 Zoning data model",
+      state: view.zoning ? "available" : "missing",
+      detail: view.zoning
+        ? `${view.zoning.district.code} · ${view.zoning.municipality.name}`
+        : "No zoning classification stored for the primary parcel",
     },
     {
       id: "constraints-dataset",
@@ -165,6 +168,18 @@ export function buildDashboardInventory(view: WorkspaceView): DashboardInventory
           ? "Parcel facts on Overview; dedicated Parcel module still Coming Soon"
           : "No parcel data yet",
         hrefSuffix: "/parcel",
+      };
+    }
+    if (section === "zoning") {
+      return {
+        id: section,
+        section,
+        label: WORKSPACE_SECTION_LABELS[section],
+        state: hasZoning ? ("available" as const) : ("missing" as const),
+        detail: hasZoning
+          ? "Zoning Overview available on Dashboard and /zoning"
+          : "Zoning Overview ready; no classification stored yet",
+        hrefSuffix: "/zoning",
       };
     }
     if (section === "activity") {

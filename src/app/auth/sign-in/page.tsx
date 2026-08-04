@@ -1,94 +1,63 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
-import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { SignInForm } from "@/features/auth/components/sign-in-form";
+import { AuthShell } from "@/features/auth/components/auth-shell";
+import { SupabaseUnconfiguredNotice } from "@/features/auth/components/supabase-unconfigured-notice";
 import { sanitizeReturnPath } from "@/lib/auth/return-path";
-import {
-  isSupabaseUnconfiguredError,
-  REQUIRED_SUPABASE_AUTH_ENV_VARS,
-  SUPABASE_AUTH_ENV_FALLBACK_NOTE,
-} from "@/lib/auth/supabase-unconfigured";
+import { SIGN_UP_PATH } from "@/lib/auth/routes";
+import { isSupabaseUnconfiguredError } from "@/lib/auth/supabase-unconfigured";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { FormAlert } from "@/features/auth/components/form-feedback";
+import { describeConfirmationError } from "@/lib/auth/messages";
 
-type SignInPageProps = {
-  searchParams: Promise<{ next?: string; error?: string }>;
+export const metadata: Metadata = {
+  title: "Sign in",
 };
 
-/**
- * PLACEHOLDER — Sign-in UI is intentionally not implemented (FM-0009).
- * Exists so middleware redirects to `/auth/sign-in` do not 404, and so
- * unconfigured-Supabase protected access shows an explicit configuration
- * message instead of the global unexpected-error screen.
- */
-export default async function SignInPlaceholderPage({ searchParams }: SignInPageProps) {
+type SignInPageProps = {
+  searchParams: Promise<{
+    next?: string;
+    error?: string;
+    error_description?: string;
+  }>;
+};
+
+export default async function SignInPage({ searchParams }: SignInPageProps) {
   const params = await searchParams;
   const returnPath = sanitizeReturnPath(params.next);
-  const unconfigured = isSupabaseUnconfiguredError(params.error);
+  const configured = isSupabaseConfigured();
+
+  if (!configured || isSupabaseUnconfiguredError(params.error)) {
+    return <SupabaseUnconfiguredNotice returnPath={returnPath} />;
+  }
+
+  // A failed email link (expired verification, reused recovery token) lands
+  // here rather than on a dead end, carrying its reason.
+  const linkError = params.error
+    ? describeConfirmationError(params.error, params.error_description)
+    : null;
 
   return (
-    <div className="mx-auto flex max-w-lg flex-col gap-6 px-4 py-16">
-      <Card className="shadow-soft">
-        <CardHeader>
-          <CardTitle>{unconfigured ? "Supabase is not configured" : "Sign in"}</CardTitle>
-          <CardDescription>
-            {unconfigured
-              ? "This is an expected development state — not an application crash."
-              : "Placeholder route — authentication forms ship in a later ticket."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4 text-sm">
-          {unconfigured ? (
-            <>
-              <p className="text-muted">
-                Protected routes stay locked until Supabase Auth env vars are set. Formetrix does
-                not simulate a signed-in session when configuration is missing.
-              </p>
-              <div className="border-border bg-background/50 rounded-lg border p-3">
-                <p className="mb-2 text-xs font-medium tracking-wide uppercase">
-                  Required environment variables
-                </p>
-                <ul className="text-muted list-inside list-disc space-y-1 font-mono text-xs">
-                  {REQUIRED_SUPABASE_AUTH_ENV_VARS.map((name) => (
-                    <li key={name}>
-                      <code className="text-foreground">{name}</code>
-                    </li>
-                  ))}
-                </ul>
-                <p className="text-muted mt-2 text-xs">{SUPABASE_AUTH_ENV_FALLBACK_NOTE}</p>
-                <p className="text-muted mt-3 text-xs">
-                  Copy <code className="text-foreground">.env.example</code> to{" "}
-                  <code className="text-foreground">.env.local</code>, set values from your hosted
-                  Supabase project (Settings → API / Connect), then restart{" "}
-                  <code className="text-foreground">npm run dev</code>. Secret values are never
-                  shown here.
-                </p>
-              </div>
-            </>
-          ) : (
-            <p className="text-muted">
-              Sign-in is not implemented yet. After Auth forms land, successful sign-in will return
-              you to the safe path below.
-            </p>
-          )}
-
-          <div className="border-border rounded-lg border border-dashed p-3">
-            <p className="text-muted mb-1 text-xs font-medium tracking-wide uppercase">
-              Return path after sign-in
-            </p>
-            <p className="font-mono text-xs break-all">
-              <code className="text-foreground">{returnPath}</code>
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <Link href="/" className={buttonVariants({ variant: "secondary" })}>
-              Back to home
-            </Link>
-            <Link href={returnPath} className={buttonVariants({ variant: "ghost" })}>
-              Retry return path
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <AuthShell
+      title="Sign in"
+      description="Access your property evaluations and development intelligence."
+      footer={
+        <>
+          New to Formetrix?{" "}
+          <Link
+            href={SIGN_UP_PATH}
+            className="text-primary font-medium underline-offset-4 hover:underline"
+          >
+            Create an account
+          </Link>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-5">
+        {linkError ? <FormAlert message={linkError} /> : null}
+        <SignInForm next={returnPath} />
+      </div>
+    </AuthShell>
   );
 }

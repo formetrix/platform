@@ -72,9 +72,16 @@ export type ParcelProvenance = {
 
 export type ParcelGeometryMeta = {
   srid: typeof PARCEL_GEOMETRY_SRID;
-  /** WKT or GeoJSON string when loaded; null if unknown/absent. */
+  /**
+   * Legacy raw geometry payload from PostgREST (often EWKB hex).
+   * Prefer `geometryGeoJson` for map rendering (FM-0015).
+   */
   geometryWkt: string | null;
   centroidWkt: string | null;
+  /** Live GeoJSON Polygon/MultiPolygon from ST_AsGeoJSON when available. */
+  geometryGeoJson: Record<string, unknown> | null;
+  /** Live GeoJSON Point from ST_AsGeoJSON when available. */
+  centroidGeoJson: Record<string, unknown> | null;
   hasGeometry: boolean;
 };
 

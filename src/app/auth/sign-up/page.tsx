@@ -1,44 +1,46 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
-import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AuthShell } from "@/features/auth/components/auth-shell";
+import { SignUpForm } from "@/features/auth/components/sign-up-form";
+import { SupabaseUnconfiguredNotice } from "@/features/auth/components/supabase-unconfigured-notice";
+import { sanitizeReturnPath } from "@/lib/auth/return-path";
+import { SIGN_IN_PATH } from "@/lib/auth/routes";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 
-/**
- * PLACEHOLDER — Sign-up UI is intentionally not implemented (FM-0009).
- * Exists so authenticated-user redirects away from auth routes have a real
- * path to classify, and so deep links to `/auth/sign-up` do not 404.
- */
-export default function SignUpPlaceholderPage() {
+export const metadata: Metadata = {
+  title: "Create account",
+};
+
+type SignUpPageProps = {
+  searchParams: Promise<{ next?: string }>;
+};
+
+export default async function SignUpPage({ searchParams }: SignUpPageProps) {
+  const params = await searchParams;
+  const returnPath = sanitizeReturnPath(params.next);
+
+  if (!isSupabaseConfigured()) {
+    return <SupabaseUnconfiguredNotice returnPath={returnPath} />;
+  }
+
   return (
-    <div className="mx-auto flex max-w-lg flex-col gap-6 px-4 py-16">
-      <Card>
-        <CardHeader>
-          <CardTitle>Sign up</CardTitle>
-          <CardDescription>
-            Placeholder route — authentication forms ship in a later ticket.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4 text-sm">
-          <p className="text-muted">
-            Account creation is not implemented yet. See{" "}
-            <code className="text-foreground">docs/AUTH_FLOW.md</code> for the planned flow.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/auth/sign-in"
-              className={buttonVariants({ variant: "secondary", className: "self-start" })}
-            >
-              Sign in placeholder
-            </Link>
-            <Link
-              href="/"
-              className={buttonVariants({ variant: "ghost", className: "self-start" })}
-            >
-              Back to home
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <AuthShell
+      title="Create your account"
+      description="Evaluate a property's parcel, zoning, and feasibility in one workspace."
+      footer={
+        <>
+          Already have an account?{" "}
+          <Link
+            href={SIGN_IN_PATH}
+            className="text-primary font-medium underline-offset-4 hover:underline"
+          >
+            Sign in
+          </Link>
+        </>
+      }
+    >
+      <SignUpForm next={returnPath} />
+    </AuthShell>
   );
 }

@@ -1,6 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { DEFAULT_AUTHENTICATED_LANDING, isAuthRoute, isProtectedRoute } from "@/lib/auth/routes";
+import {
+  DEFAULT_AUTHENTICATED_LANDING,
+  isProtectedRoute,
+  redirectsAuthenticatedAway,
+} from "@/lib/auth/routes";
 import { buildSignInRedirectUrl, sanitizeReturnPath } from "@/lib/auth/return-path";
 import { SUPABASE_UNCONFIGURED_ERROR } from "@/lib/auth/supabase-unconfigured";
 import { updateSession, type SessionUpdateResult } from "@/lib/supabase/middleware";
@@ -10,7 +14,9 @@ import { updateSession, type SessionUpdateResult } from "@/lib/supabase/middlewa
  * 1. Refresh Supabase Auth session cookies via `updateSession`.
  * 2. Enforce protected-route policy without inventing a fake session when
  *    Supabase is unconfigured.
- * 3. Redirect authenticated visitors away from sign-in/sign-up placeholders.
+ * 3. Redirect authenticated visitors away from sign-in / sign-up / forgot-password.
+ *    Recovery (`/auth/reset-password`) and the confirm handler are excluded —
+ *    those routes are only reachable *with* a session.
  *
  * Matcher excludes static assets so this does not run on every image/font.
  */
@@ -39,7 +45,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if (isAuthRoute(pathname) && configured && isAuthenticated) {
+  if (redirectsAuthenticatedAway(pathname) && configured && isAuthenticated) {
     const nextParam = request.nextUrl.searchParams.get("next");
     const destination = sanitizeReturnPath(nextParam, DEFAULT_AUTHENTICATED_LANDING);
     return NextResponse.redirect(new URL(destination, request.url));

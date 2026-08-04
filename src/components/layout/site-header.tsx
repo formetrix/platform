@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { siteConfig } from "@/config/site";
+import { AccountMenu } from "@/components/layout/account-menu";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 export function SiteHeader() {
@@ -15,7 +16,10 @@ export function SiteHeader() {
             Properties
           </Link>
         </div>
-        <ThemeToggle />
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <AccountMenu />
+        </div>
       </div>
     </header>
   );

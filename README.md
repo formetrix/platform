@@ -7,7 +7,7 @@ this project and governs every architectural and product decision here.
 > **Status:** foundation + Property Workspace/Dashboard + auth session infrastructure. Sign-in/sign-up
 > forms are not built yet. Protected application routes require Supabase env vars; without them,
 > those routes redirect to an explicit configuration message rather than simulating a session.
-> Hosted Supabase wiring is tracked in **FM-0005**.
+> Hosted Supabase (FM-0005) and Vercel production (FM-0006) are connected.
 
 ## Governing documents
 
@@ -25,15 +25,15 @@ project going forward.
 | Language      | TypeScript (strict)                      | Required by §9/§12.                                                                                  |
 | Styling       | Tailwind CSS v4                          | Required by §9. CSS-first config (no `tailwind.config.ts`; see `src/app/globals.css`).               |
 | Data          | Supabase (Postgres/PostGIS)              | Required by §9. Env + clients ready; hosted project link tracked in FM-0005.                         |
-| Maps          | Mapbox                                   | Required by §9. Placeholder only — no `mapbox-gl` dependency until a map feature exists.             |
+| Maps          | Mapbox (`mapbox-gl`)                     | Required by §9. Parcel boundary map on Property Dashboard (FM-0015).                                 |
 | Theming       | `next-themes`                            | Small, well-maintained, solves SSR flash-of-wrong-theme correctly; not worth hand-rolling.           |
 | Class merging | `clsx` + `tailwind-merge`                | Standard pairing for conditional Tailwind class composition without duplicate/conflicting utilities. |
 | Formatting    | Prettier + `prettier-plugin-tailwindcss` | Deterministic formatting and class ordering, wired into ESLint via `eslint-config-prettier`.         |
 
-No other runtime dependencies were added. Anything not listed above (a data-fetching library, a
-form library, a component primitive library, `mapbox-gl` itself) was deliberately left out —
-`FORMETRIX.md` §21 asks that a dependency earn its place when a feature actually needs it, not in
-advance.
+No other runtime dependencies were added beyond what features require.
+`mapbox-gl` ships with FM-0015 (parcel map). Anything else (a data-fetching
+library, a form library, a component primitive library) stays out until a
+feature needs it — `FORMETRIX.md` §21.
 
 ## Getting started
 
@@ -73,6 +73,48 @@ Behavior without credentials:
 
 Sign-in/sign-up **forms are not implemented** yet — `/auth/sign-in` and `/auth/sign-up` are
 minimal placeholders so redirects do not 404. See `docs/AUTH_FLOW.md` §12.
+
+### Vercel deployment (FM-0006)
+
+| Setting           | Value                                   |
+| ----------------- | --------------------------------------- |
+| Vercel project    | `formetrix/platform`                    |
+| GitHub repo       | `formetrix/platform`                    |
+| Production branch | `main`                                  |
+| Framework         | Next.js                                 |
+| Root directory    | repository root (`.`)                   |
+| Production URL    | https://platform-pi-olive-13.vercel.app |
+
+**Hosted environment variables** (Vercel → Project → Settings → Environment Variables).
+Never commit real values. Apply at least to **Production** (also **Preview** for PR deploys):
+
+| Variable                               | Scope                  | Notes                                        |
+| -------------------------------------- | ---------------------- | -------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Production (+ Preview) | Public                                       |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Production (+ Preview) | Public; or legacy anon                       |
+| `NEXT_PUBLIC_SITE_URL`                 | Production             | Production origin URL                        |
+| `SUPABASE_SERVICE_ROLE_KEY`            | Production             | Server-only; optional until ingestion needed |
+| `REGRID_API_TOKEN`                     | Production             | Server-only; optional                        |
+
+**Workflow:** pushes to `main` trigger production deploys; other branches trigger Preview
+deploys. After changing env vars, **Redeploy** so the new build picks them up.
+
+**Troubleshooting:** if production returns `NOT_FOUND` with Framework Preset **Other**, set
+Framework to **Next.js** and redeploy. If `/properties` shows `supabase_unconfigured`, the
+hosted public Supabase env vars are missing or the deployment predates them.
+
+### Supabase Auth URL configuration
+
+Supabase Dashboard → **Authentication → URL Configuration** (Founder-managed):
+
+| Setting          | Recommended values                                                       |
+| ---------------- | ------------------------------------------------------------------------ |
+| Site URL         | `https://platform-pi-olive-13.vercel.app`                                |
+| Redirect URLs    | `https://platform-pi-olive-13.vercel.app/**`, `http://localhost:3000/**` |
+| Preview strategy | Add specific Preview hostnames as needed; avoid unsafe open wildcards    |
+
+Local `.env.local` keeps `NEXT_PUBLIC_SITE_URL=http://localhost:3000`. Hosted
+`NEXT_PUBLIC_SITE_URL` must be the Vercel production origin.
 
 ### Supabase CLI (link + migrations)
 
@@ -183,7 +225,7 @@ src/
     regrid/                  Typed Regrid parcel API client (FM-0012; server-only token).
     properties/              Property/parcel helpers + ingestion services (search/import/create).
     organizations/           Membership and active-org helpers.
-    mapbox/                  Mapbox config placeholder (env var only, no SDK installed yet).
+    mapbox/                  Mapbox helpers + mapbox-gl integration (FM-0015 parcel map).
     utils/                   Small, generic helpers (currently: cn()).
     env.ts                   Typed, lazy environment variable access.
 
@@ -205,8 +247,9 @@ This follows `FORMETRIX.md` §24: feature code will live under `src/features/<do
   components/types/logic. `src/components/`, `src/lib/`, and `src/types/` hold only what is
   genuinely cross-feature, so a feature's blast radius stays contained (§10, §24).
 - **External integrations are wrapped, not imported directly.** `src/lib/supabase/*` and
-  `src/lib/mapbox/*` are the only files that should import `@supabase/*` or (eventually)
-  `mapbox-gl`. Feature code imports these wrappers, not the SDKs — so a provider can be swapped
+  `src/lib/mapbox/*` are the only files that should import `@supabase/*` or `mapbox-gl`.
+  Feature code imports these wrappers (and thin feature components), not the SDKs — so a
+  provider can be swapped
   without touching every call site (§10).
 - **Supabase client is split by environment.** `src/lib/supabase/client.ts` (browser) and
   `server.ts` (Server Components/Route Handlers, cookie-based) are separate because they have
@@ -238,9 +281,9 @@ This follows `FORMETRIX.md` §24: feature code will live under `src/features/<do
   `useAuth()` exist so feature code can already depend on a stable interface, but they return a
   hardcoded signed-out state. No login/signup UI, session logic, or route protection has been
   built — the task explicitly scoped this pass to structure only.
-- **`mapbox-gl` is not installed.** Only the env var and a `isMapboxConfigured()` check exist.
-  Installing a mapping library before any component renders a map would be exactly the kind of
-  premature complexity §21 warns against.
+- **`mapbox-gl` is installed (FM-0015).** Property Dashboard renders live PostGIS parcel
+  boundaries via Mapbox when `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` is set and geometry exists;
+  otherwise an honest empty state is shown.
 
 ## Intentionally left for future implementation
 
@@ -248,7 +291,6 @@ This follows `FORMETRIX.md` §24: feature code will live under `src/features/<do
 - Sign-in/sign-up forms, password reset UI, OAuth, and wiring `supabase.auth.onAuthStateChange`
   into the client `AuthProvider` placeholder (session middleware + protected routes already exist).
 - Row Level Security policies, database schema, and migrations (§13, §19).
-- `mapbox-gl` installation and an actual map component.
 - Generated Supabase TypeScript types (`supabase gen types typescript`) — Supabase clients are
   currently untyped rather than typed with `any`, per §12.
 - All product features: properties, parcels, zoning, feasibility, financial modeling, AI

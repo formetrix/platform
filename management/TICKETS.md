@@ -106,12 +106,16 @@ Each ticket is a heading of the form `### [ID] — [Title]`, grouped under a mil
 ### FM-0006 — Connect Vercel deployment for the platform repository
 
 - **Priority:** Medium
-- **Status:** Planned
-- **Description:** Wire the GitHub repository to a Vercel project so that approved branches deploy automatically.
+- **Status:** Completed
+- **Owner:** Cursor Grok 4.5
+- **Description:** Deploy Formetrix to Vercel and verify the hosted environment works with the connected Supabase project. Production branch `main`; no custom domain unless Founder requests.
 - **Dependencies:** FM-0003 — Completed; the foundation is on GitHub, so a Vercel project can now be connected and deploy from it.
 - **Acceptance Criteria:**
-  - The GitHub repository is linked to a Vercel project.
-  - Deploys trigger automatically from approved branches.
+  - GitHub repository `formetrix/platform` is connected to one Vercel project; `main` deploys successfully. (met)
+  - Hosted env vars configured (URL + publishable key; service-role only if required); production URL reachable. (met)
+  - Public home and Mission Control load; protected routes follow expected auth behavior; Supabase Auth URLs documented. (met)
+  - Mission Control deployment health verified; no secrets committed; validation suite passes. (met)
+- **Notes:** Production URL https://platform-pi-olive-13.vercel.app. Framework Preset corrected Other→Next.js. `/properties` redirects to sign-in placeholder (not `supabase_unconfigured`). No custom domain.
 
 ### FM-0021 — Configure the Supabase application foundation
 
@@ -307,6 +311,29 @@ Each ticket is a heading of the form `### [ID] — [Title]`, grouped under a mil
   - [x] Typed server helpers exist for profile, current organization, membership/role checks, and listing organizations with explicit result types.
   - [x] Active organization selection is safe for V1 (one active context); role hierarchy and slug validation are tested; no onboarding/invitation UI or live migration apply.
 
+### FM-0006A — Implement Production Authentication UI
+
+- **Priority:** High
+- **Status:** Completed
+- **Owner:** Claude Fable 5
+- **Description:** Replace the placeholder auth routes with working Supabase authentication flows — sign-in, sign-up, forgot password, reset password, sign-out, email-verification handling, safe `next` return paths — plus a minimal first-login organization setup that creates the Organization, the owner Membership, and the active-organization context. No invitations or organization switching.
+- **Dependencies:** FM-0009 — Completed (session middleware, route policy, return-path safety); FM-0010 — Completed (membership model, RLS, typed access helpers); FM-0005 — Completed (hosted Supabase project with migrations applied).
+- **Acceptance Criteria:**
+  - Sign-in accepts email + password with show/hide, validation, friendly errors, and preserves a sanitized `next` return path. — Met; verified by replaying real form posts against a running server: wrong password renders "Email or password is incorrect.", an empty password renders "Enter your password.", correct credentials return HTTP 303, and `?next=/property/demo/zoning` round-trips while `?next=https://evil.example` is discarded down to `/properties`.
+  - Sign-up collects full name, email, password, confirmation, and terms, creates the Supabase Auth user, and shows the email-verification state when confirmation is required. — Met for every field validation, the verification panel, and the enumeration-safe response to an already-registered address. **Stated plainly:** the "a brand-new row appears in `auth.users`" step was not directly observed through the form — see Notes.
+  - Forgot password sends a reset email using the configured production/local redirect URL and shows an enumeration-safe success state. — Met; an address with no account renders the same "Check your email" panel as one with an account, and a malformed address is rejected on the field.
+  - Reset password validates the recovery session, updates the password, and routes onward; sign-out clears the session and returns to sign-in. — Met; a real recovery token from `admin/generate_link` was exchanged at `/auth/confirm` (307 → `/auth/reset-password`), the form set a new password (303), the rotated password then authenticated while the old one was rejected, and a mismatched confirmation was refused before any update. Sign-out returned 303 to `/auth/sign-in`, and the prior session was subsequently rejected.
+  - After authentication the user profile is resolved server-side: no organization sends the user to organization setup, otherwise to `next` or `/properties`. — Met; with membership rows removed, sign-in returned 303 → `/onboarding/organization`; with an organization present it returned 303 → `/properties`.
+  - Organization setup creates the Organization, an owner Membership, and sets the active organization — no invitations, no organization switching. — Met; the form action produced `role=owner`, `status=active`, and `active_organization_id` set, verified by querying the hosted database. A taken URL, an empty URL, and a too-short name each render on the correct field; a second organization is refused as `already_member`.
+  - Security posture is preserved: verified server-side auth, no trusted client user ids, sanitized return paths, no service-role key exposure, no weakened middleware. — Met; the organization RPC derives its actor from `auth.uid()` (an anonymous caller receives `unauthenticated`), return-path validation now rejects every `/auth/*` path, no service-role key is referenced on any user-facing path, and middleware's protected-route behavior is unchanged apart from adding `/onboarding/*`.
+  - Validation suite passes (`test`, `lint`, `typecheck`, `format:check`, `build`, `dashboard:update`, `dashboard:check`, `dashboard:health`) and the flows are verified against a running server. — Met.
+- **Notes:**
+  - **Sign-up user creation, unobserved and why.** Every test address available was undeliverable — `formetrix.ai` has no DNS record at all, so Supabase rejects it as an invalid address (surfaced correctly as "Enter a valid email address."), and the hosted project's built-in SMTP allows 2 emails per hour, which verification consumed. Attempts after that returned the rate-limit path (surfaced correctly as "Too many attempts."). What _is_ verified: the success branch of `signUpAction` renders the verification panel when Supabase returns a user with no session, and the complete downstream journey — unconfirmed user cannot sign in, confirmation link establishes a session, the profile trigger fires, and the user lands on organization setup — was verified against a user created through the Auth admin API, which inserts into `auth.users` by the same path. Configuring a real SMTP provider would close this gap and is needed before onboarding real users regardless.
+  - The `/properties` first-login redirect is delivered in-band (HTTP 200 plus client navigation) rather than as a 3xx, because the root `loading.tsx` streaming boundary fixes the response status before the page's `redirect()` runs — the same App Router constraint recorded in ADR-0026. The primary path (the sign-in Server Action) does return a real 303.
+  - Fixed a pre-existing defect found while wiring the browser client: `NEXT_PUBLIC_*` variables were read through a computed `process.env[name]` lookup, which Next.js does not inline into client bundles, so every Client Component saw them as unset. This had been silently disabling the FM-0015 parcel map's client-side `isMapboxConfigured()` check (ADR-0042).
+  - Pre-existing migration-history drift, left untouched and reported rather than silently repaired: the four FM-0015/FM-0016 migrations are recorded remotely under different version numbers than their local filenames, so `supabase db push` will fail until someone runs `supabase migration repair`. This ticket's migration was applied directly and recorded as `20260804070000`.
+  - Verification fixtures created in the hosted project during this ticket were removed afterward; the project is back to zero users and zero organizations.
+
 ---
 
 ## Milestone 2: Property Workspace
@@ -362,13 +389,14 @@ Each ticket is a heading of the form `### [ID] — [Title]`, grouped under a mil
 ### FM-0015 — Mapbox parcel visualization
 
 - **Priority:** Medium
-- **Status:** Backlog
-- **Description:** Install `mapbox-gl` — deliberately deferred during the foundation pass — and render parcel geometry as the first real map feature, without implying false precision.
-- **Dependencies:** FM-0011
+- **Status:** Completed
+- **Owner:** Cursor Grok 4.5
+- **Description:** Install `mapbox-gl` and render live PostGIS parcel geometry on the Property Dashboard — boundary, fit bounds, property marker, street/satellite styles, empty states. No mock parcel data.
+- **Dependencies:** FM-0011 — Completed.
 - **Acceptance Criteria:**
-  - `mapbox-gl` is installed.
-  - Parcel geometry renders on a map.
-  - The map visualization does not imply a level of precision the underlying data does not support.
+  - [x] `mapbox-gl` is installed.
+  - [x] Parcel geometry renders on a map from live property/parcel data (fit bounds, property marker, street/satellite).
+  - [x] The map visualization does not imply unsupported precision; missing geometry/token show honest empty states.
 
 ### FM-0029 — Build the Property Workspace Foundation
 
@@ -395,12 +423,13 @@ Each ticket is a heading of the form `### [ID] — [Title]`, grouped under a mil
 ### FM-0016 — Zoning data model and Zoning Overview
 
 - **Priority:** High
-- **Status:** Backlog
-- **Description:** Store zoning classification per parcel and surface it in a Zoning Overview.
-- **Dependencies:** FM-0011
+- **Status:** Completed
+- **Owner:** Cursor Grok 4.5
+- **Description:** Store zoning classification per parcel (normalized municipality, district/code, overlays, uses, dimensional regulations) with multi-provider provenance, and surface a Zoning Overview in the Property Workspace. Never fabricate zoning facts.
+- **Dependencies:** FM-0011 — Completed.
 - **Acceptance Criteria:**
-  - Zoning classification is stored per parcel.
-  - A Zoning Overview surfaces the stored classification to the user.
+  - [x] Zoning classification is stored per parcel.
+  - [x] A Zoning Overview surfaces the stored classification to the user (district, municipality, uses, dimensional regs, provenance) with honest missing states.
 
 ### FM-0017 — Development constraints analysis
 

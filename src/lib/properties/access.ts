@@ -17,6 +17,56 @@ import { createClient } from "@/lib/supabase/server";
 
 const GENERIC_ERROR = "Property access could not be verified. Try again shortly.";
 
+type ParcelGeoJsonRow = {
+  parcel_id: string;
+  geometry_geojson: Record<string, unknown> | null;
+  centroid_geojson: Record<string, unknown> | null;
+};
+
+type SupabaseRpcClient = {
+  rpc: (
+    fn: string,
+    args: Record<string, unknown>,
+  ) => PromiseLike<{ data: unknown; error: { message?: string } | null }>;
+};
+
+/**
+ * Attach ST_AsGeoJSON payloads for Mapbox (FM-0015).
+ * Soft-fails when the RPC is not yet applied — map empty-state still works.
+ */
+async function enrichParcelsWithGeoJson(
+  supabase: SupabaseRpcClient,
+  parcels: Parcel[],
+): Promise<Parcel[]> {
+  if (parcels.length === 0) return parcels;
+
+  const { data, error } = await supabase.rpc("parcel_geometries_geojson", {
+    p_parcel_ids: parcels.map((p) => p.id),
+  });
+  if (error || !Array.isArray(data)) return parcels;
+
+  const byId = new Map<string, ParcelGeoJsonRow>();
+  for (const row of data as ParcelGeoJsonRow[]) {
+    if (row?.parcel_id) byId.set(row.parcel_id, row);
+  }
+
+  return parcels.map((parcel) => {
+    const geo = byId.get(parcel.id);
+    if (!geo) return parcel;
+    const geometryGeoJson = geo.geometry_geojson ?? parcel.geometry.geometryGeoJson;
+    const centroidGeoJson = geo.centroid_geojson ?? parcel.geometry.centroidGeoJson;
+    return {
+      ...parcel,
+      geometry: {
+        ...parcel.geometry,
+        geometryGeoJson,
+        centroidGeoJson,
+        hasGeometry: parcel.geometry.hasGeometry || Boolean(geometryGeoJson),
+      },
+    };
+  });
+}
+
 export type PropertyResult =
   | { status: "ok"; property: Property }
   | { status: "unauthenticated" }
@@ -259,6 +309,7 @@ export async function listPropertyParcels(propertyId: string): Promise<PropertyP
         .in("id", parcelIds);
       if (parcelError) return { status: "error", message: GENERIC_ERROR };
       parcels = (parcelRows ?? []).map(mapParcel);
+      parcels = await enrichParcelsWithGeoJson(supabase, parcels);
     }
 
     return { status: "ok", links: mappedLinks, parcels };

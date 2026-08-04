@@ -181,8 +181,14 @@ function computeHealth(
     existing?.supabase && existing.supabase !== "not_configured" ? existing.supabase : "unknown";
   const supabase: HealthState =
     statusOf("FM-0005") === "completed" ? supabaseCompleted : "not_configured";
+  // Same pattern as supabase: once FM-0006 completes, preserve a verified
+  // deployment health already recorded on disk; never fabricate "passing".
+  const deploymentCompleted: HealthState =
+    existing?.deployment && existing.deployment !== "not_configured"
+      ? existing.deployment
+      : "unknown";
   const deployment: HealthState =
-    statusOf("FM-0006") === "completed" ? "unknown" : "not_configured";
+    statusOf("FM-0006") === "completed" ? deploymentCompleted : "not_configured";
 
   return {
     dataIntegrity,

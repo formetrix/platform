@@ -42,6 +42,19 @@ Design Principles
 
 See README (Founder checklist) and `docs/AUTH_FLOW.md` §12.5.
 
+## Vercel deployment (FM-0006)
+
+- **Project:** `formetrix/platform` linked to GitHub `formetrix/platform`.
+- **Production branch:** `main`. Framework: Next.js. Root: `.`.
+- **URL:** https://platform-pi-olive-13.vercel.app (no custom domain in this ticket).
+- **Env (hosted):** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
+  `NEXT_PUBLIC_SITE_URL` on Production. Server-only keys optional until needed.
+  Never commit secrets. Redeploy after env changes.
+- **Flow:** `main` → production deploy; other branches → Preview. Git-connected
+  auto-deploys; CLI `vercel redeploy` when env vars change without a new commit.
+- **Auth URLs:** Supabase Site URL + redirect allow-list must include production and
+  `http://localhost:3000` (see `docs/AUTH_FLOW.md` §12.8).
+
 ## Authentication session layer (FM-0009)
 
 - **Session refresh:** root `src/middleware.ts` calls
@@ -114,6 +127,30 @@ See ADR-0035.
   recommendation placeholder, timeline/activity summary, module quick-nav.
 - **Inventory:** `buildDashboardInventory(view)` derives availability from live
   `WorkspaceView` only — never invents zoning/financial values.
-- **Out of scope:** Mapbox, zoning engine, financial calculations, AI recommendations.
+- **Out of scope:** Zoning engine, financial calculations, AI recommendations.
 
 See ADR-0036.
+
+## Mapbox parcel visualization (FM-0015)
+
+- **SDK:** `mapbox-gl` behind `@/lib/mapbox` (token via `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`).
+- **Data:** Live PostGIS parcel boundary via `parcel_geometries_geojson` (`ST_AsGeoJSON`);
+  no mock outlines. Property display pin and/or parcel centroid as marker.
+- **UI:** `ParcelMapCard` on the Property Dashboard — fit bounds, street/satellite styles,
+  precision caption, empty states when token or geometry is missing.
+- **Out of scope:** Zoning overlays, derived development geometry, editing tools.
+
+See ADR-0038.
+
+## Zoning data model & Overview (FM-0016)
+
+- **Schema:** Normalized `zoning_municipalities`, `zoning_districts`, `zoning_overlays`,
+  `zoning_land_uses`, `zoning_dimensional_regulations`, `parcel_zoning` (+ overlay join).
+- **Link:** Zoning classification attaches to **Parcel** (not Property), with provider
+  provenance and one primary classification per parcel.
+- **UI:** Full `ZoningOverview` on Property Dashboard and `/property/[id]/zoning`.
+- **Honesty:** Missing fields render as “Not available”; empty state when no row exists.
+  No fabricated districts. Multi-provider ready via provider + provider_* keys and
+  `upsert_parcel_zoning_from_provider` (service_role).
+
+See ADR-0039.
