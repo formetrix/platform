@@ -509,5 +509,116 @@
     "relatedMilestoneId": "M0",
     "previousValue": null,
     "newValue": null
+  },
+  {
+    "id": "ACT-000053",
+    "timestamp": "2026-08-03T02:00:00Z",
+    "type": "ticket_status_changed",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0006 status changed: planned -> in_progress (Connect Vercel deployment for the Formetrix platform)",
+    "relatedTicketId": "FM-0006",
+    "relatedMilestoneId": "M0",
+    "previousValue": "planned",
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000054",
+    "timestamp": "2026-08-03T02:05:00Z",
+    "type": "note",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0006: Confirmed existing Vercel project formetrix/platform linked to GitHub (productionBranch=main). Fixed Framework Preset Other→Next.js (was causing production NOT_FOUND). Redeploy READY at https://platform-pi-olive-13.vercel.app. /properties correctly shows supabase_unconfigured (no Vercel env vars yet). Blocked on Founder adding hosted env vars.",
+    "relatedTicketId": "FM-0006",
+    "relatedMilestoneId": "M0",
+    "previousValue": null,
+    "newValue": null
+  },
+  {
+    "id": "ACT-000055",
+    "timestamp": "2026-08-03T19:50:00Z",
+    "type": "ticket_completed",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0006 completed: Vercel formetrix/platform connected to GitHub main; production https://platform-pi-olive-13.vercel.app READY after Next.js framework fix + env redeploy. Home and Mission Control 200; /properties redirects to sign-in (not supabase_unconfigured). Hosted env: URL + publishable + SITE_URL. Auth Site/Redirect URLs documented (Founder-configured). No custom domain; no secrets committed.",
+    "relatedTicketId": "FM-0006",
+    "relatedMilestoneId": "M0",
+    "previousValue": "in_progress",
+    "newValue": "completed"
+  },
+  {
+    "id": "ACT-000056",
+    "timestamp": "2026-08-04T05:00:00Z",
+    "type": "ticket_status_changed",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0015 status changed: backlog -> in_progress (Mapbox parcel visualization)",
+    "relatedTicketId": "FM-0015",
+    "relatedMilestoneId": "M2",
+    "previousValue": "backlog",
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000057",
+    "timestamp": "2026-08-04T06:00:00Z",
+    "type": "ticket_completed",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0015 completed: mapbox-gl installed; Property Dashboard ParcelMapCard renders live PostGIS GeoJSON via parcel_geometries_geojson (fit bounds, marker, street/satellite, precision caption, empty states). No mock outlines. Migration applied. test/lint/typecheck/format/build passed (ADR-0038).",
+    "relatedTicketId": "FM-0015",
+    "relatedMilestoneId": "M2",
+    "previousValue": "in_progress",
+    "newValue": "completed"
+  },
+  {
+    "id": "ACT-000058",
+    "timestamp": "2026-08-04T05:20:00Z",
+    "type": "ticket_status_changed",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0016 status changed: backlog -> in_progress (Zoning data model and Zoning Overview)",
+    "relatedTicketId": "FM-0016",
+    "relatedMilestoneId": "M3",
+    "previousValue": "backlog",
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000059",
+    "timestamp": "2026-08-04T06:10:00Z",
+    "type": "ticket_completed",
+    "actor": "Cursor Grok 4.5",
+    "summary": "FM-0016 completed: normalized zoning model (municipality/district/overlays/uses/dimensional regs) linked per parcel; ZoningOverview on Property Dashboard and /zoning; multi-provider upsert RPC; honest missing states; never fabricates zoning (ADR-0039). Validations passed.",
+    "relatedTicketId": "FM-0016",
+    "relatedMilestoneId": "M3",
+    "previousValue": "in_progress",
+    "newValue": "completed"
+  },
+  {
+    "id": "ACT-000060",
+    "timestamp": "2026-08-04T07:00:00Z",
+    "type": "ticket_created",
+    "actor": "Claude Fable 5",
+    "summary": "FM-0006A created and started: implement production authentication UI (sign-in, sign-up, forgot/reset password, sign-out, email verification, safe next return path) and minimal first-login organization setup. Milestone 1 reopened to in_progress.",
+    "relatedTicketId": "FM-0006A",
+    "relatedMilestoneId": "M1",
+    "previousValue": null,
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000061",
+    "timestamp": "2026-08-04T07:40:00Z",
+    "type": "decision_recorded",
+    "actor": "Claude Fable 5",
+    "summary": "ADR-0040 (auth flows as Server Actions, not client-side supabase.auth), ADR-0041 (atomic create_organization_with_owner + on_auth_user_created profile trigger), ADR-0042 (static NEXT_PUBLIC env reads so public values reach client bundles) recorded for FM-0006A.",
+    "relatedTicketId": "FM-0006A",
+    "relatedDecisionId": "ADR-0040",
+    "relatedMilestoneId": "M1",
+    "previousValue": null,
+    "newValue": null
+  },
+  {
+    "id": "ACT-000062",
+    "timestamp": "2026-08-04T08:05:00Z",
+    "type": "ticket_completed",
+    "actor": "Claude Fable 5",
+    "summary": "FM-0006A completed: working sign-in, sign-up, forgot/reset password, sign-out, /auth/confirm link handler, and first-login organization setup, all as Server Actions with enumeration-safe errors and sanitized return paths. Migration 20260804070000 applied to the hosted project (profile trigger + atomic create_organization_with_owner). Flows verified against a running server and the hosted database; the one unobserved step (a brand-new auth.users row created through the sign-up form) was blocked by undeliverable test addresses and the 2-per-hour SMTP limit, and is recorded in the ticket Notes rather than claimed. Also fixed NEXT_PUBLIC_* variables never reaching client bundles (ADR-0042), which had been disabling the FM-0015 map's client-side configuration check.",
+    "relatedTicketId": "FM-0006A",
+    "relatedMilestoneId": "M1",
+    "previousValue": "in_progress",
+    "newValue": "completed"
   }
 ]

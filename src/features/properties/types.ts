@@ -18,7 +18,7 @@ export type FactCategory =
 /** docs/DOMAIN_MODEL.md §5.10 */
 export type ConstraintConfidence = "verified" | "inferred" | "possible" | "missing";
 
-/** Left-navigation sections. Only "overview" has real content; the rest are Coming Soon hooks. */
+/** Left-navigation sections. Dashboard + Zoning have real content; others Coming Soon. */
 export const WORKSPACE_SECTIONS = [
   "overview",
   "parcel",

@@ -12,8 +12,22 @@
 
 import { resolveSupabasePublicKey } from "@/lib/supabase/public-key";
 
-function readPublicEnv(name: string): string | undefined {
-  return process.env[name];
+/**
+ * Public (`NEXT_PUBLIC_`) values, read by **static** member access.
+ *
+ * Next.js rewrites `process.env.NEXT_PUBLIC_X` textually when building a client
+ * bundle and leaves computed lookups (`process.env[name]`) untouched — those
+ * evaluate to `undefined` in the browser. Every public value a Client Component
+ * can ask for therefore needs its own literal read here.
+ */
+const PUBLIC_ENV_READERS = {
+  NEXT_PUBLIC_SUPABASE_URL: () => process.env.NEXT_PUBLIC_SUPABASE_URL,
+  NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: () => process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN,
+  NEXT_PUBLIC_SITE_URL: () => process.env.NEXT_PUBLIC_SITE_URL,
+} as const;
+
+function readPublicEnv(name: keyof typeof PUBLIC_ENV_READERS): string | undefined {
+  return PUBLIC_ENV_READERS[name]();
 }
 
 function readServerEnv(name: string): string | undefined {

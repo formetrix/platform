@@ -185,6 +185,8 @@ describe("createPropertyFromParcel", () => {
         srid: 4326,
         geometryWkt: null,
         centroidWkt: null,
+        geometryGeoJson: null,
+        centroidGeoJson: null,
         hasGeometry: true,
       },
       createdAt: "2026-01-01T00:00:00.000Z",

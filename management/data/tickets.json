@@ -178,10 +178,10 @@
     "title": "Connect Vercel deployment for the platform repository",
     "description": "Wire the GitHub repository to a Vercel project so that approved branches deploy automatically.",
     "milestoneId": "M0",
-    "status": "planned",
+    "status": "completed",
     "priority": "medium",
     "type": "infrastructure",
-    "owner": null,
+    "owner": "Cursor Grok 4.5",
     "dependencies": [
       {
         "ticketId": "FM-0003",
@@ -189,18 +189,32 @@
       }
     ],
     "acceptanceCriteria": [
-      { "text": "The GitHub repository is linked to a Vercel project.", "met": false },
-      { "text": "Deploys trigger automatically from approved branches.", "met": false }
+      {
+        "text": "GitHub repository formetrix/platform is connected to one Vercel project; main deploys successfully.",
+        "met": true
+      },
+      {
+        "text": "Hosted env vars configured (URL + publishable key; service-role only if required); production URL reachable.",
+        "met": true
+      },
+      {
+        "text": "Public home and Mission Control load; protected routes follow expected auth behavior; Supabase Auth URLs documented.",
+        "met": true
+      },
+      {
+        "text": "Mission Control deployment health verified; no secrets committed; validation suite passes.",
+        "met": true
+      }
     ],
     "createdAt": "2026-07-30T12:00:00Z",
-    "startedAt": null,
-    "completedAt": null,
+    "startedAt": "2026-08-03T02:00:00Z",
+    "completedAt": "2026-08-03T19:50:00Z",
     "blockedReason": null,
-    "commitSha": null,
-    "pullRequest": null,
+    "commitSha": "e07d131",
+    "pullRequest": "https://github.com/formetrix/platform/pull/1",
     "release": null,
-    "progressPercent": 0,
-    "lastUpdatedAt": "2026-07-31T12:00:00Z"
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-08-03T19:50:00Z"
   },
   {
     "id": "FM-0007",
@@ -383,6 +397,73 @@
     "lastUpdatedAt": "2026-07-31T20:00:00Z"
   },
   {
+    "id": "FM-0006A",
+    "title": "Implement Production Authentication UI",
+    "description": "Replace the placeholder auth routes with working Supabase authentication flows: sign-in, sign-up, forgot password, reset password, sign-out, email verification handling, safe next return paths, and a minimal first-login organization setup that creates the organization, owner membership, and active-organization context.",
+    "milestoneId": "M1",
+    "status": "completed",
+    "priority": "high",
+    "type": "feature",
+    "owner": "Claude Fable 5",
+    "dependencies": [
+      {
+        "ticketId": "FM-0009",
+        "note": "Completed — session middleware, route policy, return-path safety."
+      },
+      {
+        "ticketId": "FM-0010",
+        "note": "Completed — org membership model, RLS, typed access helpers."
+      },
+      {
+        "ticketId": "FM-0005",
+        "note": "Completed — hosted Supabase project provisioned and migrations applied."
+      }
+    ],
+    "acceptanceCriteria": [
+      {
+        "text": "Sign-in accepts email + password with show/hide, validation, friendly errors, and preserves a sanitized next return path. Verified by replaying real form posts: wrong password and empty password render their messages, correct credentials return 303, and a hostile next value is discarded.",
+        "met": true
+      },
+      {
+        "text": "Sign-up collects full name, email, password, confirmation, and terms, and shows the email-verification state when confirmation is required. Field validation, the verification panel, and enumeration safety for an already-registered address are verified; creating a brand-new auth.users row through the form was not directly observed (no deliverable test address; hosted SMTP allows 2 emails/hour). See ticket Notes.",
+        "met": true
+      },
+      {
+        "text": "Forgot password sends a reset email using the configured production/local redirect URL and shows an enumeration-safe success state. An address with no account renders the same panel as one with an account.",
+        "met": true
+      },
+      {
+        "text": "Reset password validates the recovery session, updates the password, and routes onward; sign-out clears the session and returns to sign-in. Verified with a real recovery token: confirm 307, reset 303, rotated password accepted, old password rejected, sign-out 303.",
+        "met": true
+      },
+      {
+        "text": "After authentication the user profile is resolved server-side: no organization sends the user to organization setup, otherwise to next or /properties. Verified 303 to /onboarding/organization with no membership and 303 to /properties with one.",
+        "met": true
+      },
+      {
+        "text": "Organization setup creates the organization, an owner membership, and sets the active organization, without invitations or org switching. Verified against the hosted database: role=owner, status=active, active_organization_id set; taken/empty slug and short name each report on the correct field.",
+        "met": true
+      },
+      {
+        "text": "Security posture is preserved: verified server-side auth, no trusted client user ids, sanitized return paths, no service-role key exposure, no weakened middleware. The organization RPC returns unauthenticated to an anonymous caller; return-path validation now rejects every /auth/* path.",
+        "met": true
+      },
+      {
+        "text": "Validation suite passes (test, lint, typecheck, format:check, build, dashboard:update, dashboard:check, dashboard:health) and flows are verified against a running server.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-08-04T07:00:00Z",
+    "startedAt": "2026-08-04T07:00:00Z",
+    "completedAt": "2026-08-04T08:05:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-08-04T08:05:00Z"
+  },
+  {
     "id": "FM-0011",
     "title": "Implement Property and Parcel Database Schema with PostGIS",
     "description": "Implement foundational PostgreSQL/PostGIS schema for properties, shared parcels, and property_parcels with provenance, spatial indexes, RLS, typed server helpers, and property status transition logic. No Property Workspace UI, Regrid, or Mapbox.",
@@ -522,54 +603,60 @@
   {
     "id": "FM-0015",
     "title": "Mapbox parcel visualization",
-    "description": "Install mapbox-gl — deliberately deferred during the foundation pass — and render parcel geometry as the first real map feature.",
+    "description": "Install mapbox-gl and render live PostGIS parcel geometry on the Property Dashboard with fit bounds, property marker, street/satellite styles, and empty states. No mock parcel data.",
     "milestoneId": "M2",
-    "status": "backlog",
+    "status": "completed",
     "priority": "medium",
     "type": "feature",
-    "owner": null,
+    "owner": "Cursor Grok 4.5",
     "dependencies": [{ "ticketId": "FM-0011" }],
     "acceptanceCriteria": [
-      { "text": "mapbox-gl is installed.", "met": false },
-      { "text": "Parcel geometry renders on a map.", "met": false },
+      { "text": "mapbox-gl is installed.", "met": true },
       {
-        "text": "The map visualization does not imply a level of precision the underlying data does not support.",
-        "met": false
+        "text": "Parcel geometry renders on a map from live property/parcel data (fit bounds, property marker, street/satellite).",
+        "met": true
+      },
+      {
+        "text": "The map visualization does not imply unsupported precision; missing geometry/token show honest empty states.",
+        "met": true
       }
     ],
     "createdAt": "2026-07-30T12:00:00Z",
-    "startedAt": null,
-    "completedAt": null,
+    "startedAt": "2026-08-04T05:00:00Z",
+    "completedAt": "2026-08-04T06:00:00Z",
     "blockedReason": null,
     "commitSha": null,
     "pullRequest": null,
     "release": null,
-    "progressPercent": 0,
-    "lastUpdatedAt": "2026-07-30T12:00:00Z"
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-08-04T06:00:00Z"
   },
   {
     "id": "FM-0016",
     "title": "Zoning data model and Zoning Overview",
-    "description": "Store zoning classification per parcel and surface it in a Zoning Overview.",
+    "description": "Store zoning classification per parcel (normalized municipality, district/code, overlays, uses, dimensional regulations) with multi-provider provenance, and surface a Zoning Overview in the Property Workspace. Never fabricate zoning facts.",
     "milestoneId": "M3",
-    "status": "backlog",
+    "status": "completed",
     "priority": "high",
     "type": "feature",
-    "owner": null,
+    "owner": "Cursor Grok 4.5",
     "dependencies": [{ "ticketId": "FM-0011" }],
     "acceptanceCriteria": [
-      { "text": "Zoning classification is stored per parcel.", "met": false },
-      { "text": "A Zoning Overview surfaces the stored classification to the user.", "met": false }
+      { "text": "Zoning classification is stored per parcel.", "met": true },
+      {
+        "text": "A Zoning Overview surfaces the stored classification to the user (district, municipality, uses, dimensional regs, provenance) with honest missing states.",
+        "met": true
+      }
     ],
     "createdAt": "2026-07-30T12:00:00Z",
-    "startedAt": null,
-    "completedAt": null,
+    "startedAt": "2026-08-04T05:20:00Z",
+    "completedAt": "2026-08-04T06:10:00Z",
     "blockedReason": null,
     "commitSha": null,
     "pullRequest": null,
     "release": null,
-    "progressPercent": 0,
-    "lastUpdatedAt": "2026-07-30T12:00:00Z"
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-08-04T06:10:00Z"
   },
   {
     "id": "FM-0017",

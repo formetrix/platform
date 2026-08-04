@@ -54,6 +54,10 @@ export function createMemoryParcelStore(seed: Parcel[] = []): ParcelStore {
             geometryWkt: candidate.geometryGeoJson
               ? geometryToGeoJsonString(candidate.geometryGeoJson)
               : existing.geometry.geometryWkt,
+            geometryGeoJson: candidate.geometryGeoJson
+              ? (candidate.geometryGeoJson as unknown as Record<string, unknown>)
+              : existing.geometry.geometryGeoJson,
+            centroidGeoJson: existing.geometry.centroidGeoJson ?? null,
           },
           updatedAt: sourceRetrievedAt,
         };
@@ -84,6 +88,10 @@ export function createMemoryParcelStore(seed: Parcel[] = []): ParcelStore {
           srid: 4326,
           geometryWkt: geometryToGeoJsonString(candidate.geometryGeoJson),
           centroidWkt: null,
+          geometryGeoJson: candidate.geometryGeoJson
+            ? (candidate.geometryGeoJson as unknown as Record<string, unknown>)
+            : null,
+          centroidGeoJson: null,
           hasGeometry: Boolean(candidate.geometryGeoJson),
         },
         createdAt: sourceRetrievedAt,

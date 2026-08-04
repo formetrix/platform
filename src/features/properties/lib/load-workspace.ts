@@ -9,6 +9,7 @@ import {
 } from "@/lib/properties";
 import { isRegridConfigured } from "@/lib/regrid";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { getPropertyZoning, type ParcelZoningOverview } from "@/lib/zoning";
 
 export type WorkspaceView = {
   property: Property;
@@ -18,6 +19,8 @@ export type WorkspaceView = {
   parcels: Parcel[];
   links: PropertyParcel[];
   regridConfigured: boolean;
+  /** Primary-parcel zoning classification when stored; null if missing (never invented). */
+  zoning: ParcelZoningOverview | null;
 };
 
 export type LoadWorkspaceResult =
@@ -101,6 +104,9 @@ export async function loadPropertyWorkspace(propertyId: string): Promise<LoadWor
       ? org.organization.name
       : "Organization";
 
+  const zoningResult = await getPropertyZoning(propertyId);
+  const zoning = zoningResult.status === "ok" ? zoningResult.primary : null;
+
   return {
     status: "ok",
     view: {
@@ -111,6 +117,7 @@ export async function loadPropertyWorkspace(propertyId: string): Promise<LoadWor
       parcels: parcelsResult.parcels,
       links: parcelsResult.links,
       regridConfigured: isRegridConfigured(),
+      zoning,
     },
   };
 }

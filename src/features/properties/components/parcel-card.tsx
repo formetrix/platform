@@ -62,7 +62,11 @@ export function ParcelCard({
           />
           <FactRow
             label="Centroid"
-            value={parcel.geometry.centroidWkt ? "Present" : "Not available"}
+            value={
+              parcel.geometry.centroidGeoJson || parcel.geometry.centroidWkt
+                ? "Present"
+                : "Not available"
+            }
           />
           <FactRow
             label="Boundary"

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 import { EmptyState } from "@/features/properties/components/empty-state";
 import { PropertyListCard } from "@/features/properties/components/property-list-card";
 import { loadPropertiesList } from "@/features/properties/lib/load-workspace";
+import { ORGANIZATION_SETUP_PATH } from "@/lib/auth/routes";
 
 export const metadata: Metadata = {
   title: "Properties",
@@ -25,7 +27,7 @@ export default async function PropertiesPage() {
     );
   }
 
-  if (result.status === "unauthenticated" || result.status === "profile_missing") {
+  if (result.status === "unauthenticated") {
     return (
       <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-12">
         <PageIntro />
@@ -39,16 +41,15 @@ export default async function PropertiesPage() {
     );
   }
 
-  if (result.status === "organization_missing" || result.status === "membership_inactive") {
-    return (
-      <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-12">
-        <PageIntro />
-        <EmptyState
-          title="No active organization"
-          description="Your account needs an active organization membership before Properties can load."
-        />
-      </div>
-    );
+  // A verified user with no usable organization has nothing to list — every
+  // Property belongs to one (FD-0002). Send them to setup instead of showing an
+  // empty page they cannot act on (FM-0006A).
+  if (
+    result.status === "profile_missing" ||
+    result.status === "organization_missing" ||
+    result.status === "membership_inactive"
+  ) {
+    redirect(ORGANIZATION_SETUP_PATH);
   }
 
   if (result.status === "error") {

@@ -1,26 +1,61 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
-import type { AuthState } from "@/types/auth";
+import { createClient } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import type { AuthState, AuthUser } from "@/types/auth";
 
 /**
- * Structural placeholder only — no authentication logic yet
- * (FORMETRIX.md §23 explicitly scopes this pass to the foundation, not
- * business features). This exists so feature code can already import
- * `useAuth()` and get a typed, always-signed-out state, instead of
- * every screen wiring up its own ad hoc "am I logged in" check.
+ * Client-side view of the session, for presentation only (FM-0006A).
  *
- * When auth is implemented, this provider should subscribe to
- * `supabase.auth.onAuthStateChange` (via `@/lib/supabase/client`) and
- * populate `user`/`isLoading` for real.
+ * This is what lets the header show "Sign out" instead of "Sign in" without
+ * making every page dynamic. It is **not** an authorization boundary: it reads
+ * the browser's cookie copy of the session, which a determined user can edit.
+ * Route access is enforced by middleware and by `getAuthenticatedUser()`'s
+ * verified server round-trip — never by this value.
  */
-const AuthContext = createContext<AuthState>({ user: null, isLoading: false });
+const AuthContext = createContext<AuthState>({ user: null, isLoading: true });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  return (
-    <AuthContext.Provider value={{ user: null, isLoading: false }}>{children}</AuthContext.Provider>
-  );
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured()) {
+      setIsLoading(false);
+      return;
+    }
+
+    let active = true;
+    const supabase = createClient();
+
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (!active) return;
+        setUser(data.session?.user ?? null);
+        setIsLoading(false);
+      })
+      .catch(() => {
+        if (active) setIsLoading(false);
+      });
+
+    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!active) return;
+      setUser(session?.user ?? null);
+      setIsLoading(false);
+    });
+
+    return () => {
+      active = false;
+      subscription.subscription.unsubscribe();
+    };
+  }, []);
+
+  const value = useMemo<AuthState>(() => ({ user, isLoading }), [user, isLoading]);
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthState {

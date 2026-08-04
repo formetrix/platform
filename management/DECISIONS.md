@@ -99,7 +99,7 @@ Each entry uses the following fields, in this order:
 - **Alternatives Considered:**
   - Google Maps Platform
   - Leaflet with OpenStreetMap tiles
-- **Impact:** `src/lib/mapbox/` is the sanctioned integration point; no map rendering exists yet (see FM-0015) and `mapbox-gl` is deliberately not installed until it does.
+- **Impact:** `src/lib/mapbox/` is the sanctioned integration point; `mapbox-gl` is installed and used for parcel visualization (FM-0015 / ADR-0038).
 
 ### ADR-0006
 
@@ -456,3 +456,62 @@ Each entry uses the following fields, in this order:
   - Require both names — rejected; two conflicting sources of truth
   - Hard cutover with no fallback — rejected; breaks existing local env files abruptly
 - **Impact:** `.env.example`, `env.ts`, `config.ts`, health-check, and unconfigured auth screen document publishable first; service-role remains `SUPABASE_SERVICE_ROLE_KEY` (server-only).
+
+### ADR-0038
+
+- **Date:** 2026-08-04
+- **Status:** Accepted
+- **Decision:** Render Property Dashboard parcel maps with `mapbox-gl`, sourcing boundary GeoJSON from PostGIS via `parcel_geometries_geojson` (`ST_AsGeoJSON`). Fit bounds to the live boundary; show a property display pin when lat/lng exist, otherwise the parcel centroid; offer street and satellite basemaps; show empty states when the Mapbox token or geometry is missing. Never invent mock parcel outlines. Surface an honest precision caption from provider `geometryQuality`.
+- **Reason:** FM-0015 requires the first real map feature without implying false survey precision. PostgREST’s default geometry encoding is not Mapbox-ready; a SECURITY INVOKER RPC keeps RLS intact while returning GeoJSON.
+- **Alternatives Considered:**
+  - Client-side EWKB parsing (rejected — fragile, duplicates PostGIS)
+  - Leaflet / Google Maps (rejected — ADR-0005 commits to Mapbox)
+  - Mock GeoJSON fixtures when parcels are empty (rejected — invents land records)
+- **Impact:** `mapbox-gl` dependency; `ParcelMap` / `ParcelMapCard` on the Property Dashboard; migration `20260804050000_parcel_geometry_geojson.sql`. Zoning overlays remain later tickets.
+
+### ADR-0039
+
+- **Date:** 2026-08-04
+- **Status:** Accepted
+- **Decision:** Model zoning as normalized, parcel-linked reference data (municipality, district/code, overlays, land uses, dimensional regulations) with multi-provider identity and provenance on `parcel_zoning`. Surface a full Zoning Overview on the Property Dashboard and `/property/[id]/zoning` from live rows only. Unknown fields stay null / “Not available”; never invent classifications. Trusted writes go through `upsert_parcel_zoning_from_provider` (service_role).
+- **Reason:** FM-0016 requires stored classification per parcel and an Overview UI. Attaching to Parcel (not Property) matches ADR-0012. Normalization + provider keys allow future zoning providers without redesign. Explicit units and null-as-unknown avoid false precision that would mislead investors.
+- **Alternatives Considered:**
+  - Free-text zoning string on Parcel (rejected — not queryable; blocks overlays/uses)
+  - Property-owned zoning only (rejected — parcels are shareable land records)
+  - Seed demo zoning for empty DBs (rejected — invents land-use law)
+- **Impact:** Migrations `20260804060000`–`20260804060200`; `src/lib/zoning/`; `ZoningOverview` on Dashboard + zoning module. FM-0017 constraints analysis builds on these regulations.
+
+### ADR-0040
+
+- **Date:** 2026-08-04
+- **Status:** Accepted
+- **Decision:** Implement every authentication flow as a Next.js Server Action posting from a plain `<form>`, rather than calling `supabase.auth.*` from the browser. Credentials are validated server-side by `src/lib/auth/validation.ts` before any Supabase call, and failures are rendered through a shared `AuthFormState`.
+- **Reason:** FM-0006A. The password never enters client JavaScript, and `@supabase/ssr` writes the session cookies through Next's cookie store in the same round-trip — a browser-side sign-in updates the browser's copy of the session while the server only learns about it on some later request. Progressive enhancement (forms that work without JavaScript) falls out of the same choice, and was what allowed the flows to be verified end-to-end by replaying real form posts.
+- **Alternatives Considered:**
+  - Client-side `signInWithPassword` + `onAuthStateChange` (rejected — splits session ownership between browser and server; password enters the client bundle)
+  - Route Handlers with `fetch` from the client (rejected — reimplements what a form action already does, and loses no-JS operation)
+  - NextAuth/Auth.js in front of Supabase (rejected — ADR-0002 makes Supabase Auth the sole identity boundary; a second layer duplicates session state)
+- **Impact:** `src/features/auth/` (actions + components), `src/lib/auth/` (validation, messages, redirect URLs, post-auth routing). `AuthProvider` still subscribes to `onAuthStateChange`, but only so the header can show a signed-in state — it is documented as presentation, never an authorization gate.
+
+### ADR-0041
+
+- **Date:** 2026-08-04
+- **Status:** Accepted
+- **Decision:** Create the Organization, its owner Membership, and the user's `active_organization_id` in one `SECURITY DEFINER` function, `public.create_organization_with_owner(text, text)`, which derives its actor from `auth.uid()` and returns a status object rather than raising. Provision `user_profiles` from an `on_auth_user_created` trigger on `auth.users`, with an application-side `ensureUserProfile()` repair path.
+- **Reason:** FM-0006A first-login setup. As three separate RLS-scoped client writes, a failure after the first one strands an Organization with no owner — a row nobody can subsequently administer without the service-role key. Returning `slug_taken` / `already_member` / `invalid_slug` as data lets the form put the message on the right field instead of parsing SQLSTATEs out of an exception. The trigger guarantees no signed-in user can exist without a profile; the trigger deliberately swallows its own errors so a profile problem can never surface to a new user as "Database error saving new user".
+- **Alternatives Considered:**
+  - Three sequential client calls under RLS (rejected — non-atomic; orphan organizations)
+  - Service-role client in a Server Action (rejected — needs `SUPABASE_SERVICE_ROLE_KEY` on a user-facing path and bypasses RLS for an operation the user is entitled to perform anyway)
+  - Application-only profile creation, no trigger (rejected — leaves users created through the dashboard or admin API without a profile)
+- **Impact:** Migration `20260804070000_auth_profile_and_organization_setup.sql`; `/onboarding/organization`; `src/features/auth/actions/organization-setup.ts`. The V1 one-active-membership rule (FD-0002) is enforced in the function and by the existing unique index. Invitations and organization switching stay out of scope.
+
+### ADR-0042
+
+- **Date:** 2026-08-04
+- **Status:** Accepted
+- **Decision:** Read every `NEXT_PUBLIC_*` variable through a static `process.env.NEXT_PUBLIC_X` member access (`PUBLIC_ENV_READERS` in `src/lib/env.ts`, `defaultPublicKeyEnv()` in `src/lib/supabase/public-key.ts`) instead of the computed `process.env[name]` lookup used previously.
+- **Reason:** Next.js substitutes public env vars into client bundles by textual replacement of `process.env.NEXT_PUBLIC_X`; a computed lookup is left untouched and evaluates to `undefined` in the browser. The previous helpers therefore reported _every_ public variable as unset in any Client Component. Confirmed by inspecting the built chunks: after the change the Supabase URL, publishable key, and Mapbox token appear inlined and no `process.env` reference survives. This had also been silently disabling the FM-0015 parcel map, whose `isMapboxConfigured()` check runs client-side — it was never caught because that ticket could only verify server-rendered markup.
+- **Alternatives Considered:**
+  - Passing public values from Server Components as props (rejected — threads configuration through every component that needs it, for a problem the bundler already solves)
+  - Keeping dynamic access and reading config only on the server (rejected — the browser Supabase client and the map genuinely need these values)
+- **Impact:** `src/lib/env.ts`, `src/lib/supabase/public-key.ts`. Any future public variable must be added to `PUBLIC_ENV_READERS` to be visible in the browser; the server-only `readServerEnv` path is unchanged.

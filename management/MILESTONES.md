@@ -85,10 +85,11 @@ Each milestone entry uses the following fields, in this order:
 - Authentication & organization architecture (`docs/AUTH_FLOW.md`) (FM-0008)
 - Session refresh middleware and protected routes (`src/middleware.ts`) (FM-0009)
 - Organization/workspace membership model with RLS (`supabase/migrations`) (FM-0010)
+- Production authentication UI and first-login organization setup (FM-0006A)
 
-**Status:** Not Started
+**Status:** Complete
 
-**Completion %:** 0
+**Completion %:** 100
 
 ---
 
@@ -102,11 +103,11 @@ Each milestone entry uses the following fields, in this order:
 - Regrid integration for parcel data ingestion (FM-0012)
 - Property Search (FM-0013)
 - Property Dashboard (FM-0014)
-- Mapbox parcel visualization (FM-0015)
+- Mapbox parcel visualization (FM-0015) — Completed
 
 **Status:** Not Started
 
-**Completion %:** 0
+**Completion %:** 100 (computed from scoped tickets; milestone status remains until Founder closes M2)
 
 ---
 
@@ -116,7 +117,7 @@ Each milestone entry uses the following fields, in this order:
 
 **Deliverables:**
 
-- Zoning data model and Zoning Overview (FM-0016)
+- Zoning data model and Zoning Overview (FM-0016) — Completed
 - Development constraints analysis: setbacks, FAR, height limits (FM-0017)
 
 **Status:** Not Started

@@ -18,7 +18,10 @@ export type ResolvedSupabasePublicKey = {
   envName: typeof SUPABASE_PUBLISHABLE_KEY_ENV | typeof SUPABASE_ANON_KEY_ENV;
 };
 
-function readTrimmed(envBag: NodeJS.ProcessEnv, name: string): string | undefined {
+/** Just the shape these helpers read — `process.env` satisfies it. */
+export type EnvBag = Record<string, string | undefined>;
+
+function readTrimmed(envBag: EnvBag, name: string): string | undefined {
   const raw = envBag[name];
   if (typeof raw !== "string") return undefined;
   const trimmed = raw.trim();
@@ -26,11 +29,28 @@ function readTrimmed(envBag: NodeJS.ProcessEnv, name: string): string | undefine
 }
 
 /**
+ * Live snapshot of just the two keys, read by **static** member access.
+ *
+ * Next.js substitutes `process.env.NEXT_PUBLIC_X` textually when it builds a
+ * client bundle; a computed lookup like `process.env[name]` is left alone and
+ * evaluates to `undefined` in the browser. Reading them statically here is what
+ * lets the browser Supabase client (and `isSupabaseConfigured()` inside a
+ * Client Component) see the values at all. Rebuilt per call, so the Node tests
+ * that mutate `process.env` between assertions still observe their changes.
+ */
+function defaultPublicKeyEnv(): EnvBag {
+  return {
+    [SUPABASE_PUBLISHABLE_KEY_ENV]: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    [SUPABASE_ANON_KEY_ENV]: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  };
+}
+
+/**
  * Returns the resolved public key, or `undefined` if neither env var is set.
  * Publishable wins when both are present.
  */
 export function resolveSupabasePublicKey(
-  envBag: NodeJS.ProcessEnv = process.env,
+  envBag: EnvBag = defaultPublicKeyEnv(),
 ): ResolvedSupabasePublicKey | undefined {
   const publishable = readTrimmed(envBag, SUPABASE_PUBLISHABLE_KEY_ENV);
   if (publishable) {
