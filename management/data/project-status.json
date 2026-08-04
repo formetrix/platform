@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-04T22:19:19Z",
-  "lastIntelligenceUpdate": "2026-08-04T22:19:19Z",
+  "generatedAt": "2026-08-04T22:54:05Z",
+  "lastIntelligenceUpdate": "2026-08-04T22:54:05Z",
   "currentMilestoneId": "M0",
   "currentTicketId": null,
-  "currentWorkstream": "Milestone 2 — Parcel Ingestion Security",
-  "currentFocusSummary": "FM-0030 Complete: parcel and zoning ingestion RPCs restricted to service_role and verified denied for anon and authenticated on the hosted project (ADR-0043). Service-role ingestion unaffected. No active ticket.",
-  "currentNextAction": "No active ticket. Two defects found during the FM-0029/FM-0030 audit remain open: Regrid address search returns zero candidates because normalizeRegridFeatureCollection does not unwrap the v2 response parcels wrapper, and there is still no user-facing Add Property flow. Do not start FM-0031 until the Founder asks.",
+  "currentWorkstream": "Milestone 2 — Property Workspace",
+  "currentFocusSummary": "FM-0030B Complete: live Regrid v2 normalization fixed (grouped parcels/buildings/zoning response and nested properties.fields), plus the APN parameter and parcel-lookup path corrected. Address, APN, and point search all return real candidates with full attributes. No active ticket.",
+  "currentNextAction": "No active ticket. The Regrid services now work against the live API but nothing calls them: there is still no user-facing Add Property flow. Do not start FM-0031 until the Founder asks.",
   "overallProgressPercent": 57,
   "activeTicketCount": 0,
   "milestonesSummary": [
@@ -27,8 +27,8 @@
     "inProgress": 0,
     "review": 0,
     "blocked": 0,
-    "completed": 27,
-    "total": 32
+    "completed": 28,
+    "total": 33
   },
   "blockedTicketIds": [],
   "repositoryState": {
@@ -49,5 +49,5 @@
   },
   "dataIntegrityWarningCount": 0,
   "integrityWarnings": [],
-  "recentActivityIds": ["ACT-000065", "ACT-000064", "ACT-000063", "ACT-000062", "ACT-000061"]
+  "recentActivityIds": ["ACT-000067", "ACT-000066", "ACT-000065", "ACT-000064", "ACT-000063"]
 }

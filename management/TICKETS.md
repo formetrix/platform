@@ -433,6 +433,30 @@ Each ticket is a heading of the form `### [ID] — [Title]`, grouped under a mil
   - Root cause: Supabase's default privileges grant EXECUTE on new `public` functions directly to the named `anon`/`authenticated` roles, and `REVOKE ... FROM PUBLIC` does not remove a grant held by a named role. The global default-privilege behavior is deliberately left alone — narrowing it would also strip `authenticated` from functions that must stay callable by signed-in users (`create_organization_with_owner`, and the RLS helpers `is_active_org_member` / `has_org_role` / `can_access_property`). Every future server-only `SECURITY DEFINER` function needs the same explicit revoke (ADR-0043).
   - Found while verifying, out of scope and left unfixed: `normalizeRegridFeatureCollection` reads `collection.features`, but Regrid's live v2 address endpoint returns the FeatureCollection nested under a `parcels` key, so `searchParcels` returns zero candidates against the real API. The unit tests pass because they mock a bare FeatureCollection. Ingestion was therefore verified by normalizing a live Regrid feature directly through `normalizeRegridFeature`.
 
+### FM-0030B — Fix live Regrid search normalization
+
+- **Priority:** High
+- **Status:** Completed
+- **Owner:** Claude Fable 5
+- **Type:** Bug / integration
+- **Description:** Regrid's live v2 search responses do not match the parser written in FM-0012. The normalizer reads `collection.features` and `properties.<attr>`, but the live API nests candidate groups under `parcels` / `buildings` / `zoning` and puts every parcel attribute under `properties.fields`. Address search therefore returns zero candidates, and the few candidates that do resolve lose their APN, address, city, state, county, and acreage. Fix normalization only — no Add Property UI.
+- **Dependencies:** FM-0012 — Completed (built the Regrid client and normalizer being corrected here).
+- **Acceptance Criteria:**
+  - Candidate extraction supports the real grouped v2 response, preferring the `parcels` group and never treating a building or zoning record as a parcel candidate.
+  - The legacy bare `FeatureCollection` shape continues to work.
+  - Provider parcel id, APN, address, city, state, county, postal code, acreage, coordinates, geometry, provider metadata, and provenance all survive normalization from a live response.
+  - An empty candidate list is returned only when the provider genuinely returned no usable parcel candidates; malformed payloads fail safely rather than fabricating fields.
+  - Live verification against the real Regrid API covers a valid address, an invalid address, APN search, and point search; rate-limit and retry behavior are unchanged.
+  - Regression tests cover the grouped shape, the legacy shape, multiple groups, a missing `parcels` array, malformed candidates, an empty response, and provider-id/APN mapping.
+  - Committed fixtures contain no private addresses; the Regrid token is never exposed.
+  - The full validation suite passes.
+- **Outcome:** All met. Live verification through the application's own `searchParcels`: a valid address returned 2 candidates with APN, address, city, state, county, ZIP, acreage, coordinates, and Polygon geometry all populated; an invalid address returned 0 cleanly; APN search returned 1; point search returned 3; lookup by provider id resolved. Malformed JSON raises `parse_error`, junk-shaped bodies normalize to zero candidates, and rate limiting still retries 3 times preserving `retryAfterMs`. Tests went from 119 to 143.
+- **Notes:**
+  - **Two request-side defects fixed beyond the stated normalization scope, called out deliberately.** Live verification could not otherwise satisfy this ticket's own "APN search still works" requirement. (1) APN search sent `apn=`, which the v2 API rejects with HTTP 400 "Please provide a 'parcelnumb' parameter" — now sends `parcelnumb`. (2) `getByProviderParcelId` requested `{baseUrl}/parcels/{id}`, which serves HTML and 404s — now uses `/api/v2/parcels/{id}`. Both are one-token corrections inside the Regrid client, both are covered by new tests, and both were verified against the live API. Neither changes behavior for any other caller.
+  - The root cause of all three defects is the same: FM-0012's client was written against an assumed response/request contract and never exercised against the live API. Its unit tests mocked the assumed shape, so they passed while every live call failed.
+  - Provider characteristic worth knowing before building selection UI: Regrid returns **stacked parcels** — several records with distinct `ll_uuid` and `parcelnumb` sharing one address, acreage, and footprint (verified in the raw response, not an artifact of normalization). A candidate picker will need to present these meaningfully rather than assume one parcel per address.
+  - `latitude`/`longitude` were added to `NormalizedParcelCandidate` to satisfy the "preserve coordinates" requirement. Nothing consumes them yet; wiring them into property creation belongs to the import-UI ticket.
+
 ---
 
 ## Milestone 3: Development Intelligence

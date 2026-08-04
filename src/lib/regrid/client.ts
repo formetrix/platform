@@ -1,12 +1,11 @@
 import { getRegridConfig, isRegridConfigured } from "@/lib/regrid/config";
 import { isRetryableHttpStatus, parseRetryAfterMs, RegridClientError } from "@/lib/regrid/errors";
-import { normalizeRegridFeature, normalizeRegridFeatureCollection } from "@/lib/regrid/normalize";
+import { normalizeRegridFeature, normalizeRegridSearchResponse } from "@/lib/regrid/normalize";
 import type {
   NormalizedParcelCandidate,
   ParcelSearchQuery,
   RegridClientOptions,
   RegridParcelFeature,
-  RegridParcelFeatureCollection,
 } from "@/lib/regrid/types";
 import { normalizeApn } from "@/lib/properties/apn";
 import { validateLatLngPair } from "@/lib/properties/geometry";
@@ -57,8 +56,8 @@ export class RegridClient {
     this.validateSearchQuery(query);
     const path = this.pathForSearch(query);
     const params = this.paramsForSearch(query);
-    const body = await this.requestJson<RegridParcelFeatureCollection>(path, params);
-    return normalizeRegridFeatureCollection(body);
+    const body = await this.requestJson<unknown>(path, params);
+    return normalizeRegridSearchResponse(body);
   }
 
   async getByProviderParcelId(providerParcelId: string): Promise<NormalizedParcelCandidate | null> {
@@ -70,15 +69,14 @@ export class RegridClient {
         retryable: false,
       });
     }
-    const body = await this.requestJson<RegridParcelFeature | RegridParcelFeatureCollection>(
-      `/parcels/${encodeURIComponent(id)}`,
+    const body = await this.requestJson<unknown>(
+      `/api/v2/parcels/${encodeURIComponent(id)}`,
       new URLSearchParams(),
     );
-    if (body && typeof body === "object" && "features" in body) {
-      const candidates = normalizeRegridFeatureCollection(body);
-      return candidates[0] ?? null;
-    }
-    return normalizeRegridFeature(body as RegridParcelFeature);
+    // Lookup returns the same grouped shape as search. Fall back to treating the
+    // body as a bare Feature so a single-feature response still resolves.
+    const candidates = normalizeRegridSearchResponse(body);
+    return candidates[0] ?? normalizeRegridFeature(body as RegridParcelFeature);
   }
 
   private validateSearchQuery(query: ParcelSearchQuery): void {
@@ -126,7 +124,9 @@ export class RegridClient {
       return params;
     }
     if (query.mode === "apn") {
-      params.set("apn", query.apn.trim());
+      // The v2 APN endpoint requires `parcelnumb`; `apn` is rejected with
+      // HTTP 400 "Please provide a 'parcelnumb' parameter".
+      params.set("parcelnumb", query.apn.trim());
       if (query.stateCode) params.set("state_code", query.stateCode.trim().toUpperCase());
       if (query.county) params.set("county", query.county.trim());
       if (query.limit != null) params.set("limit", String(query.limit));

@@ -654,5 +654,27 @@
     "relatedMilestoneId": "M2",
     "previousValue": "in_progress",
     "newValue": "completed"
+  },
+  {
+    "id": "ACT-000066",
+    "timestamp": "2026-08-04T18:00:00Z",
+    "type": "ticket_created",
+    "actor": "Claude Fable 5",
+    "summary": "FM-0030B created and started: fix live Regrid search normalization. The live v2 API nests candidate groups under parcels/buildings/zoning and parcel attributes under properties.fields, so address search returns zero candidates and resolved candidates lose APN, address, city, state, county, and acreage.",
+    "relatedTicketId": "FM-0030B",
+    "relatedMilestoneId": "M2",
+    "previousValue": null,
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000067",
+    "timestamp": "2026-08-04T18:45:00Z",
+    "type": "ticket_completed",
+    "actor": "Claude Fable 5",
+    "summary": "FM-0030B completed: Regrid normalization now reads the live v2 grouped response (parcels/buildings/zoning) and the nested properties.fields attributes, so address search returns real candidates with APN, address, city, state, county, zip, acreage, coordinates, and geometry intact. Also corrected two request-side mismatches found during live verification: APN search sent apn instead of parcelnumb (HTTP 400) and parcel lookup used an unversioned path that 404s. Verified live: address 2, invalid 0, APN 1, point 3, lookup ok, malformed parse_error, rate limit intact.",
+    "relatedTicketId": "FM-0030B",
+    "relatedMilestoneId": "M2",
+    "previousValue": "in_progress",
+    "newValue": "completed"
   }
 ]

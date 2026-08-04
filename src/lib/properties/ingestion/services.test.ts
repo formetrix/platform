@@ -25,6 +25,8 @@ const candidate: NormalizedParcelCandidate = {
   city: "Austin",
   postalCode: "78701",
   acreage: 2.5,
+  latitude: 30.2745,
+  longitude: -97.7355,
   geometryGeoJson: {
     type: "Polygon",
     coordinates: [

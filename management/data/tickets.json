@@ -1283,5 +1283,64 @@
     "release": null,
     "progressPercent": 100,
     "lastUpdatedAt": "2026-08-04T17:35:00Z"
+  },
+  {
+    "id": "FM-0030B",
+    "title": "Fix live Regrid search normalization",
+    "description": "Regrid's live v2 search responses do not match the parser written in FM-0012. The normalizer reads collection.features and properties.<attr>, but the live API nests candidate groups under parcels/buildings/zoning and puts every parcel attribute under properties.fields. Address search returns zero candidates, and the few that resolve lose APN, address, city, state, county, and acreage. Normalization fix only — no Add Property UI.",
+    "milestoneId": "M2",
+    "status": "completed",
+    "priority": "high",
+    "type": "bug",
+    "owner": "Claude Fable 5",
+    "dependencies": [
+      {
+        "ticketId": "FM-0012",
+        "note": "Completed — built the Regrid client and normalizer being corrected here."
+      }
+    ],
+    "acceptanceCriteria": [
+      {
+        "text": "Candidate extraction supports the real grouped v2 response, preferring the parcels group and never treating a building or zoning record as a parcel candidate. An absent or empty parcels group returns zero candidates rather than falling through to another group.",
+        "met": true
+      },
+      {
+        "text": "The legacy bare FeatureCollection shape continues to work; the original FM-0012 client test passes unchanged.",
+        "met": true
+      },
+      {
+        "text": "Provider parcel id, APN, address, city, state, county, postal code, acreage, coordinates, geometry, provider metadata, and provenance all survive normalization — verified against a live response where every one of those was previously lost except the id and geometry.",
+        "met": true
+      },
+      {
+        "text": "Empty results only when the provider returned nothing usable: a nonexistent address returns zero candidates cleanly, malformed JSON raises parse_error, and junk-shaped bodies normalize to zero without fabricating fields.",
+        "met": true
+      },
+      {
+        "text": "Live verification against the real Regrid API covered a valid address (2 candidates), an invalid address (0), APN search (1), point search (3), lookup by provider id, malformed responses, and rate limiting (3 attempts, retryAfterMs 1000 preserved).",
+        "met": true
+      },
+      {
+        "text": "Regression tests cover the grouped shape, the legacy shape, multiple candidates, missing/empty/array parcels groups, malformed candidate objects, empty responses, and provider-id/APN mapping — 21 normalization tests plus 3 new client tests.",
+        "met": true
+      },
+      {
+        "text": "Fixtures use a public landmark address with owner and mailing details omitted; no token or private address is committed.",
+        "met": true
+      },
+      {
+        "text": "test (143 pass), lint, typecheck, format:check, build, dashboard:update, dashboard:check, and dashboard:health all pass.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-08-04T18:00:00Z",
+    "startedAt": "2026-08-04T18:00:00Z",
+    "completedAt": "2026-08-04T18:45:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-08-04T18:45:00Z"
   }
 ]
