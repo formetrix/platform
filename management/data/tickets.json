@@ -1238,5 +1238,50 @@
     "release": null,
     "progressPercent": 100,
     "lastUpdatedAt": "2026-07-31T22:00:00Z"
+  },
+  {
+    "id": "FM-0030",
+    "title": "Secure parcel ingestion RPCs",
+    "description": "Restrict upsert_parcel_from_provider and upsert_parcel_zoning_from_provider to the Supabase service_role. Both are SECURITY DEFINER and bypass RLS, but a configuration audit found anon and authenticated still hold EXECUTE on the hosted project, so any holder of the publishable key can write shared parcel and zoning reference data. No application or UI behavior changes.",
+    "milestoneId": "M2",
+    "status": "completed",
+    "priority": "high",
+    "type": "bug",
+    "owner": "Claude Fable 5",
+    "dependencies": [
+      { "ticketId": "FM-0012", "note": "Completed — created upsert_parcel_from_provider." },
+      { "ticketId": "FM-0016", "note": "Completed — created upsert_parcel_zoning_from_provider." }
+    ],
+    "acceptanceCriteria": [
+      {
+        "text": "Both ingestion RPCs explicitly REVOKE EXECUTE from public, anon, and authenticated, and GRANT EXECUTE only to service_role. Applied per-overload via a pg_proc loop in migration 20260804180000, which self-verifies with has_function_privilege and raises if any untrusted role retains access.",
+        "met": true
+      },
+      {
+        "text": "The hosted project reflects the corrected privileges; has_function_privilege reports false for anon and authenticated on both functions, and live calls return SQLSTATE 42501 permission denied for an anonymous caller and for a real signed-in user token.",
+        "met": true
+      },
+      {
+        "text": "Parcel import through the server-side service-role client still succeeds: a live Regrid parcel imported with geometry via the real importParcel path, and a repeat import reused the same row rather than duplicating it. The verification row was deleted afterward.",
+        "met": true
+      },
+      {
+        "text": "An automated regression test fails if a future migration reintroduces anon/authenticated execute access to an ingestion RPC — proven by temporarily reintroducing the original grant and observing the failure. It also carries an opt-in live probe (FORMETRIX_LIVE_RPC_CHECK=1), skipped by default so the suite stays offline.",
+        "met": true
+      },
+      {
+        "text": "No application code, UI, or unrelated migration was changed; test, lint, typecheck, format:check, build, dashboard:update, dashboard:check, and dashboard:health all pass.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-08-04T17:00:00Z",
+    "startedAt": "2026-08-04T17:00:00Z",
+    "completedAt": "2026-08-04T17:35:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-08-04T17:35:00Z"
   }
 ]

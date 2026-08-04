@@ -416,6 +416,23 @@ Each ticket is a heading of the form `### [ID] — [Title]`, grouped under a mil
   - `npm run dashboard:update`, `npm run dashboard:check`, `npm run lint`, `npm run typecheck`, `npm run format:check`, `npm run build`, and `npm run dashboard:health` all pass.
   - Verified at `http://localhost:3000/properties` and `/property/demo` (plus all 3 mock property ids, all 9 sections, and the unknown-id 404 case) via dev/production server requests and rendered-markup assertions; a full interactive browser session was not available in this environment (same caveat as FM-0026A).
 
+### FM-0030 — Secure parcel ingestion RPCs
+
+- **Priority:** High
+- **Status:** Completed
+- **Owner:** Claude Fable 5
+- **Description:** Restrict `upsert_parcel_from_provider` and `upsert_parcel_zoning_from_provider` to the Supabase `service_role`. Both are `SECURITY DEFINER` and bypass RLS, but a configuration audit found `anon` and `authenticated` still hold EXECUTE on the hosted project, so any holder of the publishable key can write shared parcel and zoning reference data. No application or UI behavior changes.
+- **Dependencies:** FM-0012 — Completed (created `upsert_parcel_from_provider`); FM-0016 — Completed (created `upsert_parcel_zoning_from_provider`).
+- **Acceptance Criteria:**
+  - Both ingestion RPCs explicitly `REVOKE EXECUTE` from `public`, `anon`, and `authenticated`, and `GRANT EXECUTE` only to `service_role`. — Met; migration `20260804180000` applies the revoke/grant per overload via a `pg_proc` loop and self-verifies with `has_function_privilege`, raising rather than reporting success if any untrusted role retains access.
+  - The hosted project reflects the corrected privileges; `has_function_privilege` reports false for `anon` and `authenticated`. — Met; both report false, and live calls return SQLSTATE `42501` for an anonymous caller (HTTP 401) and for a real signed-in user token (HTTP 403).
+  - Parcel import through the server-side service-role client still succeeds, including duplicate reuse. — Met; a live Regrid parcel imported with geometry through the real `importParcel` path, and a repeat import reused the same row (`created=false`) rather than duplicating it. The verification row was deleted afterward; the database is back to zero parcels.
+  - An automated regression test fails if a future migration reintroduces `anon`/`authenticated` execute access to an ingestion RPC. — Met; `src/lib/properties/ingestion/rpc-permissions.test.ts`, proven to fail by temporarily reintroducing the original grant and observing the assertion. It also carries an opt-in live probe (`FORMETRIX_LIVE_RPC_CHECK=1`) asserting `42501`, skipped by default so the suite stays offline.
+  - No application code, UI, or unrelated migration is changed; the full validation suite passes. — Met; the only source change is the new test file, plus the new migration and management records.
+- **Notes:**
+  - Root cause: Supabase's default privileges grant EXECUTE on new `public` functions directly to the named `anon`/`authenticated` roles, and `REVOKE ... FROM PUBLIC` does not remove a grant held by a named role. The global default-privilege behavior is deliberately left alone — narrowing it would also strip `authenticated` from functions that must stay callable by signed-in users (`create_organization_with_owner`, and the RLS helpers `is_active_org_member` / `has_org_role` / `can_access_property`). Every future server-only `SECURITY DEFINER` function needs the same explicit revoke (ADR-0043).
+  - Found while verifying, out of scope and left unfixed: `normalizeRegridFeatureCollection` reads `collection.features`, but Regrid's live v2 address endpoint returns the FeatureCollection nested under a `parcels` key, so `searchParcels` returns zero candidates against the real API. The unit tests pass because they mock a bare FeatureCollection. Ingestion was therefore verified by normalizing a live Regrid feature directly through `normalizeRegridFeature`.
+
 ---
 
 ## Milestone 3: Development Intelligence

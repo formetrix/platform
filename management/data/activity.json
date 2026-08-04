@@ -620,5 +620,39 @@
     "relatedMilestoneId": "M1",
     "previousValue": "in_progress",
     "newValue": "completed"
+  },
+  {
+    "id": "ACT-000063",
+    "timestamp": "2026-08-04T17:00:00Z",
+    "type": "ticket_created",
+    "actor": "Claude Fable 5",
+    "summary": "FM-0030 created and started: restrict upsert_parcel_from_provider and upsert_parcel_zoning_from_provider to service_role. A configuration audit found anon and authenticated still hold EXECUTE on the hosted project despite the original migrations revoking from PUBLIC, so a publishable-key holder can write shared parcel and zoning reference data.",
+    "relatedTicketId": "FM-0030",
+    "relatedMilestoneId": "M2",
+    "previousValue": null,
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000064",
+    "timestamp": "2026-08-04T17:30:00Z",
+    "type": "decision_recorded",
+    "actor": "Claude Fable 5",
+    "summary": "ADR-0043 recorded: ingestion RPC EXECUTE granted to service_role only, revoked explicitly from public, anon, and authenticated, because REVOKE FROM PUBLIC does not remove Supabase default grants held by named roles.",
+    "relatedTicketId": "FM-0030",
+    "relatedDecisionId": "ADR-0043",
+    "relatedMilestoneId": "M2",
+    "previousValue": null,
+    "newValue": null
+  },
+  {
+    "id": "ACT-000065",
+    "timestamp": "2026-08-04T17:35:00Z",
+    "type": "ticket_completed",
+    "actor": "Claude Fable 5",
+    "summary": "FM-0030 completed: upsert_parcel_from_provider and upsert_parcel_zoning_from_provider are now service_role only (migration 20260804180000, applied to the hosted project). Anonymous and real signed-in callers both receive SQLSTATE 42501; service-role ingestion re-verified end to end with a live Regrid parcel including duplicate reuse. Regression test added and proven to fail on a reintroduced grant. No application or UI change.",
+    "relatedTicketId": "FM-0030",
+    "relatedMilestoneId": "M2",
+    "previousValue": "in_progress",
+    "newValue": "completed"
   }
 ]

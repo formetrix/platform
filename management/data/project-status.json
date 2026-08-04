@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-08-04T06:15:41Z",
-  "lastIntelligenceUpdate": "2026-08-04T06:15:41Z",
+  "generatedAt": "2026-08-04T22:19:19Z",
+  "lastIntelligenceUpdate": "2026-08-04T22:19:19Z",
   "currentMilestoneId": "M0",
   "currentTicketId": null,
-  "currentWorkstream": "Milestone 1 — Production Authentication UI",
-  "currentFocusSummary": "FM-0006A Complete: working sign-in, sign-up, forgot/reset password, sign-out, /auth/confirm email-link handler, and first-login organization setup, all as Server Actions with enumeration-safe errors and sanitized return paths (ADR-0040, ADR-0041). Also fixed NEXT_PUBLIC_* values never reaching client bundles (ADR-0042). No active ticket.",
-  "currentNextAction": "No active ticket. Before onboarding real users, configure a real SMTP provider in Supabase (the built-in sender allows 2 emails/hour) and repair the pre-existing migration-history drift from FM-0015/FM-0016 so `supabase db push` works again. Do not start FM-0016 follow-on work or FM-0017 until the Founder asks.",
+  "currentWorkstream": "Milestone 2 — Parcel Ingestion Security",
+  "currentFocusSummary": "FM-0030 Complete: parcel and zoning ingestion RPCs restricted to service_role and verified denied for anon and authenticated on the hosted project (ADR-0043). Service-role ingestion unaffected. No active ticket.",
+  "currentNextAction": "No active ticket. Two defects found during the FM-0029/FM-0030 audit remain open: Regrid address search returns zero candidates because normalizeRegridFeatureCollection does not unwrap the v2 response parcels wrapper, and there is still no user-facing Add Property flow. Do not start FM-0031 until the Founder asks.",
   "overallProgressPercent": 57,
   "activeTicketCount": 0,
   "milestonesSummary": [
     { "id": "M0", "name": "Repository Foundation", "status": "in_progress", "progressPercent": 93 },
     { "id": "M1", "name": "Authentication", "status": "complete", "progressPercent": 100 },
-    { "id": "M2", "name": "Property Workspace", "status": "not_started", "progressPercent": 100 },
+    { "id": "M2", "name": "Property Workspace", "status": "complete", "progressPercent": 100 },
     {
       "id": "M3",
       "name": "Development Intelligence",
@@ -27,8 +27,8 @@
     "inProgress": 0,
     "review": 0,
     "blocked": 0,
-    "completed": 26,
-    "total": 31
+    "completed": 27,
+    "total": 32
   },
   "blockedTicketIds": [],
   "repositoryState": {
@@ -49,5 +49,5 @@
   },
   "dataIntegrityWarningCount": 0,
   "integrityWarnings": [],
-  "recentActivityIds": ["ACT-000062", "ACT-000061", "ACT-000060", "ACT-000059", "ACT-000058"]
+  "recentActivityIds": ["ACT-000065", "ACT-000064", "ACT-000063", "ACT-000062", "ACT-000061"]
 }

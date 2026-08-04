@@ -515,3 +515,15 @@ Each entry uses the following fields, in this order:
   - Passing public values from Server Components as props (rejected — threads configuration through every component that needs it, for a problem the bundler already solves)
   - Keeping dynamic access and reading config only on the server (rejected — the browser Supabase client and the map genuinely need these values)
 - **Impact:** `src/lib/env.ts`, `src/lib/supabase/public-key.ts`. Any future public variable must be added to `PUBLIC_ENV_READERS` to be visible in the browser; the server-only `readServerEnv` path is unchanged.
+
+### ADR-0043
+
+- **Date:** 2026-08-04
+- **Status:** Accepted
+- **Decision:** Grant EXECUTE on `upsert_parcel_from_provider` and `upsert_parcel_zoning_from_provider` to `service_role` only, revoking explicitly from `public`, `anon`, **and** `authenticated`. The revoke/grant is applied by looping over `pg_proc` by function name so every overload is covered, and the migration self-verifies with `has_function_privilege`, raising rather than reporting success if any untrusted role retains access.
+- **Reason:** FM-0030. Both functions are `SECURITY DEFINER` and bypass RLS — they are the only write path into `public.parcels`, which grants `authenticated` no INSERT/UPDATE policy at all. The original migrations ended with `revoke all ... from public`, which reads as "service role only" but is not: Supabase's default privileges grant EXECUTE on new functions in `public` directly to the named `anon`/`authenticated` roles, and `REVOKE ... FROM PUBLIC` does not touch a grant held by a named role. An audit confirmed `has_function_privilege('anon', ...)` was true on the hosted project, so any holder of the publishable key could insert or overwrite shared parcel and zoning reference data — the fabricated-land-record scenario FORMETRIX.md §7 forbids.
+- **Alternatives Considered:**
+  - Narrowing Supabase's global default privileges via `ALTER DEFAULT PRIVILEGES` (rejected — would also strip `authenticated` from functions that must stay callable by signed-in users: `create_organization_with_owner` and the RLS helpers `is_active_org_member` / `has_org_role` / `can_access_property`)
+  - Relying on each function's internal validation (rejected — validation rejects malformed input, not unauthorized callers; a well-formed hostile payload would still have been written)
+  - Moving ingestion behind a Next.js Route Handler and leaving the grants (rejected — the database boundary, not the application, is what must hold when the key leaks)
+- **Impact:** Migration `20260804180000_secure_ingestion_rpc_permissions.sql`. No application code or UI changed; the service-role ingestion path is unaffected and was re-verified end to end against live Regrid data. `src/lib/properties/ingestion/rpc-permissions.test.ts` fails the build if a future migration re-grants either function to `anon`/`authenticated`, and carries an opt-in live probe (`FORMETRIX_LIVE_RPC_CHECK=1`) asserting SQLSTATE 42501 from a publishable-key caller. Every future `SECURITY DEFINER` function intended to be server-only needs the same explicit revoke — the default-privilege behavior remains global.

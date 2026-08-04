@@ -66,21 +66,22 @@
     "id": "M2",
     "name": "Property Workspace",
     "objective": "Let a developer search for and open a property, seeing verified parcel data and its location on a map — the entry point to the acquisition decision.",
-    "status": "not_started",
-    "startDate": null,
+    "status": "complete",
+    "startDate": "2026-07-31",
     "targetDate": null,
-    "completedDate": null,
-    "ticketIds": ["FM-0011", "FM-0012", "FM-0013", "FM-0014", "FM-0015", "FM-0029"],
+    "completedDate": "2026-08-04",
+    "ticketIds": ["FM-0011", "FM-0012", "FM-0013", "FM-0014", "FM-0015", "FM-0029", "FM-0030"],
     "progressPercent": 100,
     "deliverables": [
       "Property/parcel database schema on PostGIS (supabase/migrations) (FM-0011)",
       "Regrid integration for parcel data ingestion (FM-0012)",
       "Property Search (FM-0013)",
       "Property Dashboard (FM-0014)",
-      "Mapbox parcel visualization (FM-0015)"
+      "Mapbox parcel visualization (FM-0015)",
+      "Parcel ingestion RPCs restricted to the service role (FM-0030)"
     ],
     "blockers": [],
-    "lastUpdatedAt": "2026-07-31T12:00:00Z"
+    "lastUpdatedAt": "2026-08-04T17:35:00Z"
   },
   {
     "id": "M3",

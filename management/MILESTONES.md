@@ -104,10 +104,16 @@ Each milestone entry uses the following fields, in this order:
 - Property Search (FM-0013)
 - Property Dashboard (FM-0014)
 - Mapbox parcel visualization (FM-0015) — Completed
+- Parcel ingestion RPCs restricted to the service role (FM-0030) — Completed
 
-**Status:** Not Started
+**Status:** Complete
 
-**Completion %:** 100 (computed from scoped tickets; milestone status remains until Founder closes M2)
+**Completion %:** 100
+
+**Note:** All scoped M2 tickets are Completed, so the milestone status is now
+Complete. The workspace still has no user-facing property-import flow — the
+Regrid services exist but nothing calls them — which is tracked as new work
+rather than as unfinished M2 scope.
 
 ---
 
