@@ -4,8 +4,8 @@
   "currentMilestoneId": "M0",
   "currentTicketId": null,
   "currentWorkstream": "Milestone 2 — Property Workspace",
-  "currentFocusSummary": "FM-0031 Complete: Add Property onboarding ships end to end — live Regrid address/APN search, candidate list, parcel preview with boundary map, import, and redirect into the new Property Workspace. Milestone 2 closed. No active ticket.",
-  "currentNextAction": "No active ticket. Before the Founder can import in production, SUPABASE_SERVICE_ROLE_KEY must be added to Vercel Production (and .env.local for local use) — parcel writes go through a service-role RPC by design (FM-0030). Do not begin Development Score or Feasibility Analysis until asked.",
+  "currentFocusSummary": "FM-0031 is code-complete and pushed to origin/2026-07-31-9bck, but NOT live. Production still runs fab9c70 (FM-0006A), which predates FM-0030, FM-0030B, and FM-0031 — confirmed by loading the authenticated production /properties page, which still renders the pre-FM-0031 empty state. The Add Property action is absent in production because that build does not contain it.",
+  "currentNextAction": "BLOCKED ON DEPLOY — merge 2026-07-31-9bck into main (or run `vercel --prod`) so FM-0030, FM-0030B, and FM-0031 reach production; both were blocked by the local permission layer. SUPABASE_SERVICE_ROLE_KEY is already configured in Vercel Production and Preview, so import will work once the new build is live. Re-verify the Add Property flow on the production URL after deploying.",
   "overallProgressPercent": 57,
   "activeTicketCount": 0,
   "milestonesSummary": [
