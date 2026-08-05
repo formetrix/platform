@@ -27,6 +27,7 @@ const candidate: NormalizedParcelCandidate = {
   acreage: 2.5,
   latitude: 30.2745,
   longitude: -97.7355,
+  matchScore: 95,
   geometryGeoJson: {
     type: "Polygon",
     coordinates: [

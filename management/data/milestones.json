@@ -78,7 +78,8 @@
       "FM-0015",
       "FM-0029",
       "FM-0030",
-      "FM-0030B"
+      "FM-0030B",
+      "FM-0031"
     ],
     "progressPercent": 100,
     "deliverables": [
@@ -88,10 +89,11 @@
       "Property Dashboard (FM-0014)",
       "Mapbox parcel visualization (FM-0015)",
       "Parcel ingestion RPCs restricted to the service role (FM-0030)",
-      "Live Regrid v2 response normalization corrected (FM-0030B)"
+      "Live Regrid v2 response normalization corrected (FM-0030B)",
+      "End-to-end Add Property onboarding: search, preview, import, workspace (FM-0031)"
     ],
     "blockers": [],
-    "lastUpdatedAt": "2026-08-04T18:45:00Z"
+    "lastUpdatedAt": "2026-08-04T20:15:00Z"
   },
   {
     "id": "M3",

@@ -676,5 +676,27 @@
     "relatedMilestoneId": "M2",
     "previousValue": "in_progress",
     "newValue": "completed"
+  },
+  {
+    "id": "ACT-000068",
+    "timestamp": "2026-08-04T19:00:00Z",
+    "type": "ticket_created",
+    "actor": "Claude Fable 5",
+    "summary": "FM-0031 created and started: build the complete Add Property workflow — search Regrid by address or APN, review live candidates, preview the parcel with its boundary, import, and land in the new Property Workspace. First end-to-end onboarding path; the ingestion services have had no caller until now.",
+    "relatedTicketId": "FM-0031",
+    "relatedMilestoneId": "M2",
+    "previousValue": null,
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000069",
+    "timestamp": "2026-08-04T20:15:00Z",
+    "type": "ticket_completed",
+    "actor": "Claude Fable 5",
+    "summary": "FM-0031 completed: the first end-to-end property onboarding path. Add Property opens a responsive modal, searches live Regrid by address or APN, lists candidates with APN/location/size/score, previews the selected parcel with its boundary on the map, imports it, and opens the new Property Workspace. Business logic sits in a framework-free workflow module behind thin Server Actions. Verified live: 10 candidates, import created the property with city/ZIP/coordinates and primary parcel link owned by the right organization, a repeat import returned duplicate_property instead of a second record, and unauthenticated calls were refused.",
+    "relatedTicketId": "FM-0031",
+    "relatedMilestoneId": "M2",
+    "previousValue": "in_progress",
+    "newValue": "completed"
   }
 ]

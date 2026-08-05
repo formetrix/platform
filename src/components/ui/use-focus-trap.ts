@@ -11,8 +11,13 @@ const FOCUSABLE_SELECTOR =
  * into the panel on open, calls `onClose` on Escape, and restores focus
  * to whatever was focused before the panel opened when it closes.
  * Hand-rolled rather than a dependency — this is the entire scope of
- * what's needed for one drawer, and FORMETRIX.md §21 asks that a
- * dependency earn its place over a small amount of plain code.
+ * what's needed, and FORMETRIX.md §21 asks that a dependency earn its
+ * place over a small amount of plain code.
+ *
+ * Promoted here from the project-dashboard feature once the properties
+ * Add Property modal needed the same behavior (FORMETRIX.md §24: a
+ * component moves to src/components/ when a second feature genuinely
+ * needs it, not before).
  */
 export function useFocusTrap(
   containerRef: RefObject<HTMLElement | null>,

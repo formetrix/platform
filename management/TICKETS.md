@@ -457,6 +457,32 @@ Each ticket is a heading of the form `### [ID] — [Title]`, grouped under a mil
   - Provider characteristic worth knowing before building selection UI: Regrid returns **stacked parcels** — several records with distinct `ll_uuid` and `parcelnumb` sharing one address, acreage, and footprint (verified in the raw response, not an artifact of normalization). A candidate picker will need to present these meaningfully rather than assume one parcel per address.
   - `latitude`/`longitude` were added to `NormalizedParcelCandidate` to satisfy the "preserve coordinates" requirement. Nothing consumes them yet; wiring them into property creation belongs to the import-UI ticket.
 
+### FM-0031 — Build the complete Add Property workflow
+
+- **Priority:** High
+- **Status:** Completed
+- **Owner:** Claude Fable 5
+- **Type:** Feature
+- **Description:** The first end-to-end property onboarding path. From an empty organization, a signed-in user searches Regrid by address or APN, reviews live candidates, previews the selected parcel with its boundary on a map, imports it, and lands in the new Property Workspace. Reuses the existing Regrid client, normalization, ingestion, and property-creation code — no second provider path and no duplicated business logic.
+- **Dependencies:** FM-0012 — Completed (Regrid client and ingestion services); FM-0030B — Completed (live Regrid normalization, without which search returns nothing); FM-0006A — Completed (authentication and active-organization context).
+- **Acceptance Criteria:**
+  - The empty Properties state presents Add Property as the primary onboarding action.
+  - Add Property opens a modal on desktop and a full-screen drawer on mobile, with address and APN search modes.
+  - Candidates render live Regrid results showing address, APN, city, county, state, parcel size, provider, and score when available.
+  - Selecting a candidate shows a preview with the parcel boundary on a map plus address, APN, city, county, ZIP, acreage, and coordinates.
+  - Import reuses `importParcel` and `createPropertyFromParcel` with the server-verified active organization; no client-supplied organization or user id is trusted.
+  - Progress is shown, duplicate submissions are prevented, and success redirects to `/property/{id}` with the parcel, map, and metadata present.
+  - No results, provider unavailable, rate limit, duplicate property, network error, unauthorized, and missing organization each produce a distinct friendly message.
+  - Business logic lives outside the UI components so a future native client can reuse the same server contract; no Regrid, Supabase, import, normalization, or property-creation logic is duplicated.
+  - Validation suite passes and the flow is verified end to end against live Regrid and the hosted database.
+- **Outcome:** All met. Driven end to end against live Regrid and the hosted database with a real signed-in user in a brand-new organization: address search returned 10 candidates with every field populated, APN search 1, a nonexistent address 0 cleanly, an invalid APN was rejected before the provider was called, and unauthenticated calls were refused by middleware (307). Import created the Property with city, ZIP, and coordinates, a `primary_site` parcel link, stored geometry, and the correct owning organization; a repeat import returned `duplicate_property` pointing at the existing record rather than creating a second one. The workspace rendered the address, APN, status, and parcel map, and the list moved from the empty state to "1 property". All fixtures were deleted afterward.
+- **Notes:**
+  - **Production blocker, not a code defect:** parcel writes go through a service-role RPC by design (FM-0030), so import needs `SUPABASE_SERVICE_ROLE_KEY`. It is currently unset in Vercel (all environments) and empty in `.env.local`. Verification ran with the key exported into the dev server process. Until it is configured, import fails closed with "Parcel import is not configured … nothing was saved" rather than erroring obscurely.
+  - The client sends only the provider parcel id, never the candidate object. Beyond removing any question of what a tampered candidate could write, this was forced by a real failure: embedding the raw provider feature in a Server Action argument produced `Connection closed.` (HTTP 500) during deserialization. Isolated by bisecting the payload — stripping `rawFeature` made the same import succeed. The server now re-fetches the parcel, which also means the stored record is current rather than a browser copy.
+  - `importParcel` now returns the normalized candidate it used, and `createPropertyFromParcel` prefers it over the previous reconstruction from the parcel row. That reconstruction hard-coded `city: null` and `postalCode: null`, so importing by provider id would have silently created Properties with no city or ZIP.
+  - `useFocusTrap` was promoted from the project-dashboard feature to `src/components/ui/` now that a second feature needs it (FORMETRIX.md §24), matching the precedent set by `Badge` in FM-0029.
+  - Regrid returns stacked parcels sharing one address and footprint, so the candidate list shows the APN on every row and warns that several records can share an address — picking by address alone would be ambiguous.
+
 ---
 
 ## Milestone 3: Development Intelligence

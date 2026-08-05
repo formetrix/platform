@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-04T22:54:05Z",
-  "lastIntelligenceUpdate": "2026-08-04T22:54:05Z",
+  "generatedAt": "2026-08-05T01:08:27Z",
+  "lastIntelligenceUpdate": "2026-08-05T01:08:27Z",
   "currentMilestoneId": "M0",
   "currentTicketId": null,
   "currentWorkstream": "Milestone 2 — Property Workspace",
-  "currentFocusSummary": "FM-0030B Complete: live Regrid v2 normalization fixed (grouped parcels/buildings/zoning response and nested properties.fields), plus the APN parameter and parcel-lookup path corrected. Address, APN, and point search all return real candidates with full attributes. No active ticket.",
-  "currentNextAction": "No active ticket. The Regrid services now work against the live API but nothing calls them: there is still no user-facing Add Property flow. Do not start FM-0031 until the Founder asks.",
+  "currentFocusSummary": "FM-0031 Complete: Add Property onboarding ships end to end — live Regrid address/APN search, candidate list, parcel preview with boundary map, import, and redirect into the new Property Workspace. Milestone 2 closed. No active ticket.",
+  "currentNextAction": "No active ticket. Before the Founder can import in production, SUPABASE_SERVICE_ROLE_KEY must be added to Vercel Production (and .env.local for local use) — parcel writes go through a service-role RPC by design (FM-0030). Do not begin Development Score or Feasibility Analysis until asked.",
   "overallProgressPercent": 57,
   "activeTicketCount": 0,
   "milestonesSummary": [
@@ -27,8 +27,8 @@
     "inProgress": 0,
     "review": 0,
     "blocked": 0,
-    "completed": 28,
-    "total": 33
+    "completed": 29,
+    "total": 34
   },
   "blockedTicketIds": [],
   "repositoryState": {
@@ -49,5 +49,5 @@
   },
   "dataIntegrityWarningCount": 0,
   "integrityWarnings": [],
-  "recentActivityIds": ["ACT-000067", "ACT-000066", "ACT-000065", "ACT-000064", "ACT-000063"]
+  "recentActivityIds": ["ACT-000069", "ACT-000068", "ACT-000067", "ACT-000066", "ACT-000065"]
 }

@@ -12,7 +12,18 @@ export type SearchParcelsResult =
   | { status: "error"; message: string };
 
 export type ImportParcelResult =
-  | { status: "ok"; parcel: Parcel; created: boolean }
+  | {
+      status: "ok";
+      parcel: Parcel;
+      created: boolean;
+      /**
+       * The normalized provider record this import was built from — whether it
+       * was supplied by the caller or fetched by provider id. Carries fields the
+       * `parcels` row does not store (city, postal code, coordinates), so
+       * callers creating a Property do not have to reconstruct them lossily.
+       */
+      candidate: NormalizedParcelCandidate;
+    }
   | { status: "unconfigured" }
   | { status: "invalid_request"; message: string }
   | { status: "rate_limited"; retryAfterMs?: number; message: string }

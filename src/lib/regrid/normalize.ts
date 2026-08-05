@@ -139,6 +139,7 @@ export function normalizeRegridFeature(
     acreage,
     latitude: asFiniteNumber(props.lat),
     longitude: asFiniteNumber(props.lon),
+    matchScore: asFiniteNumber(props.score),
     geometryGeoJson,
     geometrySource: REGRID_PROVIDER,
     sourceUpdatedAt: asString(props.ll_updated_at),

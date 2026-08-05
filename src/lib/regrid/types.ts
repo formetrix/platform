@@ -118,6 +118,11 @@ export type NormalizedParcelCandidate = {
   /** Provider point coordinates when supplied; null when Regrid omitted them. */
   latitude: number | null;
   longitude: number | null;
+  /**
+   * Provider's own match confidence for a search hit (higher is better).
+   * Null for lookups by id, which are exact and carry no score.
+   */
+  matchScore: number | null;
   /** GeoJSON Polygon or MultiPolygon, or null when Regrid omitted geometry. */
   geometryGeoJson: RegridGeoJsonGeometry | null;
   geometrySource: string;

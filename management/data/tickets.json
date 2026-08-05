@@ -1342,5 +1342,76 @@
     "release": null,
     "progressPercent": 100,
     "lastUpdatedAt": "2026-08-04T18:45:00Z"
+  },
+  {
+    "id": "FM-0031",
+    "title": "Build the complete Add Property workflow",
+    "description": "First end-to-end property onboarding: from an empty organization, a signed-in user searches Regrid by address or APN, reviews live candidates, previews the selected parcel with its boundary on a map, imports it, and lands in the new Property Workspace. Reuses the existing Regrid client, normalization, import, and property-creation code; adds no second provider path.",
+    "milestoneId": "M2",
+    "status": "completed",
+    "priority": "high",
+    "type": "feature",
+    "owner": "Claude Fable 5",
+    "dependencies": [
+      {
+        "ticketId": "FM-0012",
+        "note": "Completed — Regrid client and ingestion services being reused."
+      },
+      {
+        "ticketId": "FM-0030B",
+        "note": "Completed — live Regrid normalization, without which search returns nothing."
+      },
+      {
+        "ticketId": "FM-0006A",
+        "note": "Completed — authentication and active-organization context."
+      }
+    ],
+    "acceptanceCriteria": [
+      {
+        "text": "The empty Properties state presents Add Property as the primary onboarding action, with the specified copy. Verified rendered for a real signed-in user in a brand-new organization.",
+        "met": true
+      },
+      {
+        "text": "Add Property opens a shared Modal: centered dialog from the sm breakpoint up, full-screen sheet on phones, with address and APN modes. Focus is trapped, Escape closes, focus returns to the trigger, and body scroll is locked.",
+        "met": true
+      },
+      {
+        "text": "Candidates render live Regrid results with address, APN, city, county, state, parcel size, provider, and match score. Verified: an address search returned 10 candidates with every field populated.",
+        "met": true
+      },
+      {
+        "text": "Selecting a candidate shows the parcel boundary through the same ParcelMap the workspace uses, plus address, APN, city, county, state, ZIP, acreage, coordinates, and source.",
+        "met": true
+      },
+      {
+        "text": "Import reuses importParcel and createPropertyFromParcel with the server-verified active organization. The client sends only the provider parcel id, so the server re-fetches authoritative provider data and no client-supplied organization, user id, or parcel attribute is trusted.",
+        "met": true
+      },
+      {
+        "text": "Progress is shown on both search and import, in-flight submissions are blocked and the dialog cannot be closed mid-import, and success routes to /property/{id}. Verified: the workspace renders the address, APN, status, and parcel map, and the list shows 1 property.",
+        "met": true
+      },
+      {
+        "text": "No results, provider unavailable, rate limit, duplicate property, network/parse error, unauthorized, and missing organization each map to a distinct message; unit tests assert distinctness, that failures state nothing was saved, and that no provider or environment detail leaks.",
+        "met": true
+      },
+      {
+        "text": "Business logic lives in add-property-workflow.ts with no React or Next import; Server Actions are thin wrappers, so a native client can drive the same workflow through a Route Handler. No Regrid, Supabase, import, normalization, or property-creation logic was duplicated.",
+        "met": true
+      },
+      {
+        "text": "test (153), lint, typecheck, format:check, build, dashboard:update, dashboard:check, and dashboard:health all pass; the flow was driven end to end against live Regrid and the hosted database, and every fixture was removed afterward.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-08-04T19:00:00Z",
+    "startedAt": "2026-08-04T19:00:00Z",
+    "completedAt": "2026-08-04T20:15:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-08-04T20:15:00Z"
   }
 ]
