@@ -63,7 +63,7 @@ export default async function PropertiesPage() {
     );
   }
 
-  const { properties, organizationName, regridConfigured } = result;
+  const { properties, organizationName } = result;
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-10 sm:py-12">
@@ -82,14 +82,7 @@ export default async function PropertiesPage() {
       </div>
 
       {properties.length === 0 ? (
-        regridConfigured ? (
-          <AddFirstPropertyCard />
-        ) : (
-          <EmptyState
-            title="Parcel import is not configured"
-            description="No properties yet, and the parcel data provider is not connected for this deployment, so there is no way to import one. Formetrix will not invent placeholder properties."
-          />
-        )
+        <AddFirstPropertyCard />
       ) : (
         <div className="flex flex-col gap-3">
           {properties.map((property) => (
@@ -104,6 +97,11 @@ export default async function PropertiesPage() {
 /**
  * First-run state. Import is the only way a Property comes into existence, so
  * this card is the onboarding path rather than a passive "nothing here" notice.
+ *
+ * The action is shown unconditionally, including when the parcel provider is
+ * unconfigured. Hiding it left a first-time user staring at a dead end with no
+ * indication of what to do or why — the search dialog explains a missing
+ * provider far better than an absent button does.
  */
 function AddFirstPropertyCard() {
   return (
