@@ -3,7 +3,7 @@
 import { useRef, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils/cn";
-import { useFocusTrap } from "@/features/project-dashboard/components/details/use-focus-trap";
+import { useFocusTrap } from "@/components/ui/use-focus-trap";
 
 export interface DetailDrawerProps {
   isOpen: boolean;

@@ -615,6 +615,22 @@
     "lastUpdatedAt": "2026-08-04T07:40:00Z"
   },
   {
+    "id": "ADR-0043",
+    "kind": "architecture",
+    "date": "2026-08-04",
+    "status": "approved",
+    "decision": "Grant EXECUTE on upsert_parcel_from_provider and upsert_parcel_zoning_from_provider to service_role only, revoking explicitly from public, anon, and authenticated. Applied by looping over pg_proc by name so every overload is covered; the migration self-verifies with has_function_privilege and raises if any untrusted role retains access.",
+    "rationale": "FM-0030. Both are SECURITY DEFINER and bypass RLS — the only write path into public.parcels, which grants authenticated no INSERT/UPDATE policy. The original migrations revoked only FROM PUBLIC, which does not remove Supabase default grants held directly by the named anon/authenticated roles. An audit confirmed anon could execute them on the hosted project, letting any publishable-key holder write shared parcel and zoning reference data.",
+    "alternativesConsidered": [
+      "ALTER DEFAULT PRIVILEGES globally (rejected: would also strip authenticated from create_organization_with_owner and the RLS helpers)",
+      "Rely on each function internal validation (rejected: validates input, not caller authorization)",
+      "Move ingestion behind a Route Handler and leave grants (rejected: the database boundary must hold when the key leaks)"
+    ],
+    "impact": "Migration 20260804180000_secure_ingestion_rpc_permissions.sql. No application or UI change; service-role ingestion re-verified end to end against live Regrid data. src/lib/properties/ingestion/rpc-permissions.test.ts guards against re-granting, with an opt-in live probe asserting SQLSTATE 42501.",
+    "relatedTicketIds": ["FM-0030", "FM-0012", "FM-0016"],
+    "lastUpdatedAt": "2026-08-04T17:30:00Z"
+  },
+  {
     "id": "FD-0001",
     "kind": "founder",
     "date": "2026-07-30",

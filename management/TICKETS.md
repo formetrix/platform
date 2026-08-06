@@ -416,6 +416,75 @@ Each ticket is a heading of the form `### [ID] — [Title]`, grouped under a mil
   - `npm run dashboard:update`, `npm run dashboard:check`, `npm run lint`, `npm run typecheck`, `npm run format:check`, `npm run build`, and `npm run dashboard:health` all pass.
   - Verified at `http://localhost:3000/properties` and `/property/demo` (plus all 3 mock property ids, all 9 sections, and the unknown-id 404 case) via dev/production server requests and rendered-markup assertions; a full interactive browser session was not available in this environment (same caveat as FM-0026A).
 
+### FM-0030 — Secure parcel ingestion RPCs
+
+- **Priority:** High
+- **Status:** Completed
+- **Owner:** Claude Fable 5
+- **Description:** Restrict `upsert_parcel_from_provider` and `upsert_parcel_zoning_from_provider` to the Supabase `service_role`. Both are `SECURITY DEFINER` and bypass RLS, but a configuration audit found `anon` and `authenticated` still hold EXECUTE on the hosted project, so any holder of the publishable key can write shared parcel and zoning reference data. No application or UI behavior changes.
+- **Dependencies:** FM-0012 — Completed (created `upsert_parcel_from_provider`); FM-0016 — Completed (created `upsert_parcel_zoning_from_provider`).
+- **Acceptance Criteria:**
+  - Both ingestion RPCs explicitly `REVOKE EXECUTE` from `public`, `anon`, and `authenticated`, and `GRANT EXECUTE` only to `service_role`. — Met; migration `20260804180000` applies the revoke/grant per overload via a `pg_proc` loop and self-verifies with `has_function_privilege`, raising rather than reporting success if any untrusted role retains access.
+  - The hosted project reflects the corrected privileges; `has_function_privilege` reports false for `anon` and `authenticated`. — Met; both report false, and live calls return SQLSTATE `42501` for an anonymous caller (HTTP 401) and for a real signed-in user token (HTTP 403).
+  - Parcel import through the server-side service-role client still succeeds, including duplicate reuse. — Met; a live Regrid parcel imported with geometry through the real `importParcel` path, and a repeat import reused the same row (`created=false`) rather than duplicating it. The verification row was deleted afterward; the database is back to zero parcels.
+  - An automated regression test fails if a future migration reintroduces `anon`/`authenticated` execute access to an ingestion RPC. — Met; `src/lib/properties/ingestion/rpc-permissions.test.ts`, proven to fail by temporarily reintroducing the original grant and observing the assertion. It also carries an opt-in live probe (`FORMETRIX_LIVE_RPC_CHECK=1`) asserting `42501`, skipped by default so the suite stays offline.
+  - No application code, UI, or unrelated migration is changed; the full validation suite passes. — Met; the only source change is the new test file, plus the new migration and management records.
+- **Notes:**
+  - Root cause: Supabase's default privileges grant EXECUTE on new `public` functions directly to the named `anon`/`authenticated` roles, and `REVOKE ... FROM PUBLIC` does not remove a grant held by a named role. The global default-privilege behavior is deliberately left alone — narrowing it would also strip `authenticated` from functions that must stay callable by signed-in users (`create_organization_with_owner`, and the RLS helpers `is_active_org_member` / `has_org_role` / `can_access_property`). Every future server-only `SECURITY DEFINER` function needs the same explicit revoke (ADR-0043).
+  - Found while verifying, out of scope and left unfixed: `normalizeRegridFeatureCollection` reads `collection.features`, but Regrid's live v2 address endpoint returns the FeatureCollection nested under a `parcels` key, so `searchParcels` returns zero candidates against the real API. The unit tests pass because they mock a bare FeatureCollection. Ingestion was therefore verified by normalizing a live Regrid feature directly through `normalizeRegridFeature`.
+
+### FM-0030B — Fix live Regrid search normalization
+
+- **Priority:** High
+- **Status:** Completed
+- **Owner:** Claude Fable 5
+- **Type:** Bug / integration
+- **Description:** Regrid's live v2 search responses do not match the parser written in FM-0012. The normalizer reads `collection.features` and `properties.<attr>`, but the live API nests candidate groups under `parcels` / `buildings` / `zoning` and puts every parcel attribute under `properties.fields`. Address search therefore returns zero candidates, and the few candidates that do resolve lose their APN, address, city, state, county, and acreage. Fix normalization only — no Add Property UI.
+- **Dependencies:** FM-0012 — Completed (built the Regrid client and normalizer being corrected here).
+- **Acceptance Criteria:**
+  - Candidate extraction supports the real grouped v2 response, preferring the `parcels` group and never treating a building or zoning record as a parcel candidate.
+  - The legacy bare `FeatureCollection` shape continues to work.
+  - Provider parcel id, APN, address, city, state, county, postal code, acreage, coordinates, geometry, provider metadata, and provenance all survive normalization from a live response.
+  - An empty candidate list is returned only when the provider genuinely returned no usable parcel candidates; malformed payloads fail safely rather than fabricating fields.
+  - Live verification against the real Regrid API covers a valid address, an invalid address, APN search, and point search; rate-limit and retry behavior are unchanged.
+  - Regression tests cover the grouped shape, the legacy shape, multiple groups, a missing `parcels` array, malformed candidates, an empty response, and provider-id/APN mapping.
+  - Committed fixtures contain no private addresses; the Regrid token is never exposed.
+  - The full validation suite passes.
+- **Outcome:** All met. Live verification through the application's own `searchParcels`: a valid address returned 2 candidates with APN, address, city, state, county, ZIP, acreage, coordinates, and Polygon geometry all populated; an invalid address returned 0 cleanly; APN search returned 1; point search returned 3; lookup by provider id resolved. Malformed JSON raises `parse_error`, junk-shaped bodies normalize to zero candidates, and rate limiting still retries 3 times preserving `retryAfterMs`. Tests went from 119 to 143.
+- **Notes:**
+  - **Two request-side defects fixed beyond the stated normalization scope, called out deliberately.** Live verification could not otherwise satisfy this ticket's own "APN search still works" requirement. (1) APN search sent `apn=`, which the v2 API rejects with HTTP 400 "Please provide a 'parcelnumb' parameter" — now sends `parcelnumb`. (2) `getByProviderParcelId` requested `{baseUrl}/parcels/{id}`, which serves HTML and 404s — now uses `/api/v2/parcels/{id}`. Both are one-token corrections inside the Regrid client, both are covered by new tests, and both were verified against the live API. Neither changes behavior for any other caller.
+  - The root cause of all three defects is the same: FM-0012's client was written against an assumed response/request contract and never exercised against the live API. Its unit tests mocked the assumed shape, so they passed while every live call failed.
+  - Provider characteristic worth knowing before building selection UI: Regrid returns **stacked parcels** — several records with distinct `ll_uuid` and `parcelnumb` sharing one address, acreage, and footprint (verified in the raw response, not an artifact of normalization). A candidate picker will need to present these meaningfully rather than assume one parcel per address.
+  - `latitude`/`longitude` were added to `NormalizedParcelCandidate` to satisfy the "preserve coordinates" requirement. Nothing consumes them yet; wiring them into property creation belongs to the import-UI ticket.
+
+### FM-0031 — Build the complete Add Property workflow
+
+- **Priority:** High
+- **Status:** Completed
+- **Owner:** Claude Fable 5
+- **Type:** Feature
+- **Description:** The first end-to-end property onboarding path. From an empty organization, a signed-in user searches Regrid by address or APN, reviews live candidates, previews the selected parcel with its boundary on a map, imports it, and lands in the new Property Workspace. Reuses the existing Regrid client, normalization, ingestion, and property-creation code — no second provider path and no duplicated business logic.
+- **Dependencies:** FM-0012 — Completed (Regrid client and ingestion services); FM-0030B — Completed (live Regrid normalization, without which search returns nothing); FM-0006A — Completed (authentication and active-organization context).
+- **Acceptance Criteria:**
+  - The empty Properties state presents Add Property as the primary onboarding action.
+  - Add Property opens a modal on desktop and a full-screen drawer on mobile, with address and APN search modes.
+  - Candidates render live Regrid results showing address, APN, city, county, state, parcel size, provider, and score when available.
+  - Selecting a candidate shows a preview with the parcel boundary on a map plus address, APN, city, county, ZIP, acreage, and coordinates.
+  - Import reuses `importParcel` and `createPropertyFromParcel` with the server-verified active organization; no client-supplied organization or user id is trusted.
+  - Progress is shown, duplicate submissions are prevented, and success redirects to `/property/{id}` with the parcel, map, and metadata present.
+  - No results, provider unavailable, rate limit, duplicate property, network error, unauthorized, and missing organization each produce a distinct friendly message.
+  - Business logic lives outside the UI components so a future native client can reuse the same server contract; no Regrid, Supabase, import, normalization, or property-creation logic is duplicated.
+  - Validation suite passes and the flow is verified end to end against live Regrid and the hosted database.
+- **Outcome:** All met. Driven end to end against live Regrid and the hosted database with a real signed-in user in a brand-new organization: address search returned 10 candidates with every field populated, APN search 1, a nonexistent address 0 cleanly, an invalid APN was rejected before the provider was called, and unauthenticated calls were refused by middleware (307). Import created the Property with city, ZIP, and coordinates, a `primary_site` parcel link, stored geometry, and the correct owning organization; a repeat import returned `duplicate_property` pointing at the existing record rather than creating a second one. The workspace rendered the address, APN, status, and parcel map, and the list moved from the empty state to "1 property". All fixtures were deleted afterward.
+- **Notes:**
+  - **Production verification failed on 2026-08-04, and the ticket's "verified" claims were about a local dev server, not the deployed app.** A first-time user on production saw no Add Property action. Root cause was a deployment gap: `origin/main` was at `fab9c70` (FM-0006A) and the commits for FM-0030, FM-0030B, and FM-0031 had never been pushed, so the deployed build simply did not contain the component. Confirmed by loading the authenticated production `/properties` page, which still rendered the pre-FM-0031 copy ("No properties in this organization … ingestion services"). The branch is now pushed; the merge to `main` and a direct `vercel --prod` were both blocked by the local permission layer, so production remains on the old build until a human deploys.
+  - **A second, real defect was found while auditing that failure:** the new empty state gated the Add Property button on `regridConfigured`, so any deployment without a parcel provider would still have shown a dead end with no explanation. That contradicted the ticket's own specification, which asks for the action unconditionally. Fixed in `9ef9ffc` — the button now always renders, and the dialog explains a missing provider far better than an absent button could.
+  - **Import needs `SUPABASE_SERVICE_ROLE_KEY`** because parcel writes go through a service-role RPC by design (FM-0030). It is now configured in Vercel Production and Preview (added by the Founder), so import will work as soon as the new build is deployed. Local verification ran with the key exported into the dev server process; `.env.local` still has it empty.
+  - The client sends only the provider parcel id, never the candidate object. Beyond removing any question of what a tampered candidate could write, this was forced by a real failure: embedding the raw provider feature in a Server Action argument produced `Connection closed.` (HTTP 500) during deserialization. Isolated by bisecting the payload — stripping `rawFeature` made the same import succeed. The server now re-fetches the parcel, which also means the stored record is current rather than a browser copy.
+  - `importParcel` now returns the normalized candidate it used, and `createPropertyFromParcel` prefers it over the previous reconstruction from the parcel row. That reconstruction hard-coded `city: null` and `postalCode: null`, so importing by provider id would have silently created Properties with no city or ZIP.
+  - `useFocusTrap` was promoted from the project-dashboard feature to `src/components/ui/` now that a second feature needs it (FORMETRIX.md §24), matching the precedent set by `Badge` in FM-0029.
+  - Regrid returns stacked parcels sharing one address and footprint, so the candidate list shows the APN on every row and warns that several records can share an address — picking by address alone would be ambiguous.
+
 ---
 
 ## Milestone 3: Development Intelligence

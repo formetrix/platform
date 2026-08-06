@@ -1238,5 +1238,180 @@
     "release": null,
     "progressPercent": 100,
     "lastUpdatedAt": "2026-07-31T22:00:00Z"
+  },
+  {
+    "id": "FM-0030",
+    "title": "Secure parcel ingestion RPCs",
+    "description": "Restrict upsert_parcel_from_provider and upsert_parcel_zoning_from_provider to the Supabase service_role. Both are SECURITY DEFINER and bypass RLS, but a configuration audit found anon and authenticated still hold EXECUTE on the hosted project, so any holder of the publishable key can write shared parcel and zoning reference data. No application or UI behavior changes.",
+    "milestoneId": "M2",
+    "status": "completed",
+    "priority": "high",
+    "type": "bug",
+    "owner": "Claude Fable 5",
+    "dependencies": [
+      { "ticketId": "FM-0012", "note": "Completed — created upsert_parcel_from_provider." },
+      { "ticketId": "FM-0016", "note": "Completed — created upsert_parcel_zoning_from_provider." }
+    ],
+    "acceptanceCriteria": [
+      {
+        "text": "Both ingestion RPCs explicitly REVOKE EXECUTE from public, anon, and authenticated, and GRANT EXECUTE only to service_role. Applied per-overload via a pg_proc loop in migration 20260804180000, which self-verifies with has_function_privilege and raises if any untrusted role retains access.",
+        "met": true
+      },
+      {
+        "text": "The hosted project reflects the corrected privileges; has_function_privilege reports false for anon and authenticated on both functions, and live calls return SQLSTATE 42501 permission denied for an anonymous caller and for a real signed-in user token.",
+        "met": true
+      },
+      {
+        "text": "Parcel import through the server-side service-role client still succeeds: a live Regrid parcel imported with geometry via the real importParcel path, and a repeat import reused the same row rather than duplicating it. The verification row was deleted afterward.",
+        "met": true
+      },
+      {
+        "text": "An automated regression test fails if a future migration reintroduces anon/authenticated execute access to an ingestion RPC — proven by temporarily reintroducing the original grant and observing the failure. It also carries an opt-in live probe (FORMETRIX_LIVE_RPC_CHECK=1), skipped by default so the suite stays offline.",
+        "met": true
+      },
+      {
+        "text": "No application code, UI, or unrelated migration was changed; test, lint, typecheck, format:check, build, dashboard:update, dashboard:check, and dashboard:health all pass.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-08-04T17:00:00Z",
+    "startedAt": "2026-08-04T17:00:00Z",
+    "completedAt": "2026-08-04T17:35:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-08-04T17:35:00Z"
+  },
+  {
+    "id": "FM-0030B",
+    "title": "Fix live Regrid search normalization",
+    "description": "Regrid's live v2 search responses do not match the parser written in FM-0012. The normalizer reads collection.features and properties.<attr>, but the live API nests candidate groups under parcels/buildings/zoning and puts every parcel attribute under properties.fields. Address search returns zero candidates, and the few that resolve lose APN, address, city, state, county, and acreage. Normalization fix only — no Add Property UI.",
+    "milestoneId": "M2",
+    "status": "completed",
+    "priority": "high",
+    "type": "bug",
+    "owner": "Claude Fable 5",
+    "dependencies": [
+      {
+        "ticketId": "FM-0012",
+        "note": "Completed — built the Regrid client and normalizer being corrected here."
+      }
+    ],
+    "acceptanceCriteria": [
+      {
+        "text": "Candidate extraction supports the real grouped v2 response, preferring the parcels group and never treating a building or zoning record as a parcel candidate. An absent or empty parcels group returns zero candidates rather than falling through to another group.",
+        "met": true
+      },
+      {
+        "text": "The legacy bare FeatureCollection shape continues to work; the original FM-0012 client test passes unchanged.",
+        "met": true
+      },
+      {
+        "text": "Provider parcel id, APN, address, city, state, county, postal code, acreage, coordinates, geometry, provider metadata, and provenance all survive normalization — verified against a live response where every one of those was previously lost except the id and geometry.",
+        "met": true
+      },
+      {
+        "text": "Empty results only when the provider returned nothing usable: a nonexistent address returns zero candidates cleanly, malformed JSON raises parse_error, and junk-shaped bodies normalize to zero without fabricating fields.",
+        "met": true
+      },
+      {
+        "text": "Live verification against the real Regrid API covered a valid address (2 candidates), an invalid address (0), APN search (1), point search (3), lookup by provider id, malformed responses, and rate limiting (3 attempts, retryAfterMs 1000 preserved).",
+        "met": true
+      },
+      {
+        "text": "Regression tests cover the grouped shape, the legacy shape, multiple candidates, missing/empty/array parcels groups, malformed candidate objects, empty responses, and provider-id/APN mapping — 21 normalization tests plus 3 new client tests.",
+        "met": true
+      },
+      {
+        "text": "Fixtures use a public landmark address with owner and mailing details omitted; no token or private address is committed.",
+        "met": true
+      },
+      {
+        "text": "test (143 pass), lint, typecheck, format:check, build, dashboard:update, dashboard:check, and dashboard:health all pass.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-08-04T18:00:00Z",
+    "startedAt": "2026-08-04T18:00:00Z",
+    "completedAt": "2026-08-04T18:45:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-08-04T18:45:00Z"
+  },
+  {
+    "id": "FM-0031",
+    "title": "Build the complete Add Property workflow",
+    "description": "First end-to-end property onboarding: from an empty organization, a signed-in user searches Regrid by address or APN, reviews live candidates, previews the selected parcel with its boundary on a map, imports it, and lands in the new Property Workspace. Reuses the existing Regrid client, normalization, import, and property-creation code; adds no second provider path.",
+    "milestoneId": "M2",
+    "status": "completed",
+    "priority": "high",
+    "type": "feature",
+    "owner": "Claude Fable 5",
+    "dependencies": [
+      {
+        "ticketId": "FM-0012",
+        "note": "Completed — Regrid client and ingestion services being reused."
+      },
+      {
+        "ticketId": "FM-0030B",
+        "note": "Completed — live Regrid normalization, without which search returns nothing."
+      },
+      {
+        "ticketId": "FM-0006A",
+        "note": "Completed — authentication and active-organization context."
+      }
+    ],
+    "acceptanceCriteria": [
+      {
+        "text": "The empty Properties state presents Add Property as the primary onboarding action, with the specified copy. Verified rendered for a real signed-in user in a brand-new organization.",
+        "met": true
+      },
+      {
+        "text": "Add Property opens a shared Modal: centered dialog from the sm breakpoint up, full-screen sheet on phones, with address and APN modes. Focus is trapped, Escape closes, focus returns to the trigger, and body scroll is locked.",
+        "met": true
+      },
+      {
+        "text": "Candidates render live Regrid results with address, APN, city, county, state, parcel size, provider, and match score. Verified: an address search returned 10 candidates with every field populated.",
+        "met": true
+      },
+      {
+        "text": "Selecting a candidate shows the parcel boundary through the same ParcelMap the workspace uses, plus address, APN, city, county, state, ZIP, acreage, coordinates, and source.",
+        "met": true
+      },
+      {
+        "text": "Import reuses importParcel and createPropertyFromParcel with the server-verified active organization. The client sends only the provider parcel id, so the server re-fetches authoritative provider data and no client-supplied organization, user id, or parcel attribute is trusted.",
+        "met": true
+      },
+      {
+        "text": "Progress is shown on both search and import, in-flight submissions are blocked and the dialog cannot be closed mid-import, and success routes to /property/{id}. Verified: the workspace renders the address, APN, status, and parcel map, and the list shows 1 property.",
+        "met": true
+      },
+      {
+        "text": "No results, provider unavailable, rate limit, duplicate property, network/parse error, unauthorized, and missing organization each map to a distinct message; unit tests assert distinctness, that failures state nothing was saved, and that no provider or environment detail leaks.",
+        "met": true
+      },
+      {
+        "text": "Business logic lives in add-property-workflow.ts with no React or Next import; Server Actions are thin wrappers, so a native client can drive the same workflow through a Route Handler. No Regrid, Supabase, import, normalization, or property-creation logic was duplicated.",
+        "met": true
+      },
+      {
+        "text": "test (153), lint, typecheck, format:check, build, dashboard:update, dashboard:check, and dashboard:health all pass; the flow was driven end to end against live Regrid and the hosted database, and every fixture was removed afterward.",
+        "met": true
+      }
+    ],
+    "createdAt": "2026-08-04T19:00:00Z",
+    "startedAt": "2026-08-04T19:00:00Z",
+    "completedAt": "2026-08-04T20:15:00Z",
+    "blockedReason": null,
+    "commitSha": null,
+    "pullRequest": null,
+    "release": null,
+    "progressPercent": 100,
+    "lastUpdatedAt": "2026-08-04T20:15:00Z"
   }
 ]

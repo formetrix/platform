@@ -620,5 +620,83 @@
     "relatedMilestoneId": "M1",
     "previousValue": "in_progress",
     "newValue": "completed"
+  },
+  {
+    "id": "ACT-000063",
+    "timestamp": "2026-08-04T17:00:00Z",
+    "type": "ticket_created",
+    "actor": "Claude Fable 5",
+    "summary": "FM-0030 created and started: restrict upsert_parcel_from_provider and upsert_parcel_zoning_from_provider to service_role. A configuration audit found anon and authenticated still hold EXECUTE on the hosted project despite the original migrations revoking from PUBLIC, so a publishable-key holder can write shared parcel and zoning reference data.",
+    "relatedTicketId": "FM-0030",
+    "relatedMilestoneId": "M2",
+    "previousValue": null,
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000064",
+    "timestamp": "2026-08-04T17:30:00Z",
+    "type": "decision_recorded",
+    "actor": "Claude Fable 5",
+    "summary": "ADR-0043 recorded: ingestion RPC EXECUTE granted to service_role only, revoked explicitly from public, anon, and authenticated, because REVOKE FROM PUBLIC does not remove Supabase default grants held by named roles.",
+    "relatedTicketId": "FM-0030",
+    "relatedDecisionId": "ADR-0043",
+    "relatedMilestoneId": "M2",
+    "previousValue": null,
+    "newValue": null
+  },
+  {
+    "id": "ACT-000065",
+    "timestamp": "2026-08-04T17:35:00Z",
+    "type": "ticket_completed",
+    "actor": "Claude Fable 5",
+    "summary": "FM-0030 completed: upsert_parcel_from_provider and upsert_parcel_zoning_from_provider are now service_role only (migration 20260804180000, applied to the hosted project). Anonymous and real signed-in callers both receive SQLSTATE 42501; service-role ingestion re-verified end to end with a live Regrid parcel including duplicate reuse. Regression test added and proven to fail on a reintroduced grant. No application or UI change.",
+    "relatedTicketId": "FM-0030",
+    "relatedMilestoneId": "M2",
+    "previousValue": "in_progress",
+    "newValue": "completed"
+  },
+  {
+    "id": "ACT-000066",
+    "timestamp": "2026-08-04T18:00:00Z",
+    "type": "ticket_created",
+    "actor": "Claude Fable 5",
+    "summary": "FM-0030B created and started: fix live Regrid search normalization. The live v2 API nests candidate groups under parcels/buildings/zoning and parcel attributes under properties.fields, so address search returns zero candidates and resolved candidates lose APN, address, city, state, county, and acreage.",
+    "relatedTicketId": "FM-0030B",
+    "relatedMilestoneId": "M2",
+    "previousValue": null,
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000067",
+    "timestamp": "2026-08-04T18:45:00Z",
+    "type": "ticket_completed",
+    "actor": "Claude Fable 5",
+    "summary": "FM-0030B completed: Regrid normalization now reads the live v2 grouped response (parcels/buildings/zoning) and the nested properties.fields attributes, so address search returns real candidates with APN, address, city, state, county, zip, acreage, coordinates, and geometry intact. Also corrected two request-side mismatches found during live verification: APN search sent apn instead of parcelnumb (HTTP 400) and parcel lookup used an unversioned path that 404s. Verified live: address 2, invalid 0, APN 1, point 3, lookup ok, malformed parse_error, rate limit intact.",
+    "relatedTicketId": "FM-0030B",
+    "relatedMilestoneId": "M2",
+    "previousValue": "in_progress",
+    "newValue": "completed"
+  },
+  {
+    "id": "ACT-000068",
+    "timestamp": "2026-08-04T19:00:00Z",
+    "type": "ticket_created",
+    "actor": "Claude Fable 5",
+    "summary": "FM-0031 created and started: build the complete Add Property workflow — search Regrid by address or APN, review live candidates, preview the parcel with its boundary, import, and land in the new Property Workspace. First end-to-end onboarding path; the ingestion services have had no caller until now.",
+    "relatedTicketId": "FM-0031",
+    "relatedMilestoneId": "M2",
+    "previousValue": null,
+    "newValue": "in_progress"
+  },
+  {
+    "id": "ACT-000069",
+    "timestamp": "2026-08-04T20:15:00Z",
+    "type": "ticket_completed",
+    "actor": "Claude Fable 5",
+    "summary": "FM-0031 completed: the first end-to-end property onboarding path. Add Property opens a responsive modal, searches live Regrid by address or APN, lists candidates with APN/location/size/score, previews the selected parcel with its boundary on the map, imports it, and opens the new Property Workspace. Business logic sits in a framework-free workflow module behind thin Server Actions. Verified live: 10 candidates, import created the property with city/ZIP/coordinates and primary parcel link owned by the right organization, a repeat import returned duplicate_property instead of a second record, and unauthenticated calls were refused.",
+    "relatedTicketId": "FM-0031",
+    "relatedMilestoneId": "M2",
+    "previousValue": "in_progress",
+    "newValue": "completed"
   }
 ]

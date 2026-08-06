@@ -135,7 +135,7 @@ export async function importParcel(
       rawSourceMetadata,
     });
 
-    return { status: "ok", parcel, created };
+    return { status: "ok", parcel, created, candidate };
   } catch (error) {
     if (error instanceof RegridClientError) {
       const mapped = mapRegridFailureToSearchResult(error.toFailure());
@@ -262,19 +262,11 @@ export async function createPropertyFromParcel(
     return { status: "error", message: imported.message };
   }
 
-  const candidate =
-    input.candidate ??
-    ({
-      provider: REGRID_PROVIDER,
-      providerParcelId: imported.parcel.provenance.providerParcelId,
-      situsAddress: imported.parcel.situsAddress,
-      apn: imported.parcel.apn,
-      city: null,
-      postalCode: null,
-      stateRegion: imported.parcel.stateRegion,
-      countryCode: imported.parcel.countryCode,
-      acreage: imported.parcel.acreage,
-    } as NormalizedParcelCandidate);
+  // Prefer the record the import actually used. When the caller passed only a
+  // provider id, that is the freshly fetched provider record — which still
+  // carries city, postal code, and coordinates that the `parcels` row does not
+  // store and that a reconstruction from the row would silently drop.
+  const candidate = input.candidate ?? imported.candidate;
 
   const propertyResult = await resolved.createPropertyFn({
     organizationId: input.organizationId,
@@ -285,6 +277,10 @@ export async function createPropertyFromParcel(
     stateRegion: candidate.stateRegion,
     postalCode: candidate.postalCode,
     countryCode: candidate.countryCode ?? "US",
+    // Provider point, when supplied — this is what places the map's display pin
+    // before any survey-grade location is known.
+    latitude: candidate.latitude ?? null,
+    longitude: candidate.longitude ?? null,
   });
 
   if (propertyResult.status !== "ok") {

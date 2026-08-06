@@ -79,6 +79,82 @@ describe("RegridClient", () => {
     assert.ok(results[0]?.rawFeature);
   });
 
+  it("parses the live grouped response and ignores building/zoning groups", async () => {
+    const client = createRegridClient({
+      config: { apiToken: "test-token", baseUrl: "https://app.regrid.com" },
+      fetchImpl: async () =>
+        jsonResponse({
+          parcels: {
+            type: "FeatureCollection",
+            features: [
+              {
+                type: "Feature",
+                id: 933228,
+                geometry: sampleFeature.geometry,
+                properties: {
+                  ll_uuid: "a6c56bd2-5128-46a2-87ef-6a67a36cf8cb",
+                  fields: { parcelnumb: "992401188", state2: "TX", scity: "DALLAS" },
+                },
+              },
+            ],
+          },
+          buildings: { features: [{ id: 1, properties: { ll_uuid: "building" } }] },
+          zoning: { features: [{ id: 2, properties: { ll_uuid: "zoning" } }] },
+        }),
+    });
+
+    const results = await client.search({ mode: "address", query: "1600 Pennsylvania Ave NW" });
+    assert.equal(results.length, 1);
+    assert.equal(results[0]?.providerParcelId, "a6c56bd2-5128-46a2-87ef-6a67a36cf8cb");
+    assert.equal(results[0]?.apn, "992401188");
+    assert.equal(results[0]?.city, "DALLAS");
+  });
+
+  it("sends parcelnumb for APN search, the parameter the v2 API requires", async () => {
+    let requested = "";
+    const client = createRegridClient({
+      config: { apiToken: "test-token", baseUrl: "https://app.regrid.com" },
+      fetchImpl: async (input) => {
+        requested = String(input);
+        return jsonResponse({ parcels: { features: [] } });
+      },
+    });
+
+    await client.search({ mode: "apn", apn: "992401188" });
+    assert.match(requested, /\/api\/v2\/parcels\/apn/);
+    assert.match(requested, /parcelnumb=992401188/);
+    // `apn=` is rejected by the live API with HTTP 400.
+    assert.ok(!/[?&]apn=/.test(requested), `must not send an apn parameter: ${requested}`);
+  });
+
+  it("looks a parcel up on the versioned API path", async () => {
+    let requested = "";
+    const client = createRegridClient({
+      config: { apiToken: "test-token", baseUrl: "https://app.regrid.com" },
+      fetchImpl: async (input) => {
+        requested = String(input);
+        return jsonResponse({
+          parcels: {
+            features: [
+              {
+                type: "Feature",
+                properties: {
+                  ll_uuid: "a6c56bd2-5128-46a2-87ef-6a67a36cf8cb",
+                  fields: { parcelnumb: "992401188" },
+                },
+              },
+            ],
+          },
+        });
+      },
+    });
+
+    const candidate = await client.getByProviderParcelId("a6c56bd2-5128-46a2-87ef-6a67a36cf8cb");
+    // The unversioned /parcels/{id} path serves HTML and 404s.
+    assert.match(requested, /\/api\/v2\/parcels\/a6c56bd2-5128-46a2-87ef-6a67a36cf8cb/);
+    assert.equal(candidate?.apn, "992401188");
+  });
+
   it("rejects invalid APN before calling the network", async () => {
     let called = false;
     const client = createRegridClient({

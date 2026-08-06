@@ -172,6 +172,65 @@ export async function listOrganizationProperties(
   }
 }
 
+export type PropertyForParcelResult =
+  | { status: "ok"; property: Property | null }
+  | { status: "unauthenticated" }
+  | { status: "unconfigured" }
+  | { status: "profile_missing" }
+  | { status: "organization_missing" }
+  | { status: "membership_inactive" }
+  | { status: "insufficient_role" }
+  | { status: "error"; message: string };
+
+/**
+ * Finds the Organization's existing Property for a provider parcel, if any.
+ *
+ * Importing the same parcel twice would otherwise create a second Property over
+ * the same land — the `property_parcels` unique constraint is per
+ * (property, parcel), so it does not stop a *new* Property pointing at an
+ * already-imported parcel. Callers use this to offer the existing Property
+ * instead of silently duplicating it.
+ *
+ * `property.organization_id` is filtered explicitly *and* RLS scopes the read to
+ * organizations the caller actively belongs to, so a parcel imported by another
+ * organization is invisible here rather than reported as a duplicate.
+ */
+export async function findOrganizationPropertyByParcel(
+  organizationId: string,
+  provider: string,
+  providerParcelId: string,
+): Promise<PropertyForParcelResult> {
+  if (!isSupabaseConfigured()) return { status: "unconfigured" };
+  if (!organizationId || !provider || !providerParcelId) {
+    return { status: "ok", property: null };
+  }
+
+  const membership = await requireOrganizationMembership(organizationId);
+  if (membership.status !== "ok") return membership;
+
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("property_parcels")
+      .select("properties!inner(*), parcels!inner(provider, provider_parcel_id)")
+      .eq("parcels.provider", provider)
+      .eq("parcels.provider_parcel_id", providerParcelId)
+      .eq("properties.organization_id", organizationId)
+      .limit(1);
+
+    if (error) return { status: "error", message: GENERIC_ERROR };
+
+    const row = (data ?? [])[0] as { properties?: unknown } | undefined;
+    if (!row?.properties) return { status: "ok", property: null };
+
+    const propertyRow = Array.isArray(row.properties) ? row.properties[0] : row.properties;
+    const property = mapProperty(propertyRow as Parameters<typeof mapProperty>[0]);
+    return { status: "ok", property: property ?? null };
+  } catch {
+    return { status: "error", message: GENERIC_ERROR };
+  }
+}
+
 export async function createProperty(input: CreatePropertyInput): Promise<PropertyResult> {
   if (!isSupabaseConfigured()) return { status: "unconfigured" };
 

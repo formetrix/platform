@@ -8,9 +8,10 @@ export { createRegridClient, RegridClient } from "@/lib/regrid/client";
 export { RegridClientError, type RegridErrorCode, type RegridFailure } from "@/lib/regrid/errors";
 export {
   buildProvenanceMetadata,
+  extractParcelFeatures,
   geometryToGeoJsonString,
   normalizeRegridFeature,
-  normalizeRegridFeatureCollection,
+  normalizeRegridSearchResponse,
 } from "@/lib/regrid/normalize";
 export type {
   NormalizedParcelCandidate,
@@ -23,4 +24,5 @@ export type {
   RegridParcelFeature,
   RegridParcelFeatureCollection,
   RegridParcelProperties,
+  RegridSearchResponse,
 } from "@/lib/regrid/types";

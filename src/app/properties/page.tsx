@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { Card } from "@/components/ui/card";
+import { AddPropertyButton } from "@/features/properties/components/add-property-button";
 import { EmptyState } from "@/features/properties/components/empty-state";
 import { PropertyListCard } from "@/features/properties/components/property-list-card";
 import { loadPropertiesList } from "@/features/properties/lib/load-workspace";
@@ -61,31 +63,26 @@ export default async function PropertiesPage() {
     );
   }
 
-  const { properties, organizationName, regridConfigured } = result;
+  const { properties, organizationName } = result;
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-10 sm:py-12">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Properties</h1>
-        <p className="text-muted text-sm">
-          {organizationName}
-          {" · "}
-          {properties.length === 0
-            ? "No properties yet"
-            : `${properties.length} propert${properties.length === 1 ? "y" : "ies"}`}
-          {!regridConfigured ? " · Regrid not configured" : null}
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Properties</h1>
+          <p className="text-muted text-sm">
+            {organizationName}
+            {" · "}
+            {properties.length === 0
+              ? "No properties yet"
+              : `${properties.length} propert${properties.length === 1 ? "y" : "ies"}`}
+          </p>
+        </div>
+        {properties.length > 0 ? <AddPropertyButton /> : null}
       </div>
 
       {properties.length === 0 ? (
-        <EmptyState
-          title="No properties in this organization"
-          description={
-            regridConfigured
-              ? "Create a Property from an imported parcel via the ingestion services. This list only shows real database records."
-              : "No properties yet. Regrid is not configured (REGRID_API_TOKEN), so parcel import is unavailable. Formetrix will not invent placeholder properties."
-          }
-        />
+        <AddFirstPropertyCard />
       ) : (
         <div className="flex flex-col gap-3">
           {properties.map((property) => (
@@ -94,6 +91,29 @@ export default async function PropertiesPage() {
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * First-run state. Import is the only way a Property comes into existence, so
+ * this card is the onboarding path rather than a passive "nothing here" notice.
+ *
+ * The action is shown unconditionally, including when the parcel provider is
+ * unconfigured. Hiding it left a first-time user staring at a dead end with no
+ * indication of what to do or why — the search dialog explains a missing
+ * provider far better than an absent button does.
+ */
+function AddFirstPropertyCard() {
+  return (
+    <Card className="shadow-soft mx-auto flex max-w-lg flex-col items-center gap-4 border-dashed py-10 text-center">
+      <div className="flex flex-col gap-2">
+        <h2 className="text-lg font-semibold tracking-tight">No properties yet</h2>
+        <p className="text-muted text-sm">
+          Import your first parcel to begin evaluating development opportunities.
+        </p>
+      </div>
+      <AddPropertyButton size="lg" />
+    </Card>
   );
 }
 
